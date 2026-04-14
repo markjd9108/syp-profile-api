@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+syp_logo_white_wm.png
+*.pdf
+.DS_Store

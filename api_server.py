@@ -25,9 +25,9 @@ class ProfileRequest(BaseModel):
     archetype: str = Field(..., description="Archetype key: operator, architect, navigator, signal, anchor, ember")
     participant_name: str = Field(..., description="Participant's full name")
     company: str = Field("", description="Company name")
-    comm_score: int = Field(..., ge=0, le=100, description="Communication score 0-100")
-    decision_score: int = Field(..., ge=0, le=100, description="Decision Making score 0-100")
-    collab_score: int = Field(..., ge=0, le=100, description="Collaboration score 0-100")
+    comm_score: int = Field(..., ge=0, description="Communication score 0-100")
+    decision_score: int = Field(..., ge=0, description="Decision Making score 0-100")
+    collab_score: int = Field(..., ge=0, description="Collaboration score 0-100")
     response_format: Optional[str] = Field("binary", description="'binary' returns raw PDF, 'base64' returns JSON with base64-encoded PDF")
 
 # ─── Health check ─────────────────────────────────────────────────────────────
@@ -42,14 +42,19 @@ def generate(req: ProfileRequest):
     if key not in ARCHETYPES:
         raise HTTPException(status_code=400, detail=f"Unknown archetype '{key}'. Valid: {list(ARCHETYPES.keys())}")
 
+    # Clamp scores to 0-100 range (Make.com may send raw sums that exceed 100)
+       comm = min(max(req.comm_score, 0), 100)
+       decision = min(max(req.decision_score, 0), 100)
+       collab = min(max(req.collab_score, 0), 100)
+
     try:
         pdf_bytes = generate_profile_bytes(
             archetype_key=key,
             participant_name=req.participant_name,
             company=req.company,
-            comm_score=req.comm_score,
-            decision_score=req.decision_score,
-            collab_score=req.collab_score,
+            comm_score=comm,
+            decision_score=decision,
+            collab_score=collab,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")

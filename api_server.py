@@ -43,9 +43,9 @@ def generate(req: ProfileRequest):
         raise HTTPException(status_code=400, detail=f"Unknown archetype '{key}'. Valid: {list(ARCHETYPES.keys())}")
 
     # Clamp scores to 0-100 range (Make.com may send raw sums that exceed 100)
-       comm = min(max(req.comm_score, 0), 100)
-       decision = min(max(req.decision_score, 0), 100)
-       collab = min(max(req.collab_score, 0), 100)
+    comm = min(max(req.comm_score, 0), 100)
+    decision = min(max(req.decision_score, 0), 100)
+    collab = min(max(req.collab_score, 0), 100)
 
     try:
         pdf_bytes = generate_profile_bytes(

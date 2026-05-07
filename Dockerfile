@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY generate_syp_profiles_improved.py .
+COPY generate_manager_report.py .
 COPY api_server.py .
 
 # Copy brand assets (logo) - use JSON form for paths with special chars

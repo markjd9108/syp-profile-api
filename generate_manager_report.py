@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SYP Team Effectiveness Lab â Manager Team Diagnostic Report PDF Generator
+SYP Team Effectiveness Lab  -  Manager Team Diagnostic Report PDF Generator
 4-page team overview PDF: Cover / Team at a Glance / Dimension Analysis / Individual Profiles + Recommendations
 """
 
@@ -13,7 +13,7 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
 
-# âââ Brand palette ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+#  Brand palette 
 NAVY       = colors.HexColor("#0D1B4B")
 TEAL       = colors.HexColor("#009688")
 TEAL_DARK  = colors.HexColor("#00695C")
@@ -30,7 +30,7 @@ AMBER_DARK  = colors.HexColor("#E65100")
 AMBER_LIGHT = colors.HexColor("#FFF3E0")
 AMBER_MID   = colors.HexColor("#F57C00")
 
-# Archetype accent colours â matching individual profiles
+# Archetype accent colours  -  matching individual profiles
 ARCHETYPE_COLORS = {
     "Operator":  colors.HexColor("#B45309"),
     "Architect": colors.HexColor("#6D28D9"),
@@ -41,12 +41,12 @@ ARCHETYPE_COLORS = {
 }
 
 ARCHETYPE_DESCRIPTIONS = {
-    "Architect": "Strategic Â· Analytical Â· Systematic â builds robust frameworks",
-    "Navigator": "Adaptive Â· Decisive Â· Collaborative â steers through complexity",
-    "Anchor":    "Dependable Â· Grounded Â· Steadying â holds the team together",
-    "Signal":    "Communicative Â· Expressive Â· Inclusive â connects the team",
-    "Operator":  "Structured Â· Decisive Â· Coordinated â drives consistent execution",
-    "Ember":     "Developing Â· Potential Â· Emerging â growing toward full contribution",
+    "Architect": "Strategic  |  Analytical  |  Systematic  -  builds robust frameworks",
+    "Navigator": "Adaptive  |  Decisive  |  Collaborative  -  steers through complexity",
+    "Anchor":    "Dependable  |  Grounded  |  Steadying  -  holds the team together",
+    "Signal":    "Communicative  |  Expressive  |  Inclusive  -  connects the team",
+    "Operator":  "Structured  |  Decisive  |  Coordinated  -  drives consistent execution",
+    "Ember":     "Developing  |  Potential  |  Emerging  -  growing toward full contribution",
 }
 
 ARCHETYPE_ORDER = ["Architect", "Navigator", "Anchor", "Signal", "Operator", "Ember"]
@@ -59,7 +59,7 @@ MB   = 18 * mm      # bottom margin
 CW   = W - ML - MR  # usable content width
 
 
-# âââ Score label helper âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+#  Score label helper 
 def score_label(score: int) -> str:
     """Convert a 0-100 score to a 4-tier label."""
     if score < 40:
@@ -72,7 +72,7 @@ def score_label(score: int) -> str:
         return "Strong"
 
 
-# âââ Helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+#  Helpers 
 def draw_para(c, text, x, y, width, font="Helvetica", size=9.5, color=NEAR_BLACK,
               align=TA_JUSTIFY, leading=14):
     """Draw a flowing Paragraph, return y after drawing."""
@@ -98,7 +98,7 @@ def header_band(c, company, page_num):
     c.drawRightString(W - MR, H - bh + 4 * mm, company)
     c.setFont("Helvetica", 7.5)
     c.setFillColor(MID_GREY)
-    c.drawCentredString(W / 2, MB - 5 * mm, f"Team Effectiveness Lab Â· Page {page_num} Â· Confidential")
+    c.drawCentredString(W / 2, MB - 5 * mm, f"Team Effectiveness Lab  |  Page {page_num}  |  Confidential")
 
 
 def section_title(c, text, y):
@@ -156,7 +156,7 @@ def dimension_bar(c, x, y, label, avg_score, high, low, n, interpretation, descr
     c.setFont("Helvetica-Bold", 8)
     c.setFillColor(WHITE if avg_score > 15 else NEAR_BLACK)
     c.drawString(x + max(fill_w - 22, 2), y - bar_h + 2.5 * mm,
-                 f"{avg_score:.1f} Â· {lbl}")
+                 f"{avg_score:.1f}  |  {lbl}")
 
     # Dashed threshold at 60
     thresh_x = x + 0.6 * bar_w
@@ -173,9 +173,9 @@ def dimension_bar(c, x, y, label, avg_score, high, low, n, interpretation, descr
     sx = x + bar_w + 4 * mm
     c.setFont("Helvetica-Bold", 9)
     c.setFillColor(GREEN_MID)
-    c.drawString(sx, y - 3 * mm, f"â {high}/{n}")
+    c.drawString(sx, y - 3 * mm, f"+ {high}/{n}")
     c.setFillColor(AMBER_DARK)
-    c.drawString(sx, y - bar_h + 1.5 * mm, f"â {low}/{n}")
+    c.drawString(sx, y - bar_h + 1.5 * mm, f"- {low}/{n}")
     y -= bar_h + 5 * mm
 
     # Bold interpretation
@@ -194,7 +194,7 @@ def dimension_bar(c, x, y, label, avg_score, high, low, n, interpretation, descr
     return y
 
 
-# âââ Page 1: Cover ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+#  Page 1: Cover 
 def draw_cover(c, manager_name, company, workshop_date):
     c.setFillColor(NAVY)
     c.rect(0, 0, W, H, fill=1, stroke=0)
@@ -230,10 +230,10 @@ def draw_cover(c, manager_name, company, workshop_date):
 
     c.setFont("Helvetica", 8.5)
     c.setFillColor(colors.HexColor("#607D8B"))
-    c.drawCentredString(W / 2, 0.09 * H, "Team Effectiveness Lab Â· Confidential")
+    c.drawCentredString(W / 2, 0.09 * H, "Team Effectiveness Lab  |  Confidential")
 
 
-# âââ Page 2: Team at a Glance + Comm + Decision Making & Strategy bars ââââââââââââ
+#  Page 2: Team at a Glance + Comm + Decision Making & Strategy bars 
 def draw_page2(c, company, participants, n, overall_avg, avg_comm, avg_decision,
                comm_high, comm_low, decision_high, decision_low,
                strengths, dev_areas, archetype_counts):
@@ -246,7 +246,7 @@ def draw_page2(c, company, participants, n, overall_avg, avg_comm, avg_decision,
     dev_sentence = (
         f"Development opportunities were identified in {' and '.join(dev_areas)}."
         if dev_areas else
-        "All dimensions exceeded the 60-point performance threshold â a great result."
+        "All dimensions exceeded the 60-point performance threshold  -  a great result."
     )
     intro = (
         f"Your team of <b>{n} participant{'s' if n != 1 else ''}</b> completed the Team Effectiveness Lab. "
@@ -263,7 +263,7 @@ def draw_page2(c, company, participants, n, overall_avg, avg_comm, avg_decision,
     bx    = ML
     stat_box(c, bx, y, box_w, box_h, "Participants", n);                    bx += box_w + gap
     stat_box(c, bx, y, box_w, box_h, "Avg Score", f"{overall_avg:.1f}");    bx += box_w + gap
-    stat_box(c, bx, y, box_w, box_h, "Strengths", len(strengths), "dims â¥ 60"); bx += box_w + gap
+    stat_box(c, bx, y, box_w, box_h, "Strengths", len(strengths), "dims >= 60"); bx += box_w + gap
     stat_box(c, bx, y, box_w, box_h, "Dev Areas", len(dev_areas), "dims < 60")
     y -= box_h + 7 * mm
 
@@ -307,7 +307,7 @@ def draw_page2(c, company, participants, n, overall_avg, avg_comm, avg_decision,
         c, ML, y,
         "Communication",
         avg_comm, comm_high, comm_low, n,
-        f"Communication is {'a team strength' if avg_comm >= 60 else 'an area for development'} â "
+        f"Communication is {'a team strength' if avg_comm >= 60 else 'an area for development'}  -  "
         f"{comm_high} of {n} participants scored above threshold.",
         "Communication captures how clearly participants expressed information, listened under pressure, "
         "and adapted their style when instructions were ambiguous or roles shifted. High-scoring teams "
@@ -319,7 +319,7 @@ def draw_page2(c, company, participants, n, overall_avg, avg_comm, avg_decision,
             c, ML, y,
             "Decision Making & Strategy",
             avg_decision, decision_high, decision_low, n,
-            f"Decision Making & Strategy is {'a team strength' if avg_decision >= 60 else 'an area for development'} â "
+            f"Decision Making & Strategy is {'a team strength' if avg_decision >= 60 else 'an area for development'}  -  "
             f"{decision_high} of {n} participants performed above threshold.",
             "Decision Making & Strategy reflects how participants assessed constraints, committed under uncertainty, "
             "and adapted their approach when new information emerged. High scores indicate participants "
@@ -327,7 +327,7 @@ def draw_page2(c, company, participants, n, overall_avg, avg_comm, avg_decision,
         )
 
 
-# âââ Page 3: Collaboration & Teamwork + Strengths / Dev Areas âââââââââââââââââââââ
+#  Page 3: Collaboration & Teamwork + Strengths / Dev Areas 
 def draw_page3(c, company, n, avg_collab, collab_high, collab_low, strengths, dev_areas):
     header_band(c, company, 3)
     y = H - 18 * mm - 5 * mm
@@ -337,7 +337,7 @@ def draw_page3(c, company, n, avg_collab, collab_high, collab_low, strengths, de
         c, ML, y,
         "Collaboration & Teamwork",
         avg_collab, collab_high, collab_low, n,
-        f"Collaboration & Teamwork is {'a team strength' if avg_collab >= 60 else 'an area for growth'} â "
+        f"Collaboration & Teamwork is {'a team strength' if avg_collab >= 60 else 'an area for growth'}  -  "
         f"{collab_high} of {n} participants exceeded threshold.",
         "Collaboration & Teamwork measures how participants contributed to shared goals, supported others during "
         "difficulty, and adapted their role when team dynamics shifted. Strong collaborators raise the "
@@ -351,12 +351,12 @@ def draw_page3(c, company, n, avg_collab, collab_high, collab_low, strengths, de
     c.setFillColor(GREEN_LIGHT); c.roundRect(ML, y - sh, CW, sh, 4, fill=1, stroke=0)
     c.setFillColor(GREEN_MID);   c.roundRect(ML, y - sh, 4, sh, 0, fill=1, stroke=0)
     c.setFont("Helvetica-Bold", 10); c.setFillColor(GREEN_DARK)
-    c.drawString(ML + 8, y - 7 * mm, "â Team Strengths")
+    c.drawString(ML + 8, y - 7 * mm, "Team Strengths")
     by = y - 13 * mm
     if strengths:
         for s in strengths:
             c.setFont("Helvetica", 9); c.setFillColor(GREEN_DARK)
-            c.drawString(ML + 14, by, f"â¢ {s} â team average exceeds the 60-point performance threshold")
+            c.drawString(ML + 14, by, f"- {s}  -  team average exceeds the 60-point performance threshold")
             by -= 7 * mm
     else:
         c.setFont("Helvetica", 9); c.setFillColor(GREEN_DARK)
@@ -368,27 +368,27 @@ def draw_page3(c, company, n, avg_collab, collab_high, collab_low, strengths, de
     c.setFillColor(AMBER_LIGHT); c.roundRect(ML, y - dh, CW, dh, 4, fill=1, stroke=0)
     c.setFillColor(AMBER_MID);   c.roundRect(ML, y - dh, 4, dh, 0, fill=1, stroke=0)
     c.setFont("Helvetica-Bold", 10); c.setFillColor(AMBER_DARK)
-    c.drawString(ML + 8, y - 7 * mm, "â¡ Development Areas")
+    c.drawString(ML + 8, y - 7 * mm, "Development Areas")
     by = y - 13 * mm
     if dev_areas:
         for d in dev_areas:
             c.setFont("Helvetica", 9); c.setFillColor(AMBER_DARK)
-            c.drawString(ML + 14, by, f"â¢ {d} â team average is below the 60-point performance threshold")
+            c.drawString(ML + 14, by, f"- {d}  -  team average is below the 60-point performance threshold")
             by -= 7 * mm
     else:
         c.setFont("Helvetica", 9); c.setFillColor(AMBER_DARK)
         c.drawString(ML + 14, by,
-                     "All dimensions above threshold â great result!")
+                     "All dimensions above threshold  -  great result!")
 
 
-# âââ Page 4: Individual Profiles + Manager Recommendations + Folder Button ââââââââ
+#  Page 4: Individual Profiles + Manager Recommendations + Folder Button 
 def draw_page4(c, company, participants, recommendations, folder_url=None):
     header_band(c, company, 4)
     y = H - 18 * mm - 5 * mm
 
     y = section_title(c, "Individual Profiles", y)
 
-    # Table headers â full category names
+    # Table headers  -  full category names
     col_w = [CW * 0.26, CW * 0.18, CW * 0.18, CW * 0.20, CW * 0.18]
     hx = ML
     c.setFont("Helvetica-Bold", 7); c.setFillColor(MID_GREY)
@@ -400,8 +400,8 @@ def draw_page4(c, company, participants, recommendations, folder_url=None):
     y -= 3 * mm; h_rule(c, y, RULE_GREY); y -= 4 * mm
 
     for ri, p in enumerate(participants):
-        name  = p.get("name", "â")
-        arch  = p.get("archetype", "â")
+        name  = p.get("name", " - ")
+        arch  = p.get("archetype", " - ")
         comm  = p.get("comm_score", 0)
         dec   = p.get("decision_score", 0)
         col   = p.get("collab_score", 0)
@@ -421,7 +421,7 @@ def draw_page4(c, company, participants, recommendations, folder_url=None):
         # Scores with labels
         for score in [comm, dec, col]:
             lbl = score_label(score)
-            arrow = "â" if score >= 60 else "â"
+            arrow = "+" if score >= 60 else "-"
             c.setFont("Helvetica", 7.5)
             c.setFillColor(GREEN_MID if score >= 60 else AMBER_DARK)
             c.drawString(rx + 2, y - 5.5, f"{arrow} {lbl}")
@@ -430,6 +430,33 @@ def draw_page4(c, company, participants, recommendations, folder_url=None):
         y -= rh; h_rule(c, y, RULE_GREY)
 
     y -= 7 * mm; h_rule(c, y); y -= 7 * mm
+
+    # Google Drive folder button
+    if folder_url:
+        btn_w   = 90 * mm
+        btn_h   = 11 * mm
+        btn_x   = (W - btn_w) / 2
+        btn_top = y
+
+        # Shadow
+        c.setFillColor(TEAL_DARK)
+        c.roundRect(btn_x + 1, btn_top - btn_h - 1, btn_w, btn_h, 5, fill=1, stroke=0)
+
+        # Button face
+        c.setFillColor(TEAL)
+        c.roundRect(btn_x, btn_top - btn_h, btn_w, btn_h, 5, fill=1, stroke=0)
+
+        # Button text
+        c.setFont("Helvetica-Bold", 10)
+        c.setFillColor(WHITE)
+        c.drawCentredString(W / 2, btn_top - btn_h + 3.5 * mm,
+                            "View All Team Profiles >>")
+
+        # Clickable hyperlink
+        c.linkURL(folder_url,
+                  (btn_x, btn_top - btn_h, btn_x + btn_w, btn_top),
+                  relative=0)
+        y -= btn_h + 7 * mm
 
     # Manager Recommendations
     y = section_title(c, "Manager Recommendations", y)
@@ -456,32 +483,6 @@ def draw_page4(c, company, participants, recommendations, folder_url=None):
 
     note_y = max(y - 4 * mm, MB + 22 * mm)
 
-    # ââ Google Drive folder button ââââââââââââââââââââââââââââââââââââââââââââââââ
-    if folder_url:
-        btn_w   = 90 * mm
-        btn_h   = 11 * mm
-        btn_x   = (W - btn_w) / 2
-        btn_top = note_y + 18 * mm
-
-        # Shadow
-        c.setFillColor(TEAL_DARK)
-        c.roundRect(btn_x + 1, btn_top - btn_h - 1, btn_w, btn_h, 5, fill=1, stroke=0)
-
-        # Button face
-        c.setFillColor(TEAL)
-        c.roundRect(btn_x, btn_top - btn_h, btn_w, btn_h, 5, fill=1, stroke=0)
-
-        # Button text
-        c.setFont("Helvetica-Bold", 10)
-        c.setFillColor(WHITE)
-        c.drawCentredString(W / 2, btn_top - btn_h + 3.5 * mm,
-                            "View All Team Profiles  â")
-
-        # Clickable hyperlink
-        c.linkURL(folder_url,
-                  (btn_x, btn_top - btn_h, btn_x + btn_w, btn_top),
-                  relative=0)
-
     # Footer rule + note
     h_rule(c, note_y)
     footer_sty = ParagraphStyle("ft", fontName="Helvetica", fontSize=7.5,
@@ -496,7 +497,7 @@ def draw_page4(c, company, participants, recommendations, folder_url=None):
     fp.drawOn(c, ML, note_y - fph - 2 * mm)
 
 
-# âââ Recommendations engine âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+#  Recommendations engine 
 def generate_recommendations(participants, strengths, dev_areas, archetype_counts, n):
     recs = []
 
@@ -524,7 +525,7 @@ def generate_recommendations(participants, strengths, dev_areas, archetype_count
         avg_d = sum(p["decision_score"] for p in participants) / n
         recs.append((
             "Introduce a Lightweight Decision-Making Framework",
-            f"The team averaged {avg_d:.1f} in Decision Making & Strategy â below the 60-point threshold. "
+            f"The team averaged {avg_d:.1f} in Decision Making & Strategy  -  below the 60-point threshold. "
             "Introduce a simple protocol such as a RACI matrix or pre-mortem practice for your next three "
             "significant decisions. This builds the muscle systematically without requiring major process overhaul."
         ))
@@ -534,7 +535,7 @@ def generate_recommendations(participants, strengths, dev_areas, archetype_count
         recs.append((
             "Structured Collaboration & Teamwork Practice",
             f"With a team Collaboration & Teamwork average of {avg_co:.1f}, the group benefits from making "
-            "collaboration explicit. Run your next project kick-off using a working agreement â 30 minutes "
+            "collaboration explicit. Run your next project kick-off using a working agreement  -  30 minutes "
             "defining how decisions will be made, how disagreement will be handled, and how progress will be shared."
         ))
 
@@ -550,7 +551,7 @@ def generate_recommendations(participants, strengths, dev_areas, archetype_count
     return recs[:3]
 
 
-# âââ Main entry point ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+#  Main entry point 
 def generate_manager_report_bytes(
     manager_name: str,
     company: str,
@@ -565,7 +566,7 @@ def generate_manager_report_bytes(
         name (str), archetype (str),
         comm_score (int 0-100), decision_score (int 0-100), collab_score (int 0-100)
 
-    folder_url: optional Google Drive folder URL â renders a clickable button on page 4.
+    folder_url: optional Google Drive folder URL  -  renders a clickable button on page 4.
     """
     if not participants:
         raise ValueError("participants list must not be empty")

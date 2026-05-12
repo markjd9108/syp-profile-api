@@ -98,201 +98,153 @@ LOGO_PATH  = ensure_white_logo()
 
 # ─── Archetype data ─────────────────────────────────────────────────────────────
 ARCHETYPES = {
-    # ── The Operator ────────────────────────────────────────────────────────────
-    "operator": {
-        "number": "ARCHETYPE 3",
-        "name":   "The Operator",
-        "subtitle": "Steady under fire. Sharper in the brief.",
-        "light":  "#FEF3C7", "accent": "#92400E", "dark": "#78350F",
-        "pill_bg": "#B45309",
-        "comm": 45, "decision": 74, "collab": 68,
+    # ── The Generalist ──────────────────────────────────────────────────────────────────────────
+    "generalist": {
+        "number": "ARCHETYPE 4",
+        "name":   "The Generalist",
+        "subtitle": "Broad range. Ready for anything.",
+        "light":  "#EDE9FE", "accent": "#6D28D9", "dark": "#4C1D95",
+        "pill_bg": "#7C3AED",
+        "comm": 67, "decision": 65, "collab": 68,
         "hook": (
-            "You make strong calls, keep the team running, and recover quickly when things "
-            "break. But your communication doesn't yet match the quality of your thinking, "
-            "and that gap is costing your team more than you realise."
+            "You demonstrated broad, adaptive capability across all three dimensions in today's "
+            "session. You did not dominate in one area — you showed up reliably across all of "
+            "them. That kind of versatility is rarer than people think, and in professional "
+            "environments it often matters more than being exceptional in one area."
         ),
         "strength_paras": [
-            "You have operational instincts that most people spend years developing. In "
-            "today's sessions you made decisions under constraint, committed to them without "
-            "second-guessing, and when collaboration broke down, you paused and restructured "
-            "rather than escalated. These are behaviours typically associated with experienced "
-            "operators: the people teams depend on when execution has to happen under pressure.",
+            "The Generalist profile is defined by balance, not mediocrity. Today you showed "
+            "communication that kept the group aligned, decision-making that held steady under "
+            "constraint, and collaboration that helped others stay functional. No single dimension "
+            "pulled away — and that means your contribution was felt across the whole session, "
+            "not just in the moments that match one dominant strength.",
 
-            "In professional environments this translates into reliability. Teams with an "
-            "Operator at the table move faster and experience less momentum loss during "
-            "disruption. You are the person a leader can delegate to when the brief is "
-            "incomplete, not because you always have the perfect answer, but because you will "
-            "commit to finding one. That combination of decisiveness and adaptive execution "
-            "distinguishes strong individual contributors from future team leads.",
-
-            "The opportunity in front of you is significant. Decision quality paired with "
-            "recovery instincts under pressure is the foundation of senior operational "
-            "leadership. The gap between where you are now and having full impact is not about "
-            "becoming more capable, it is about ensuring the quality of your thinking becomes "
-            "visible to the people around you. When your communication matches your execution, "
-            "your ceiling rises dramatically.",
+            "Professionals with Generalist profiles tend to be the people others look to when a "
+            "situation changes shape. You are not locked into one mode. When the team needs "
+            "direction, you can provide some. When it needs connection, you can offer that too. "
+            "This adaptability is a genuine competitive advantage in environments that shift quickly.",
         ],
         "gap_paras": [
-            "Your instructions were clear to you, but the picture your teammates built from "
-            "them didn't match what you intended. You are working from a complete mental model "
-            "and transmitting it in fragments. This isn't a communication failure, it's a "
-            "translation gap. Your brain has already solved for the outcome before your words "
-            "have finished describing the starting point.",
+            "The development challenge for a Generalist is that versatility can make it hard to "
+            "build a recognisable signature. In professional settings, people who are known for "
+            "one thing tend to get faster career traction. Your task is not to become less "
+            "balanced — it is to identify which dimension you can push hardest in the specific "
+            "contexts that matter most to your team and your manager.",
 
-            "In the workplace this shows up as misaligned execution. Your team finishes a task "
-            "that isn't quite what you envisioned. Revisions happen after delivery instead of "
-            "being caught in the brief. The cost is invisible in any single instance but "
-            "accumulates as rework, friction, and a quiet erosion of confidence, even when "
-            "your operational instincts remain entirely sound.",
-
-            "The cost of leaving this unaddressed scales directly with your seniority. A "
-            "communication gap at individual contributor level creates minor friction. The same "
-            "gap at team lead or manager level creates systemic misalignment. Addressing this "
-            "now, before your scope of responsibility grows, is the highest-leverage investment "
-            "you can make in your professional development.",
+            "Over time, the goal is to move from 'reliable across everything' to 'exceptional "
+            "in one area and strong across the rest.' That shift requires deliberate decisions "
+            "about where you invest your development effort, rather than spreading it evenly.",
         ],
         "steps": [
-            ("Say the destination first, always",
-             "Before giving any instruction, state the outcome: 'We're trying to end up with "
-             "X. Here's how I think we get there.' One sentence of context before the steps "
-             "doubles the alignment rate of everything that follows. Practice this deliberately "
-             "in your next three project handoffs or team briefings."),
-            ("Close the loop deliberately",
-             "After giving a brief or instruction, ask: 'What's your understanding of what we "
-             "need?' This is not micromanagement, it is the Clarity Loop in action. You are "
-             "verifying that your mental model has transferred correctly before execution begins, "
-             "not after it diverges."),
-            ("Share the 'because'",
-             "When you give an instruction that emerged from a reasoning process, share the "
-             "one-line version of that reasoning. Not the full logic, just the 'because.' "
-             "'We're doing X because Y' reduces resistance, builds context, and helps your "
-             "team make good decisions when you're not in the room."),
+            ("Identify your emergence zone",
+             "Look at your three scores and find the dimension closest to the 75-point threshold. "
+             "That is your emergence zone — the area most likely to become your signature strength "
+             "with focused effort. Direct your deliberate practice there first."),
+            ("Lead from one dimension per session",
+             "In your next team activity, decide in advance which dimension you will lead from "
+             "based on what the situation needs. Name it to yourself beforehand. This builds the "
+             "habit of intentional contribution rather than reactive filling of gaps."),
+            ("Ask for targeted feedback",
+             "After sessions, ask one observer: 'Which of my contributions felt most distinctive "
+             "today?' Their answer will help you identify your natural edge before you are "
+             "consciously aware of it yourself."),
         ],
         "recommendations": (
-            "The single highest-leverage development area is the transition from 'clear in my "
-            "head' to 'clear in the room.' Before important handoffs or meetings, draft one "
-            "sentence that describes the outcome you are driving toward and use it to open. "
-            "The discipline of articulating destination before method feels unnatural at first, "
-            "but it becomes a professional superpower when automatic. This shift will ensure "
-            "that you and your team are on the same page and moving as a unit. Ask a trusted "
-            "colleague to give you real-time signals when your instructions are unclear, so you "
-            "can calibrate in the moment rather than discovering misalignment after delivery."
+            "The highest-leverage move for a Generalist is deliberate dimension focus. Pick one "
+            "dimension per session cycle and invest in it intentionally — read about it, practise "
+            "it, ask for feedback on it. Do not try to develop all three simultaneously. Balanced "
+            "growth is already your default; your development task is to build a recognisable peak."
         ),
         "leadership_cta": (
             "Schedule time to discuss this profile with your leader within the next 7 days. "
-            "Over the next 30 days, plan to: 1) Identify two live projects or handoffs where "
-            "you will deliberately practise outcome-first communication, opening with the "
-            "destination before the steps. 2) Ask your leader to observe one team briefing per "
-            "week and give you specific feedback on whether you led with outcome or method. "
-            "3) Track your progress by noting after each briefing whether you opened with the "
-            "outcome or launched into the method. Your goal is a 100% success rate on opening "
-            "with destination, which will take 3-4 weeks of conscious practice."
+            "Over the next 30 days: 1) Identify which of your three dimensions your team relies "
+            "on you for most often — that is your current signature, whether you intended it or "
+            "not. 2) Choose the dimension you want to develop next and make one deliberate, visible "
+            "contribution from that dimension per session. 3) Track which contributions get noticed "
+            "and referenced — that feedback loop will show you where your emerging strength is "
+            "taking shape."
         ),
         "framework_rows": [
-            ("Clarity Loop",        "Primary",  "Communication is your highest-leverage development area."),
-            ("Decision Engine",     "Continue", "Decision instincts are strong. Keep the standard high."),
-            ("Collaboration Reset", "Continue", "Recovery skills are present. Deepen the precision."),
+            ("Clarity Loop",        "Develop",  "Communication is solid. Push toward distinction — outcome-first, every time."),
+            ("Decision Engine",     "Develop",  "Decision-making is functional. Look for moments to lead the call, not just support it."),
+            ("Collaboration Reset", "Develop",  "Composure is present. Develop assertive contribution — being seen to hold ground."),
         ],
     },
 
-    # ── The Architect ───────────────────────────────────────────────────────────
-    "architect": {
-        "number": "ARCHETYPE 1",
-        "name":   "The Architect",
-        "subtitle": "You build clarity everywhere except inside yourself.",
-        "light":  "#EDE9FE", "accent": "#4C1D95", "dark": "#3B0764",
-        "pill_bg": "#6D28D9",
-        "comm": 78, "decision": 72, "collab": 42,
+    # ── The Full Spectrum ───────────────────────────────────────────────────────────────────────
+    "full_spectrum": {
+        "number": "ARCHETYPE 5",
+        "name":   "The Full Spectrum",
+        "subtitle": "Strong across the board. Leads from any dimension.",
+        "light":  "#FEF9C3", "accent": "#CA8A04", "dark": "#78350F",
+        "pill_bg": "#D97706",
+        "comm": 82, "decision": 80, "collab": 81,
         "hook": (
-            "You think in systems, communicate with precision, and make structured decisions "
-            "under pressure. But today revealed a blind spot: when the team around you breaks "
-            "down, you solve for the output, not the people."
+            "You delivered strong performance across all three dimensions in today's session. "
+            "Communication, decision-making, and composure under pressure — all present, all "
+            "functional, all above the threshold. This is a rare profile. It does not happen "
+            "because of luck; it happens because of real capability that spans the full range "
+            "of what effective professionals need."
         ),
         "strength_paras": [
-            "You are the person others instinctively turn to when things are unclear. In "
-            "today's sessions your instructions were precise, your decisions were structured, "
-            "and when constraints hit you adapted your framework rather than abandoning it. "
-            "That combination of communication clarity and structured decision-making is "
-            "genuinely rare, and it consistently de-risked your team's performance when the "
-            "pressure intensified.",
+            "Full Spectrum is the profile of someone who can lead from any direction the team "
+            "needs. When clarity is missing, you provide direction. When tension rises, you "
+            "stabilise. When alignment is breaking down, you communicate. This flexibility is "
+            "not just useful — it is the defining feature of individuals who tend to take on "
+            "more responsibility over time.",
 
-            "What drives this strength is systems thinking applied in real time. You don't "
-            "just respond to what is in front of you. You build mental models of how the "
-            "pieces connect, and those models allow you to communicate and decide faster than "
-            "most. In professional environments this shows up as reliability under ambiguity: "
-            "colleagues trust your briefings, leaders delegate complex problems to you, and "
-            "you are often asked to structure the thinking of those around you.",
-
-            "The opportunity in front of you is a leadership track built on analytical "
-            "credibility. Your precision is a rare asset. The question is not whether your "
-            "thinking will serve you. It will. The question is whether you can extend that "
-            "clarity to include the human dimension of your teams, which would make you not "
-            "just effective, but genuinely influential at scale.",
+            "In professional environments, Full Spectrum profiles often become the people others "
+            "gravitate toward in high-stakes moments. Not because they are louder or more assertive "
+            "than others, but because they are consistently reliable across multiple modes of "
+            "contribution. That reliability compounds over time into influence and trust.",
         ],
         "gap_paras": [
-            "Collaboration was where today revealed a gap. Under pressure, your instinct was "
-            "to solve the output problem rather than re-align the people creating it. When the "
-            "team around you broke down, you moved faster toward the answer rather than pausing "
-            "to check whether everyone was still oriented toward the same question. Teammates "
-            "sometimes experienced this as being treated like variables in your system rather "
-            "than partners in it.",
+            "The development challenge for a Full Spectrum profile is not improvement — it is "
+            "calibration. Specifically: learning when to lead from the front, and when to step "
+            "back so others can grow. High-capability individuals in group settings can "
+            "inadvertently limit the development of those around them by solving too much "
+            "themselves.",
 
-            "This gap has a specific behavioral root: when you have a clear model of the right "
-            "answer, the human process of aligning others can feel like friction. It isn't. "
-            "It is a requirement. The clearer your thinking, the more intentional you need to "
-            "be about externalising it in ways that bring people with you rather than leaving "
-            "them to catch up. Efficiency in your thinking must be matched by investment in "
-            "shared understanding.",
-
-            "The downstream cost is real and compound. Decisions get made correctly but don't "
-            "land with team ownership. Projects succeed technically but don't build the "
-            "capability or trust that makes future work easier. Over time, people follow your "
-            "lead without contributing to it. Your impact ceiling stays lower than your "
-            "capability ceiling, simply because you are carrying more of the cognitive load "
-            "than you need to.",
+            "The growth edge is not about adding new skills. It is about deploying existing ones "
+            "with more precision — reading the room well enough to know which dimension to lead "
+            "from, and when to deliberately create space for a less experienced teammate to find "
+            "their footing.",
         ],
         "steps": [
-            ("Before naming the solution, name the dynamic",
-             "When collaboration breaks down, resist the urge to solve the output problem first. "
-             "Pause and say out loud: 'Before we push forward, are we all still pointed at the "
-             "same thing?' This is not inefficiency. It is the investment that makes your output "
-             "durable and builds team ownership alongside delivery."),
-            ("Make space for disagreement",
-             "In your next project or meeting, deliberately invite challenge: 'I've got a view on "
-             "this. I want to hear if you see it differently before we proceed.' This signals "
-             "that the team's thinking matters to your process, not just their execution, and "
-             "builds the collaborative ownership your outputs currently lack."),
-            ("Separate confidence from certainty",
-             "You can be confident in your process without being closed to revision. Practice "
-             "saying 'Here's my thinking. What am I missing?' instead of 'Here's the plan.' "
-             "The signal your team needs is not that you have the answer, but that you have a "
-             "rigorous approach to finding it. They are part of that approach."),
+            ("Choose your dimension deliberately",
+             "Before each session or key meeting, decide which single dimension you will lead "
+             "from — and hold back on the others. This is not natural for a Full Spectrum; your "
+             "default is to fill all gaps. Practising dimension constraint builds strategic "
+             "leadership rather than reflexive capability deployment."),
+            ("Create development space for others",
+             "When you notice a teammate struggling in an area you are strong in, resist stepping "
+             "in immediately. Ask a question instead of providing the answer. Your ceiling is not "
+             "about your own capability — it is about how much capability you activate in the "
+             "people around you."),
+            ("Track your highest-impact dimension",
+             "After each high-stakes moment, note which dimension drove your contribution. Over "
+             "time this reveals your 'home base' — the dimension you return to under pressure. "
+             "Knowing it helps you make it a conscious choice rather than a default."),
         ],
         "recommendations": (
-            "Your highest-leverage development is learning to distinguish between problems that "
-            "require your individual thinking and problems that require collective thinking. Not "
-            "every challenge is best solved by your clarity alone. Some are best solved by the "
-            "team developing shared understanding together, even if it takes longer. This "
-            "distinction will dramatically increase your team's capability and ownership. Invest "
-            "in facilitation skills: guiding a group toward clarity is the natural extension of "
-            "your existing individual strength and multiplies your impact significantly. Your "
-            "teams will move faster and with more autonomy when they feel like partners rather "
-            "than executors of your thinking."
+            "The development priority for Full Spectrum is strategic restraint and uplift. Identify "
+            "one person in your cohort who is still finding their dimension and invest deliberately "
+            "in their development. Ask questions rather than providing answers. The measure of a "
+            "Full Spectrum professional is not just their own performance — it is the performance "
+            "they generate in others."
         ),
         "leadership_cta": (
-            "Schedule a conversation with your leader within the next 7 days to discuss your "
-            "collaboration gap. Over the next 30 days, plan to: 1) In your next two projects, "
-            "deliberately facilitate team thinking rather than presenting solutions. Open by "
-            "naming the problem and inviting the team's approach before you propose yours. "
-            "2) Ask your leader to observe how you bring your team into your thinking process "
-            "and notice whether they feel like partners or executors. 3) After each facilitated "
-            "session, reflect on whether the team felt ownership of the direction and track how "
-            "this increases their autonomy and reduces your cognitive load in implementation."
+            "Schedule time to discuss this profile with your leader within the next 7 days. "
+            "Over the next 30 days: 1) Identify a situation where you deliberately held back to "
+            "give a less experienced teammate the opportunity to lead — note what happened. "
+            "2) Choose one dimension to lead from deliberately in each of the next four sessions, "
+            "rotating through all three. 3) Ask your leader to observe one high-stakes moment per "
+            "week and give you feedback specifically on whether you created space or filled it."
         ),
         "framework_rows": [
-            ("Collaboration Reset", "Primary",  "The gap between your output quality and team alignment."),
-            ("Clarity Loop",        "Continue", "Already strong. Keep the standard high."),
-            ("Decision Engine",     "Continue", "Structured thinking is a foundation. Build on it."),
+            ("Clarity Loop",        "Monitor",  "Communication is strong. Lead with precision, not volume."),
+            ("Decision Engine",     "Monitor",  "Decision instincts are excellent. Build judgment about when to delegate."),
+            ("Collaboration Reset", "Monitor",  "Composure is a strength. Use it to lift others, not only to stabilise yourself."),
         ],
     },
 
@@ -605,117 +557,83 @@ ARCHETYPES = {
         ],
     },
 
-    # ── The Ember ───────────────────────────────────────────────────────────────
-    "ember": {
+    # ── The Developing ───────────────────────────────────────────────────────────────────────────
+    "developing": {
         "number": "ARCHETYPE 6",
-        "name":   "The Ember",
-        "subtitle": "Not out. Not yet lit. Today was the ignition.",
-        "light":  "#F3F4F6", "accent": "#374151", "dark": "#111827",
-        "pill_bg": "#4B5563",
-        "comm": 38, "decision": 42, "collab": 35,
+        "name":   "The Developing",
+        "subtitle": "Building foundations. Watch this space.",
+        "light":  "#D1FAE5", "accent": "#059669", "dark": "#065F46",
+        "pill_bg": "#10B981",
+        "comm": 42, "decision": 44, "collab": 43,
         "hook": (
-            "Today was hard. Every simulation surfaced something uncomfortable. That discomfort "
-            "is the most honest and useful signal in this entire report because it means the "
-            "workshop worked exactly as designed."
+            "Your scores today reflect an early-stage profile across all three dimensions — "
+            "communication, decision-making, and composure. This is a starting point, not a "
+            "verdict. Every experienced professional in this room had a moment when their "
+            "scores looked like yours. The difference between now and then is not talent — "
+            "it is exposure, repetition, and the willingness to keep showing up."
         ),
         "strength_paras": [
-            "You showed up. You stayed in it. Somewhere in today's sessions, in a moment of "
-            "frustration, confusion, or a game that didn't go the way you expected, you "
-            "noticed something true about yourself. That noticing is the beginning of everything "
-            "this workshop is designed to build. The willingness to sit with honest feedback "
-            "rather than deflect it is not a small thing. Most people never actually do it.",
+            "The act of participation itself is a strength at this stage. You showed up, engaged "
+            "with the exercises, and gathered real data about where you currently stand. Many "
+            "people never do this. The fact that you have this profile in your hands means you "
+            "are already ahead of those who avoid structured assessment entirely.",
 
-            "This matters more than it sounds. The most significant development barrier any "
-            "professional faces is rarely skill. It is self-awareness. You can teach someone "
-            "communication frameworks, decision tools, and collaboration techniques. You cannot "
-            "teach the willingness to see clearly when the feedback is uncomfortable. That "
-            "willingness has to come from within, and you demonstrated it today.",
-
-            "In the workforce, this capacity for honest self-assessment represents a raw growth "
-            "potential that polished-but-fixed professionals often lack. Someone who can look "
-            "at precise feedback and sit with it, rather than reframe it, explain it away, or "
-            "get defensive, is someone who can actually change. Every other archetype in this "
-            "framework is built on skills that can be developed through deliberate practice. "
-            "None of them require more than what you showed up with today.",
+            "Look at your three scores and find the one closest to 50 — that is your emergence "
+            "zone. It may not feel significant, but a score approaching threshold is evidence "
+            "that one dimension is beginning to consolidate. That dimension is worth noting, "
+            "because it is likely to be the first to cross into 'Emerging' territory with "
+            "focused effort.",
         ],
         "gap_paras": [
-            "All three dimensions are development areas right now. Communication, Decision "
-            "Making, and Collaboration are each below the threshold that indicates reliable, "
-            "consistent performance under pressure. This is not a verdict. It is a starting "
-            "point, and honest starting points are genuinely rare. Most professionals go years "
-            "without receiving feedback this specific about where they actually are.",
+            "The honest development priority here is breadth before depth. All three dimensions "
+            "need attention, so the first task is not to decide which one to specialise in — "
+            "it is to get more repetitions across all three. Repeated exposure to structured "
+            "team challenges is what moves scores from below-threshold to threshold.",
 
-            "The behavioral root of today's results is likely not a lack of capability. It is "
-            "a lack of practised frameworks. Under pressure, people default to their most "
-            "practised behaviours. If those behaviours haven't yet been built in communication, "
-            "decision-making, or team collaboration, the simulation surfaces the gaps quickly. "
-            "The good news: all three dimensions are learnable. The behaviours that produce "
-            "high scores in this framework are specific, practiceable, and teachable.",
-
-            "In the workplace, these three gaps compound. Low communication precision creates "
-            "misalignment. Misalignment under low decision confidence creates stalled execution. "
-            "Stalled execution under weak collaboration tools creates team breakdown. The "
-            "pattern is a cascade and the upstream intervention, communication, addresses "
-            "all three. This is why the Clarity Loop is your starting point, not because it "
-            "is the most important framework in isolation, but because it is the one that "
-            "unlocks progress in the others.",
+            "The specific mechanics to work on: in communication, practise stating the outcome "
+            "before the method. In decision-making, practise committing to a call and then "
+            "observing what happens. In composure, practise staying functional when a plan "
+            "breaks down rather than freezing or escalating. These are learnable behaviours, "
+            "not fixed traits.",
         ],
         "steps": [
-            ("Build one communication habit this week",
-             "Before you finish any conversation at work where something important was agreed, "
-             "say: 'I just want to make sure I am understanding correctly.' Then go on to "
-             "reiterate your understanding of the instructions and requirements. This gives you "
-             "an opportunity to confirm alignment and close the clarity loop. This single "
-             "question builds the Clarity Loop in both directions and practices the precision "
-             "of checking rather than assuming. Do it every day. The compound effect over 30 days "
-             "is significant."),
-            ("Make one decision per day without seeking consensus first",
-             "It doesn't need to be significant. Meeting location, approach to a task, how "
-             "to structure an email. Make the call and execute it. The goal is repetition, "
-             "building the pathway of decision, commitment, and action. Decisiveness is a "
-             "muscle. Small daily practice builds it faster than infrequent high-stakes "
-             "attempts. Exercise your brain and resist becoming reliant on AI to make your "
-             "decisions. Although AI tools are quick and convenient, building your own "
-             "decision-making muscle requires real mental effort. The pathway from thought to "
-             "commitment to action needs to be yours."),
-            ("In your next team breakdown, name what you see",
-             "You don't need to have the solution. You just need to name the problem: 'I "
-             "think we have lost alignment. Can we pause?' That single sentence is a "
-             "Collaboration Reset, and it is available to you right now, with the skills "
-             "you already have. You do not need to wait to be more developed to start."),
+            ("Prioritise your emergence zone",
+             "Find the dimension with the highest score among your three. That is your emergence "
+             "zone. For the next two sessions, direct your deliberate attention there — ask "
+             "questions about it, practise the specific behaviour associated with it, notice "
+             "when you do it naturally."),
+            ("Aim for one clear moment per session",
+             "Rather than trying to perform across the full 90 minutes, set a smaller target: "
+             "one moment per session where you communicate clearly, make a call, or hold your "
+             "composure under pressure. That single moment is your unit of progress."),
+            ("Ask for specific positive feedback",
+             "After sessions, ask one person: 'What was one thing I did that helped the team "
+             "today?' Positive-framed feedback helps you identify where your emerging strengths "
+             "are before you are consciously aware of them yourself."),
         ],
         "recommendations": (
-            "The most important thing you can do with this report is not read it once and "
-            "file it. Come back to it in 30 days and ask honestly: which of these three "
-            "dimensions have I actually practised? The gap between awareness and action is "
-            "where development is won or lost. You have the awareness now. The work is in "
-            "finding low-stakes opportunities every day to practise the specific behaviours "
-            "in this report, not waiting for the perfect moment, but building the reflex "
-            "through consistent, small repetition. Every time you practise the Clarity Loop, "
-            "you are rewiring your default response. Progress will be incremental but real."
+            "The most important thing at this stage is continued participation. Each session adds "
+            "to the pattern of data. Two to three more sessions will reveal whether scores are "
+            "trending upward and in which dimension. Avoid drawing firm conclusions from a single "
+            "data point. The trajectory matters more than today's position. Stay present, stay "
+            "curious, and focus on improving one small thing per session."
         ),
         "leadership_cta": (
-            "Schedule a conversation with your leader or manager within 7 days. This profile "
-            "benefits significantly from supported follow-up. Over the next 30 days, plan to: "
-            "1) Identify three specific moments each week in your real work where you can "
-            "practise one of these three behaviours with support. Ask your leader to help you "
-            "identify these opportunities in advance so you're not starting from zero. "
-            "2) Request honest, specific observations after each attempt, not general "
-            "encouragement, but real feedback on what you did well and where the next step is. "
-            "3) Track your progress by documenting one win each week where you practised a skill "
-            "deliberately. Your goal is to build evidence that change is possible, which fuels "
-            "continued effort. Supported practice in real work contexts will accelerate your "
-            "development faster than anything else available to you."
+            "Schedule time to discuss this profile with your leader within the next 7 days. "
+            "The focus for the next 30 days should be encouragement and role variety, not "
+            "pressure. 1) Ensure this participant has at least two more opportunities to "
+            "complete structured team challenges before drawing any profile conclusions. "
+            "2) Assign roles that rotate across all three dimensions — not just the one they "
+            "seem most comfortable in. 3) After the next session, ask them what one thing felt "
+            "different. Their answer will indicate where development is beginning to take hold."
         ),
         "framework_rows": [
-            ("Clarity Loop",        "Primary",  "Start here. This is the foundation that unlocks the others."),
-            ("Decision Engine",     "Continue", "Build structure gradually. Small daily calls compound fast."),
-            ("Collaboration Reset", "Continue", "Recovery instincts will emerge as communication strengthens."),
+            ("Clarity Loop",        "Primary",  "Communication: practise stating the outcome before the steps in every handoff."),
+            ("Decision Engine",     "Primary",  "Decision-making: commit to calls and observe outcomes — build through repetition."),
+            ("Collaboration Reset", "Primary",  "Composure: practise staying functional under pressure — this is trainable."),
         ],
     },
-}
 
-# ─── Utility helpers ───────────────────────────────────────────────────────────
 def band_label(score):
     if score >= 80: return "Strong",     BAND_STRONG
     if score >= 60: return "Developing", BAND_DEVELOPING
@@ -899,6 +817,17 @@ def draw_header_p1(c, arch):
     c.setFillColor(colors.HexColor("#CBD5E1"))   # light slate — visible but softer
     c.drawString(PX, sub_y, arch["subtitle"])
     c.restoreState()
+
+    # Session context annotation (renders below subtitle when present)
+    ann = arch.get('_context_annotation')
+    if ann:
+        ann_y = sub_y - 5 * mm
+        c.saveState()
+        c.setFont('Helvetica', 7)
+        c.setFillColor(colors.HexColor('#94A3B8'))
+        c.drawString(PX, ann_y, ann)
+        c.restoreState()
+        sub_y = ann_y  # shift divider reference point down
 
     # Hairline divider
     div_y = sub_y - 5 * mm
@@ -1316,7 +1245,8 @@ def generate_profile(archetype_key, output_dir=".",
 def generate_profile_bytes(archetype_key,
                            participant_name=None, company=None,
                            comm_score=None, decision_score=None,
-                           collab_score=None):
+                           collab_score=None,
+                           context_score=None, state_score=None):
     """Generate a PDF and return it as bytes (for API use)."""
     import copy, datetime, io
     arch = copy.deepcopy(ARCHETYPES[archetype_key])
@@ -1332,6 +1262,20 @@ def generate_profile_bytes(archetype_key,
     company_part = company or "Company"
     month_year = datetime.datetime.now().strftime("%B %Y")
     arch["_meta_line"] = f"{name_part}  ·  {company_part}  ·  {month_year}"
+    # Session context annotation (from Quick Reflection block)
+    if context_score is not None and state_score is not None:
+        cs, ss = float(context_score), float(state_score)
+        if cs >= 4 and ss >= 4:
+            interp = 'High-challenge, strong focus — result carries additional weight'
+        elif cs >= 3 and ss >= 3:
+            interp = 'Moderate challenge and focus — result is representative'
+        elif cs < 3 and ss < 3:
+            interp = 'Low challenge and focus — treat as indicative'
+        else:
+            interp = 'Mixed session conditions — consider alongside other data'
+        arch['_context_annotation'] = (
+            f'Session context: {cs:.1f}/5  ·  {ss:.0f}/5 focus  |  {interp}'
+        )
 
     buf = io.BytesIO()
     c = rl_canvas.Canvas(buf, pagesize=A4)

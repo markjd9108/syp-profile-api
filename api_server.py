@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SYP Team Effectiveness Lab — PDF Profile API Server
+SYP Team Effectiveness Lab — PDF Profile API Server v1.3
 Endpoints:
   POST /generate               — individual participant PDF
   POST /generate-manager-report — team manager diagnostic report PDF
@@ -17,50 +17,54 @@ from generate_manager_report import generate_manager_report_bytes
 app = FastAPI(
     title="SYP Profile Generator API",
     description="Generates Team Effectiveness Lab PDFs — participant profiles and manager reports",
-    version="1.2.0",
+    version="1.3.0",
 )
+
+# Backward-compat aliases: old archetype keys → new keys
+LEGACY_ALIAS = {
+    "operator":  "navigator",
+    "architect": "generalist",
+    "connector": "anchor",
+    "ember":     "developing",
+}
 
 # --- Individual profile models ---
 class ProfileRequest(BaseModel):
-    archetype: str          = Field(..., description="Archetype key: operator, architect, navigator, signal, anchor, ember")
+    archetype: str          = Field(..., description="Archetype key: signal, navigator, anchor, generalist, full_spectrum, developing")
     participant_name: str   = Field(..., description="Participant's full name")
     company: str            = Field("",  description="Company name")
     comm_score: int         = Field(..., ge=0, description="Communication score 0-100")
     decision_score: int     = Field(..., ge=0, description="Decision Making score 0-100")
     collab_score: int       = Field(..., ge=0, description="Collaboration score 0-100")
-    response_format: Optional[str] = Field("binary", description="'binary' returns raw PDF, 'base64' returns JSON with base64-encoded PDF")
+    context_score: Optional[float] = Field(None, description="Session context quality 1-5")
+    state_score: Optional[float]   = Field(None, description="Session readiness state 1-5")
+    response_format: Optional[str] = Field("binary", description="binary or base64")
 
 # --- Manager report models ---
 class ManagerReportParticipant(BaseModel):
     name: str           = Field(..., description="Participant full name")
-    archetype: str      = Field(..., description="Archetype: Architect, Navigator, Anchor, Signal, Operator, Ember")
-    comm_score: int     = Field(..., ge=0, le=100, description="Communication score 0-100")
-    decision_score: int = Field(..., ge=0, le=100, description="Decision Making score 0-100")
-    collab_score: int   = Field(..., ge=0, le=100, description="Collaboration score 0-100")
+    archetype: str      = Field(..., description="Archetype name")
+    comm_score: int     = Field(..., ge=0, le=100)
+    decision_score: int = Field(..., ge=0, le=100)
+    collab_score: int   = Field(..., ge=0, le=100)
+    role: Optional[str] = Field(None)
 
 class ManagerReportRequest(BaseModel):
-    manager_name: str   = Field(..., description="Manager's full name (e.g. Sarah Mitchell)")
-    company: str        = Field(..., description="Company name (e.g. AED Global)")
-    workshop_date: str  = Field(..., description="Workshop date string (e.g. 6 May 2026)")
-    participants: List[ManagerReportParticipant] = Field(..., description="Array of participant results")
-    folder_url: Optional[str] = Field(None, description="Google Drive folder URL containing individual team profiles (linked from the button on page 4)")
-
-# --- Health check ---
-@app.get("/")
-def health():
-    return {
-        "status": "ok",
-        "service": "SYP Profile Generator",
-        "archetypes": list(ARCHETYPES.keys()),
-        "endpoints": ["/generate", "/generate-manager-report"],
-    }
+    manager_name: str                            = Field(..., description="Manager name")
+    company: str                                 = Field("", description="Company name")
+    participants: List[ManagerReportParticipant] = Field(..., description="Participants")
+    response_format: Optional[str]               = Field("binary")
 
 # --- Individual participant profile ---
 @app.post("/generate")
 def generate(req: ProfileRequest):
-    key = req.archetype.lower().strip()
+    key = req.archetype.lower().strip().replace(" ", "_")
+    key = LEGACY_ALIAS.get(key, key)
     if key not in ARCHETYPES:
-        raise HTTPException(status_code=400, detail=f"Unknown archetype '{key}'. Valid: {list(ARCHETYPES.keys())}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown archetype '{req.archetype}'. Valid: {list(ARCHETYPES.keys())}"
+        )
     comm     = min(max(req.comm_score,     0), 100)
     decision = min(max(req.decision_score, 0), 100)
     collab   = min(max(req.collab_score,   0), 100)
@@ -72,6 +76,8 @@ def generate(req: ProfileRequest):
             comm_score=comm,
             decision_score=decision,
             collab_score=collab,
+            context_score=req.context_score,
+            state_score=req.state_score,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
@@ -90,31 +96,33 @@ def generate(req: ProfileRequest):
         headers={"Content-Disposition": f'attachment; filename="SYP_{safe_name}_Profile.pdf"'},
     )
 
-# --- Manager team diagnostic report ---
+# --- Manager overview report ---
 @app.post("/generate-manager-report")
 def generate_manager_report(req: ManagerReportRequest):
     if not req.participants:
-        raise HTTPException(status_code=400, detail="participants array must not be empty")
-    participants = [p.model_dump() for p in req.participants]
+        raise HTTPException(status_code=400, detail="No participants provided.")
     try:
         pdf_bytes = generate_manager_report_bytes(
             manager_name=req.manager_name,
             company=req.company,
-            workshop_date=req.workshop_date,
-            participants=participants,
-            folder_url=req.folder_url,
+            participants=[p.dict() for p in req.participants],
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Manager report generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 
-    safe_company = req.company.replace(" ", "_")
+    if req.response_format == "base64":
+        return {
+            "filename":     f"SYP_Manager_Report_{req.manager_name.replace(' ', '_')}.pdf",
+            "content_type": "application/pdf",
+            "data":         base64.b64encode(pdf_bytes).decode("utf-8"),
+        }
+    safe_name = req.manager_name.replace(" ", "_")
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="SYP_Team_Report_{safe_company}.pdf"'},
+        headers={"Content-Disposition": f'attachment; filename="SYP_Manager_Report_{safe_name}.pdf"'},
     )
 
-# --- Entry point ---
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))

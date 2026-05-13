@@ -55,6 +55,11 @@ class ManagerReportRequest(BaseModel):
     participants: List[ManagerReportParticipant] = Field(..., description="Participants")
     response_format: Optional[str]               = Field("binary")
 
+# --- Health check ---
+@app.get("/")
+def health():
+    return {"status": "ok", "version": "1.3.0"}
+
 # --- Individual participant profile ---
 @app.post("/generate")
 def generate(req: ProfileRequest):

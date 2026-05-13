@@ -633,7 +633,7 @@ ARCHETYPES = {
             ("Collaboration Reset", "Primary",  "Composure: practise staying functional under pressure — this is trainable."),
         ],
     },
-
+}
 def band_label(score):
     if score >= 80: return "Strong",     BAND_STRONG
     if score >= 60: return "Developing", BAND_DEVELOPING

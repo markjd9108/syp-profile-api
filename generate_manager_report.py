@@ -1,627 +1,943 @@
 #!/usr/bin/env python3
 """
-SYP Team Effectiveness Lab  -  Manager Team Diagnostic Report PDF Generator
-4-page team overview PDF: Cover / Team at a Glance / Dimension Analysis / Individual Profiles + Recommendations
+SYP Team Effectiveness Lab — Manager Diagnostic Report Generator
+================================================================
+Generates a branded, multi-page PDF diagnostic report for team managers,
+summarising the team's performance across the three core dimensions:
+Communication, Decision Making, and Collaboration.
+
+Usage (standalone):
+    python3 generate_manager_report.py              # uses built-in sample data
+    python3 generate_manager_report.py input.json   # reads JSON from file
+
+As a module:
+    from generate_manager_report import generate_manager_report_pdf
+    pdf_bytes = generate_manager_report_pdf(data_dict)
+
+Expected JSON structure:
+    {
+        "team_name":     "AED Global",
+        "workshop_date": "6 May 2026",
+        "manager_name":  "Sarah Mitchell",
+        "manager_email": "sarah@aedglobal.com",
+        "participants": [
+            {
+                "name":      "Alice Nguyen",
+                "role":      "Guide",          # Guide / Builder / Observer
+                "c_score":   78.0,             # Communication 0-100
+                "d_score":   42.0,             # Decision Making 0-100
+                "co_score":  85.0,             # Collaboration 0-100
+                "c_level":   "High",           # High / Low
+                "d_level":   "Low",
+                "co_level":  "High",
+                "archetype": "Signal"
+            },
+            ...
+        ]
+    }
+
+Flask route (add to your Railway app.py):
+    See generate_flask_route() at the bottom of this file.
+
+Dependencies:
+    pip install reportlab --break-system-packages
 """
 
+import json
+import sys
 import io
+from collections import Counter
+from datetime import datetime
+
+from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
-from reportlab.lib import colors
-from reportlab.pdfgen import canvas as rl_canvas
-from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from reportlab.platypus import (
+    BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer,
+    Table, TableStyle, HRFlowable, PageBreak, KeepTogether,
+    NextPageTemplate,
+)
+from reportlab.platypus.flowables import Flowable
 
-#  Brand palette 
-NAVY       = colors.HexColor("#0D1B4B")
-TEAL       = colors.HexColor("#009688")
-TEAL_DARK  = colors.HexColor("#00695C")
-TEAL_LIGHT = colors.HexColor("#E0F2F1")
-WHITE      = colors.white
-NEAR_BLACK = colors.HexColor("#1A1A2E")
-MID_GREY   = colors.HexColor("#888888")
-LIGHT_GREY = colors.HexColor("#F5F7FA")
-RULE_GREY  = colors.HexColor("#E0E0E0")
-GREEN_DARK  = colors.HexColor("#1B5E20")
-GREEN_LIGHT = colors.HexColor("#E8F5E9")
-GREEN_MID   = colors.HexColor("#2E7D32")
-AMBER_DARK  = colors.HexColor("#E65100")
-AMBER_LIGHT = colors.HexColor("#FFF3E0")
-AMBER_MID   = colors.HexColor("#F57C00")
 
-# Archetype accent colours  -  matching individual profiles
-ARCHETYPE_COLORS = {
-    "Operator":  colors.HexColor("#B45309"),
-    "Architect": colors.HexColor("#6D28D9"),
-    "Navigator": colors.HexColor("#1D4ED8"),
-    "Signal":    colors.HexColor("#B91C1C"),
-    "Anchor":    colors.HexColor("#047857"),
-    "Ember":     colors.HexColor("#4B5563"),
+# ─── Brand palette ──────────────────────────────────────────────────────────
+
+DARK_BLUE   = colors.HexColor("#0D2A66")
+SKY_BLUE    = colors.HexColor("#1E88E5")
+NEAR_BLACK  = colors.HexColor("#1A1A2E")
+LIGHT_BLUE  = colors.HexColor("#E3F2FD")
+MID_GREY    = colors.HexColor("#6B7280")
+LIGHT_GREY  = colors.HexColor("#F3F4F6")
+SUCCESS     = colors.HexColor("#059669")
+WARNING     = colors.HexColor("#D97706")
+WHITE       = colors.white
+
+ARCHETYPE_COLOURS = {
+    # Current archetype names
+    "Relay":         colors.HexColor("#2E75B6"),
+    "Navigator":     colors.HexColor("#00838F"),
+    "Signal":        colors.HexColor("#E65100"),
+    "Anchor":        colors.HexColor("#B71C1C"),
+    "Compass":       colors.HexColor("#6A1B9A"),
+    "Summit":        colors.HexColor("#1B5E20"),
+    # Legacy names (backward compat)
+    "Architect":     colors.HexColor("#6A1B9A"),
+    "Operator":      colors.HexColor("#1565C0"),
+    "Ember":         colors.HexColor("#757575"),
+    "Generalist":    colors.HexColor("#827717"),
+    "Full Spectrum": colors.HexColor("#4A148C"),
+    "Developing":    colors.HexColor("#BF360C"),
 }
 
-ARCHETYPE_DESCRIPTIONS = {
-    "Architect": "Strategic  |  Analytical  |  Systematic  -  builds robust frameworks",
-    "Navigator": "Adaptive  |  Decisive  |  Collaborative  -  steers through complexity",
-    "Anchor":    "Dependable  |  Grounded  |  Steadying  -  holds the team together",
-    "Signal":    "Communicative  |  Expressive  |  Inclusive  -  connects the team",
-    "Operator":  "Structured  |  Decisive  |  Coordinated  -  drives consistent execution",
-    "Ember":     "Developing  |  Potential  |  Emerging  -  growing toward full contribution",
+ARCHETYPE_SUMMARY = {
+    # Current archetype names
+    "Relay":         "Collaborative · Adaptive · Connector — keeps the team moving together",
+    "Navigator":     "Decisive · Structured · Strategic — charts the course under pressure",
+    "Signal":        "Communicative · Expressive · Inclusive — connects and energises the team",
+    "Anchor":        "Dependable · Clear · Stable — provides reliable grounding",
+    "Compass":       "Analytical · Systematic · Strategic — builds robust frameworks",
+    "Summit":        "Visionary · Integrating · Elevating — lifts the team to new levels",
+    # Legacy names (backward compat)
+    "Operator":      "Structured · Decisive · Coordinated — drives consistent execution",
+    "Architect":     "Strategic · Analytical · Systematic — builds robust frameworks",
+    "Ember":         "Developing · Potential · Emerging — growing toward full contribution",
+    "Generalist":    "Versatile · Balanced · Adaptive — draws on multiple strengths",
+    "Full Spectrum": "Multi-dimensional · Complex · Integrated — operates across all dimensions",
+    "Developing":    "Emerging · Growing · Potential — building toward full contribution",
 }
 
-ARCHETYPE_ORDER = ["Architect", "Navigator", "Anchor", "Signal", "Operator", "Ember"]
+DIMENSION_DESCRIPTIONS = {
+    "Communication":    "How clearly individuals express ideas, listen actively, and adapt their message to different audiences.",
+    "Decision Making":  "How effectively individuals analyse options, reason under pressure, and commit to clear choices.",
+    "Collaboration":    "How well individuals coordinate with others, share credit, and adapt their style to team needs.",
+}
 
-W, H = A4           # 595.28 x 841.89 pts
-ML   = 20 * mm      # left margin
-MR   = 20 * mm      # right margin
-MT   = 20 * mm      # top margin
-MB   = 18 * mm      # bottom margin
-CW   = W - ML - MR  # usable content width
-
-
-#  Score label helper 
-def score_label(score: int) -> str:
-    """Convert a 0-100 score to a 4-tier label."""
-    if score < 40:
-        return "Needs Improvement"
-    elif score < 60:
-        return "Emerging"
-    elif score < 80:
-        return "Developing"
-    else:
-        return "Strong"
+PAGE_W, PAGE_H = A4            # 595 × 842 pt
+L_MARGIN = R_MARGIN = 18 * mm
+T_MARGIN_COVER   = 10 * mm
+T_MARGIN_CONTENT = 28 * mm
+B_MARGIN         = 20 * mm
+BODY_W = PAGE_W - L_MARGIN - R_MARGIN
 
 
-#  Helpers 
-def draw_para(c, text, x, y, width, font="Helvetica", size=9.5, color=NEAR_BLACK,
-              align=TA_JUSTIFY, leading=14):
-    """Draw a flowing Paragraph, return y after drawing."""
-    sty = ParagraphStyle("p", fontName=font, fontSize=size, textColor=color,
-                         alignment=align, leading=leading)
-    p = Paragraph(text, sty)
-    _, ph = p.wrap(width, 9999)
-    p.drawOn(c, x, y - ph)
-    return y - ph
+# ─── Page templates (canvas callbacks) ──────────────────────────────────────
+
+def _draw_cover(canvas, doc):
+    """Full-bleed dark blue cover page."""
+    canvas.saveState()
+    # Dark blue fill
+    canvas.setFillColor(DARK_BLUE)
+    canvas.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
+    # Sky blue accent bar at very top
+    canvas.setFillColor(SKY_BLUE)
+    canvas.rect(0, PAGE_H - 6 * mm, PAGE_W, 6 * mm, fill=1, stroke=0)
+    # Subtle darker strip at bottom
+    canvas.setFillColor(colors.HexColor("#061844"))
+    canvas.rect(0, 0, PAGE_W, 32 * mm, fill=1, stroke=0)
+    canvas.restoreState()
 
 
-def header_band(c, company, page_num):
-    """Navy header + teal underline used on pages 2-4."""
-    bh = 14 * mm
-    c.setFillColor(NAVY)
-    c.rect(0, H - bh, W, bh, fill=1, stroke=0)
-    c.setFillColor(TEAL)
-    c.rect(0, H - bh - 2, W, 2, fill=1, stroke=0)
-    c.setFont("Helvetica-Bold", 9)
-    c.setFillColor(WHITE)
-    c.drawString(ML, H - bh + 4 * mm, "TEAM DIAGNOSTIC REPORT")
-    c.setFont("Helvetica", 9)
-    c.drawRightString(W - MR, H - bh + 4 * mm, company)
-    c.setFont("Helvetica", 7.5)
-    c.setFillColor(MID_GREY)
-    c.drawCentredString(W / 2, MB - 5 * mm, f"Team Effectiveness Lab  |  Page {page_num}  |  Confidential")
+def _draw_content(canvas, doc):
+    """Header + footer on every interior page."""
+    canvas.saveState()
+
+    # ── Header bar
+    canvas.setFillColor(DARK_BLUE)
+    canvas.rect(0, PAGE_H - 22 * mm, PAGE_W, 22 * mm, fill=1, stroke=0)
+
+    canvas.setFont("Helvetica-Bold", 8.5)
+    canvas.setFillColor(WHITE)
+    canvas.drawString(L_MARGIN, PAGE_H - 12 * mm, "TEAM EFFECTIVENESS LAB")
+
+    canvas.setFont("Helvetica", 7.5)
+    canvas.setFillColor(colors.HexColor("#90CAF9"))
+    canvas.drawString(L_MARGIN, PAGE_H - 18.5 * mm, "Manager Diagnostic Report  ·  Confidential")
+    canvas.drawRightString(PAGE_W - R_MARGIN, PAGE_H - 12 * mm, f"Page {doc.page}")
+
+    # Sky blue accent underline
+    canvas.setFillColor(SKY_BLUE)
+    canvas.rect(0, PAGE_H - 23 * mm, PAGE_W, 1 * mm, fill=1, stroke=0)
+
+    # ── Footer
+    canvas.setFillColor(LIGHT_GREY)
+    canvas.rect(0, 0, PAGE_W, 12 * mm, fill=1, stroke=0)
+    canvas.setFont("Helvetica", 6.5)
+    canvas.setFillColor(MID_GREY)
+    canvas.drawString(L_MARGIN, 4 * mm,
+                      "© The Performance Lens by Saigon Young Professionals")
+    canvas.drawRightString(PAGE_W - R_MARGIN, 4 * mm,
+                           f"Generated {datetime.now().strftime('%d %B %Y')}")
+
+    canvas.restoreState()
 
 
-def section_title(c, text, y):
-    """Teal accent bar + bold section heading. Returns y below heading."""
-    c.setFillColor(TEAL)
-    c.rect(ML, y - 1, 3 * mm, 5.5 * mm, fill=1, stroke=0)
-    c.setFont("Helvetica-Bold", 12)
-    c.setFillColor(NAVY)
-    c.drawString(ML + 5 * mm, y, text)
-    return y - 9 * mm
+# ─── Custom flowables ────────────────────────────────────────────────────────
 
+class DimensionBar(Flowable):
+    """Labelled horizontal score bar with 60-point threshold marker."""
 
-def h_rule(c, y, color=RULE_GREY):
-    c.setStrokeColor(color)
-    c.setLineWidth(0.5)
-    c.line(ML, y, W - MR, y)
+    def __init__(self, label, avg_score, high_n, low_n):
+        super().__init__()
+        self.label     = label
+        self.avg_score = avg_score
+        self.high_n    = high_n
+        self.low_n     = low_n
+        self._height   = 18 * mm
 
+    def wrap(self, *args):
+        return (BODY_W, self._height)
 
-def stat_box(c, x, y, w, h, label, value, sub=None):
-    """Rounded stat box with large teal value."""
-    c.setFillColor(LIGHT_GREY)
-    c.roundRect(x, y - h, w, h, 3, fill=1, stroke=0)
-    c.setFillColor(TEAL)
-    c.setFont("Helvetica-Bold", 20)
-    c.drawCentredString(x + w / 2, y - h / 2 + 2, str(value))
-    c.setFont("Helvetica", 7.5)
-    c.setFillColor(MID_GREY)
-    c.drawCentredString(x + w / 2, y - h / 2 - 10, label.upper())
-    if sub:
+    def draw(self):
+        c       = self.canv
+        label_w = 48 * mm
+        bar_x   = label_w
+        bar_y   = 5 * mm
+        bar_h   = 9 * mm
+        bar_w   = BODY_W - label_w
+
+        # Label
+        c.setFont("Helvetica-Bold", 9)
+        c.setFillColor(NEAR_BLACK)
+        c.drawString(0, bar_y + 2.5 * mm, self.label)
+
+        # Hi/Lo sub-label
         c.setFont("Helvetica", 7)
-        c.drawCentredString(x + w / 2, y - h + 5, sub)
+        c.setFillColor(MID_GREY)
+        c.drawString(0, bar_y - 2 * mm, f"↑ High: {self.high_n}   ↓ Low: {self.low_n}")
+
+        # Track
+        c.setFillColor(LIGHT_GREY)
+        c.roundRect(bar_x, bar_y, bar_w, bar_h, 3 * mm, fill=1, stroke=0)
+
+        # Fill
+        fill_w   = bar_w * min(self.avg_score, 100) / 100
+        fill_col = SUCCESS if self.avg_score >= 60 else WARNING
+        c.setFillColor(fill_col)
+        if fill_w > 0:
+            c.roundRect(bar_x, bar_y, fill_w, bar_h, 3 * mm, fill=1, stroke=0)
+
+        # Threshold marker at 60
+        tx = bar_x + bar_w * 0.60
+        c.setStrokeColor(MID_GREY)
+        c.setLineWidth(0.8)
+        c.setDash([3, 2])
+        c.line(tx, bar_y - 1, tx, bar_y + bar_h + 1)
+        c.setDash([])
+        c.setFont("Helvetica", 6)
+        c.setFillColor(MID_GREY)
+        c.drawCentredString(tx, bar_y + bar_h + 2.5, "60")
+
+        # Score text
+        score_txt = f"{self.avg_score:.0f}"
+        if fill_w > 14 * mm:
+            c.setFont("Helvetica-Bold", 9)
+            c.setFillColor(WHITE)
+            c.drawRightString(bar_x + fill_w - 3 * mm, bar_y + 3 * mm, score_txt)
+        else:
+            c.setFont("Helvetica-Bold", 9)
+            c.setFillColor(NEAR_BLACK)
+            c.drawString(bar_x + fill_w + 3 * mm, bar_y + 3 * mm, score_txt)
 
 
-def dimension_bar(c, x, y, label, avg_score, high, low, n, interpretation, description):
-    """Horizontal dimension bar with 4-tier label. Returns y after drawing."""
-    bar_h = 8 * mm
-    bar_w = CW - 28 * mm
-    lbl   = score_label(int(round(avg_score)))
+class StatBox(Flowable):
+    """Coloured box showing a key metric."""
 
-    c.setFont("Helvetica-Bold", 11)
-    c.setFillColor(NAVY)
-    c.drawString(x, y, label)
-    y -= 5 * mm
+    def __init__(self, value, label, colour, width=44 * mm, height=22 * mm):
+        super().__init__()
+        self.value  = str(value)
+        self.label  = label
+        self.colour = colour
+        self.bw     = width
+        self.bh     = height
 
-    # Background track
-    c.setFillColor(RULE_GREY)
-    c.roundRect(x, y - bar_h, bar_w, bar_h, 3, fill=1, stroke=0)
+    def wrap(self, *args):
+        return (self.bw, self.bh)
 
-    # Score fill
-    fill_w = max((avg_score / 100) * bar_w, 4)
-    c.setFillColor(TEAL if avg_score >= 60 else AMBER_MID)
-    c.roundRect(x, y - bar_h, fill_w, bar_h, 3, fill=1, stroke=0)
-
-    # Score + label inside bar
-    c.setFont("Helvetica-Bold", 8)
-    c.setFillColor(WHITE if avg_score > 15 else NEAR_BLACK)
-    c.drawString(x + max(fill_w - 22, 2), y - bar_h + 2.5 * mm,
-                 f"{avg_score:.1f}  |  {lbl}")
-
-    # Dashed threshold at 60
-    thresh_x = x + 0.6 * bar_w
-    c.setStrokeColor(NEAR_BLACK)
-    c.setLineWidth(1.2)
-    c.setDash(3, 3)
-    c.line(thresh_x, y - bar_h - 2, thresh_x, y + 2)
-    c.setDash()
-    c.setFont("Helvetica", 7)
-    c.setFillColor(MID_GREY)
-    c.drawCentredString(thresh_x, y - bar_h - 4 * mm, "60")
-
-    # Hi/Lo stats
-    sx = x + bar_w + 4 * mm
-    c.setFont("Helvetica-Bold", 9)
-    c.setFillColor(GREEN_MID)
-    c.drawString(sx, y - 3 * mm, f"+ {high}/{n}")
-    c.setFillColor(AMBER_DARK)
-    c.drawString(sx, y - bar_h + 1.5 * mm, f"- {low}/{n}")
-    y -= bar_h + 5 * mm
-
-    # Bold interpretation
-    c.setFont("Helvetica-Bold", 8.5)
-    c.setFillColor(NAVY)
-    c.drawString(x, y, interpretation)
-    y -= 4 * mm
-
-    # Description
-    sty = ParagraphStyle("d", fontName="Helvetica", fontSize=8.5,
-                         textColor=colors.HexColor("#444444"), leading=12)
-    p = Paragraph(description, sty)
-    _, ph = p.wrap(CW, 200)
-    p.drawOn(c, x, y - ph)
-    y -= ph + 7 * mm
-    return y
-
-
-#  Page 1: Cover 
-def draw_cover(c, manager_name, company, workshop_date):
-    c.setFillColor(NAVY)
-    c.rect(0, 0, W, H, fill=1, stroke=0)
-    c.setFillColor(TEAL)
-    c.rect(0, H - 6 * mm, W, 6 * mm, fill=1, stroke=0)
-    c.rect(0, 0, W, 4 * mm, fill=1, stroke=0)
-    c.rect(ML - 2, 0.14 * H, 3, 0.72 * H, fill=1, stroke=0)
-
-    c.setFont("Helvetica", 8.5)
-    c.setFillColor(TEAL)
-    c.drawString(ML + 8, 0.83 * H, "THE PERFORMANCE LENS BY SAIGON YOUNG PROFESSIONALS")
-
-    ty = 0.73 * H
-    c.setFont("Helvetica-Bold", 38)
-    c.setFillColor(WHITE)
-    c.drawString(ML + 8, ty, "TEAM DIAGNOSTIC")
-    c.drawString(ML + 8, ty - 44, "REPORT")
-
-    c.setFillColor(TEAL)
-    c.rect(ML + 8, ty - 58, CW * 0.6, 2, fill=1, stroke=0)
-
-    c.setFont("Helvetica-Bold", 22)
-    c.setFillColor(WHITE)
-    c.drawString(ML + 8, ty - 83, company)
-
-    c.setFont("Helvetica", 12)
-    c.setFillColor(TEAL)
-    c.drawString(ML + 8, ty - 106, workshop_date)
-
-    c.setFont("Helvetica", 11)
-    c.setFillColor(colors.HexColor("#B0BEC5"))
-    c.drawString(ML + 8, ty - 133, f"Prepared for {manager_name}")
-
-    c.setFont("Helvetica", 8.5)
-    c.setFillColor(colors.HexColor("#607D8B"))
-    c.drawCentredString(W / 2, 0.09 * H, "Team Effectiveness Lab  |  Confidential")
-
-
-#  Page 2: Team at a Glance + Comm + Decision Making & Strategy bars 
-def draw_page2(c, company, participants, n, overall_avg, avg_comm, avg_decision,
-               comm_high, comm_low, decision_high, decision_low,
-               strengths, dev_areas, archetype_counts):
-    header_band(c, company, 2)
-    y = H - 18 * mm - 5 * mm
-
-    y = section_title(c, "Team at a Glance", y)
-
-    strengths_str = " and ".join(strengths) if strengths else "none of the measured dimensions"
-    dev_sentence = (
-        f"Development opportunities were identified in {' and '.join(dev_areas)}."
-        if dev_areas else
-        "All dimensions exceeded the 60-point performance threshold  -  a great result."
-    )
-    intro = (
-        f"Your team of <b>{n} participant{'s' if n != 1 else ''}</b> completed the Team Effectiveness Lab. "
-        f"Across all three dimensions, the team averaged <b>{overall_avg:.1f} out of 100</b>. "
-        f"Collective strengths emerged in {strengths_str}. {dev_sentence}"
-    )
-    y = draw_para(c, intro, ML, y, CW)
-    y -= 5 * mm
-
-    # Stat boxes
-    gap   = 3 * mm
-    box_w = (CW - 3 * gap) / 4
-    box_h = 18 * mm
-    bx    = ML
-    stat_box(c, bx, y, box_w, box_h, "Participants", n);                    bx += box_w + gap
-    stat_box(c, bx, y, box_w, box_h, "Avg Score", f"{overall_avg:.1f}");    bx += box_w + gap
-    stat_box(c, bx, y, box_w, box_h, "Strengths", len(strengths), "dims >= 60"); bx += box_w + gap
-    stat_box(c, bx, y, box_w, box_h, "Dev Areas", len(dev_areas), "dims < 60")
-    y -= box_h + 7 * mm
-
-    h_rule(c, y); y -= 6 * mm
-
-    # Archetype Distribution
-    y = section_title(c, "Archetype Distribution", y)
-    col_w = [CW * 0.24, CW * 0.11, CW * 0.11, CW * 0.54]
-    hx = ML
-    c.setFont("Helvetica-Bold", 7.5); c.setFillColor(MID_GREY)
-    for lbl, cw in zip(["Archetype", "Count", "% Team", "Profile"], col_w):
-        c.drawString(hx, y, lbl.upper()); hx += cw
-    y -= 3 * mm; h_rule(c, y); y -= 4 * mm
-
-    desc_sty = ParagraphStyle("ds", fontName="Helvetica", fontSize=8,
-                              textColor=colors.HexColor("#555555"), leading=11)
-    shown = sorted(archetype_counts.items(),
-                   key=lambda x: (-x[1], ARCHETYPE_ORDER.index(x[0]) if x[0] in ARCHETYPE_ORDER else 99))
-    for arch, cnt in shown:
-        pct = cnt / n * 100
-        ac  = ARCHETYPE_COLORS.get(arch, MID_GREY)
-        rx  = ML
-        c.setFillColor(ac); c.rect(rx, y - 9, 3, 11, fill=1, stroke=0)
-        c.setFont("Helvetica-Bold", 9); c.setFillColor(ac)
-        c.drawString(rx + 5, y - 6, arch); rx += col_w[0]
-        c.setFont("Helvetica-Bold", 9); c.setFillColor(NEAR_BLACK)
-        c.drawString(rx + 2, y - 6, str(cnt)); rx += col_w[1]
-        c.setFont("Helvetica", 9); c.setFillColor(MID_GREY)
-        c.drawString(rx + 2, y - 6, f"{pct:.0f}%"); rx += col_w[2]
-        dp = Paragraph(ARCHETYPE_DESCRIPTIONS.get(arch, ""), desc_sty)
-        _, dph = dp.wrap(col_w[3] - 2, 40)
-        dp.drawOn(c, rx, y - dph + 2)
-        y -= max(dph, 12) + 4
-        h_rule(c, y, RULE_GREY); y -= 3 * mm
-
-    y -= 3 * mm; h_rule(c, y); y -= 7 * mm
-
-    # Dimension Analysis
-    y = section_title(c, "Dimension Analysis", y)
-    y = dimension_bar(
-        c, ML, y,
-        "Communication",
-        avg_comm, comm_high, comm_low, n,
-        f"Communication is {'a team strength' if avg_comm >= 60 else 'an area for development'}  -  "
-        f"{comm_high} of {n} participants scored above threshold.",
-        "Communication captures how clearly participants expressed information, listened under pressure, "
-        "and adapted their style when instructions were ambiguous or roles shifted. High-scoring teams "
-        "maintain clarity even when the environment is chaotic."
-    )
-
-    if y > MB + 55 * mm:
-        dimension_bar(
-            c, ML, y,
-            "Decision Making & Strategy",
-            avg_decision, decision_high, decision_low, n,
-            f"Decision Making & Strategy is {'a team strength' if avg_decision >= 60 else 'an area for development'}  -  "
-            f"{decision_high} of {n} participants performed above threshold.",
-            "Decision Making & Strategy reflects how participants assessed constraints, committed under uncertainty, "
-            "and adapted their approach when new information emerged. High scores indicate participants "
-            "who make timely, grounded decisions without overcorrecting when plans change."
-        )
-
-
-#  Page 3: Collaboration & Teamwork + Strengths / Dev Areas 
-def draw_page3(c, company, n, avg_collab, collab_high, collab_low, strengths, dev_areas):
-    header_band(c, company, 3)
-    y = H - 18 * mm - 5 * mm
-
-    y = section_title(c, "Dimension Analysis (continued)", y)
-    y = dimension_bar(
-        c, ML, y,
-        "Collaboration & Teamwork",
-        avg_collab, collab_high, collab_low, n,
-        f"Collaboration & Teamwork is {'a team strength' if avg_collab >= 60 else 'an area for growth'}  -  "
-        f"{collab_high} of {n} participants exceeded threshold.",
-        "Collaboration & Teamwork measures how participants contributed to shared goals, supported others during "
-        "difficulty, and adapted their role when team dynamics shifted. Strong collaborators raise the "
-        "floor of overall team performance, not just their own output."
-    )
-
-    h_rule(c, y); y -= 7 * mm
-
-    # Team Strengths
-    sh = 10 * mm + len(strengths) * 7.5 * mm if strengths else 14 * mm
-    c.setFillColor(GREEN_LIGHT); c.roundRect(ML, y - sh, CW, sh, 4, fill=1, stroke=0)
-    c.setFillColor(GREEN_MID);   c.roundRect(ML, y - sh, 4, sh, 0, fill=1, stroke=0)
-    c.setFont("Helvetica-Bold", 10); c.setFillColor(GREEN_DARK)
-    c.drawString(ML + 8, y - 7 * mm, "Team Strengths")
-    by = y - 13 * mm
-    if strengths:
-        for s in strengths:
-            c.setFont("Helvetica", 9); c.setFillColor(GREEN_DARK)
-            c.drawString(ML + 14, by, f"- {s}  -  team average exceeds the 60-point performance threshold")
-            by -= 7 * mm
-    else:
-        c.setFont("Helvetica", 9); c.setFillColor(GREEN_DARK)
-        c.drawString(ML + 14, by, "No dimensions reached the 60-point threshold in this session.")
-    y -= sh + 5 * mm
-
-    # Dev Areas
-    dh = 10 * mm + len(dev_areas) * 7.5 * mm if dev_areas else 14 * mm
-    c.setFillColor(AMBER_LIGHT); c.roundRect(ML, y - dh, CW, dh, 4, fill=1, stroke=0)
-    c.setFillColor(AMBER_MID);   c.roundRect(ML, y - dh, 4, dh, 0, fill=1, stroke=0)
-    c.setFont("Helvetica-Bold", 10); c.setFillColor(AMBER_DARK)
-    c.drawString(ML + 8, y - 7 * mm, "Development Areas")
-    by = y - 13 * mm
-    if dev_areas:
-        for d in dev_areas:
-            c.setFont("Helvetica", 9); c.setFillColor(AMBER_DARK)
-            c.drawString(ML + 14, by, f"- {d}  -  team average is below the 60-point performance threshold")
-            by -= 7 * mm
-    else:
-        c.setFont("Helvetica", 9); c.setFillColor(AMBER_DARK)
-        c.drawString(ML + 14, by,
-                     "All dimensions above threshold  -  great result!")
-
-
-#  Page 4: Individual Profiles + Manager Recommendations + Folder Button 
-def draw_page4(c, company, participants, recommendations, folder_url=None):
-    header_band(c, company, 4)
-    y = H - 18 * mm - 5 * mm
-
-    y = section_title(c, "Individual Profiles", y)
-
-    # Table headers  -  full category names
-    col_w = [CW * 0.26, CW * 0.18, CW * 0.18, CW * 0.20, CW * 0.18]
-    hx = ML
-    c.setFont("Helvetica-Bold", 7); c.setFillColor(MID_GREY)
-    for lbl, cw in zip(
-        ["Name", "Archetype", "Communication", "Decision Making & Strategy", "Collaboration & Teamwork"],
-        col_w
-    ):
-        c.drawString(hx, y, lbl.upper()); hx += cw
-    y -= 3 * mm; h_rule(c, y, RULE_GREY); y -= 4 * mm
-
-    for ri, p in enumerate(participants):
-        name  = p.get("name", " - ")
-        arch  = p.get("archetype", " - ")
-        comm  = p.get("comm_score", 0)
-        dec   = p.get("decision_score", 0)
-        col   = p.get("collab_score", 0)
-        ac    = ARCHETYPE_COLORS.get(arch, MID_GREY)
-        rh    = 8 * mm
-
-        c.setFillColor(WHITE if ri % 2 == 0 else LIGHT_GREY)
-        c.rect(ML, y - rh, CW, rh, fill=1, stroke=0)
-
-        rx = ML
-        # Name
-        c.setFont("Helvetica-Bold", 8.5); c.setFillColor(NEAR_BLACK)
-        c.drawString(rx + 2, y - 5.5, name[:28]); rx += col_w[0]
-        # Archetype
-        c.setFont("Helvetica-Bold", 8); c.setFillColor(ac)
-        c.drawString(rx + 2, y - 5.5, arch); rx += col_w[1]
-        # Scores with labels
-        for score in [comm, dec, col]:
-            lbl = score_label(score)
-            arrow = "+" if score >= 60 else "-"
-            c.setFont("Helvetica", 7.5)
-            c.setFillColor(GREEN_MID if score >= 60 else AMBER_DARK)
-            c.drawString(rx + 2, y - 5.5, f"{arrow} {lbl}")
-            rx += col_w[2]
-
-        y -= rh; h_rule(c, y, RULE_GREY)
-
-    y -= 7 * mm; h_rule(c, y); y -= 7 * mm
-
-    # Google Drive folder button
-    if folder_url:
-        btn_w   = 90 * mm
-        btn_h   = 11 * mm
-        btn_x   = (W - btn_w) / 2
-        btn_top = y
-
-        # Shadow
-        c.setFillColor(TEAL_DARK)
-        c.roundRect(btn_x + 1, btn_top - btn_h - 1, btn_w, btn_h, 5, fill=1, stroke=0)
-
-        # Button face
-        c.setFillColor(TEAL)
-        c.roundRect(btn_x, btn_top - btn_h, btn_w, btn_h, 5, fill=1, stroke=0)
-
-        # Button text
-        c.setFont("Helvetica-Bold", 10)
+    def draw(self):
+        c = self.canv
+        c.setFillColor(self.colour)
+        c.roundRect(0, 0, self.bw, self.bh, 3.5 * mm, fill=1, stroke=0)
+        c.setFont("Helvetica-Bold", 18)
         c.setFillColor(WHITE)
-        c.drawCentredString(W / 2, btn_top - btn_h + 3.5 * mm,
-                            "View All Team Profiles >>")
-
-        # Clickable hyperlink
-        c.linkURL(folder_url,
-                  (btn_x, btn_top - btn_h, btn_x + btn_w, btn_top),
-                  relative=0)
-        y -= btn_h + 7 * mm
-
-    # Manager Recommendations
-    y = section_title(c, "Manager Recommendations", y)
-
-    title_sty = ParagraphStyle("rt", fontName="Helvetica-Bold", fontSize=10,
-                               textColor=NAVY, leading=14)
-    body_sty  = ParagraphStyle("rb", fontName="Helvetica", fontSize=9,
-                               textColor=colors.HexColor("#333333"), leading=13,
-                               alignment=TA_JUSTIFY)
-
-    for i, (title, body) in enumerate(recommendations, 1):
-        c.setFillColor(TEAL)
-        c.circle(ML + 4 * mm, y - 3 * mm, 4 * mm, fill=1, stroke=0)
-        c.setFont("Helvetica-Bold", 9); c.setFillColor(WHITE)
-        c.drawCentredString(ML + 4 * mm, y - 4.5 * mm, str(i))
-        tp = Paragraph(title, title_sty)
-        _, tph = tp.wrap(CW - 12 * mm, 40)
-        tp.drawOn(c, ML + 12 * mm, y - tph)
-        y -= tph + 2 * mm
-        bp = Paragraph(body, body_sty)
-        _, bph = bp.wrap(CW - 12 * mm, 300)
-        bp.drawOn(c, ML + 12 * mm, y - bph)
-        y -= bph + 7 * mm
-
-    note_y = max(y - 4 * mm, MB + 22 * mm)
-
-    # Footer rule + note
-    h_rule(c, note_y)
-    footer_sty = ParagraphStyle("ft", fontName="Helvetica", fontSize=7.5,
-                                textColor=MID_GREY, leading=11)
-    footer_text = (
-        "Individual profile PDFs have been sent directly to each participant. "
-        "You also have access to the team data sheet shared separately, which contains all scores "
-        "in a searchable format. For questions about the Team Effectiveness Lab, contact your SYP facilitator."
-    )
-    fp = Paragraph(footer_text, footer_sty)
-    _, fph = fp.wrap(CW, 60)
-    fp.drawOn(c, ML, note_y - fph - 2 * mm)
+        c.drawCentredString(self.bw / 2, self.bh * 0.46, self.value)
+        c.setFont("Helvetica", 7)
+        c.setFillColor(WHITE)
+        c.drawCentredString(self.bw / 2, self.bh * 0.16, self.label.upper())
 
 
-#  Recommendations engine 
-def generate_recommendations(participants, strengths, dev_areas, archetype_counts, n):
+# ─── Text styles ─────────────────────────────────────────────────────────────
+
+def _styles():
+    return {
+        "section_title": ParagraphStyle("section_title",
+            fontName="Helvetica-Bold", fontSize=14, textColor=DARK_BLUE,
+            spaceBefore=2 * mm, spaceAfter=3 * mm),
+
+        "sub_heading": ParagraphStyle("sub_heading",
+            fontName="Helvetica-Bold", fontSize=10, textColor=NEAR_BLACK,
+            spaceBefore=2 * mm, spaceAfter=2 * mm),
+
+        "body": ParagraphStyle("body",
+            fontName="Helvetica", fontSize=9, textColor=NEAR_BLACK,
+            leading=14, spaceAfter=3 * mm),
+
+        "caption": ParagraphStyle("caption",
+            fontName="Helvetica", fontSize=8, textColor=MID_GREY,
+            leading=12, spaceAfter=3 * mm),
+
+        "bullet": ParagraphStyle("bullet",
+            fontName="Helvetica", fontSize=9, textColor=NEAR_BLACK,
+            leading=14, leftIndent=8, firstLineIndent=-8, spaceAfter=2 * mm),
+
+        # Cover page
+        "cover_title": ParagraphStyle("cover_title",
+            fontName="Helvetica-Bold", fontSize=30, textColor=WHITE,
+            leading=36, spaceAfter=4 * mm),
+
+        "cover_sub": ParagraphStyle("cover_sub",
+            fontName="Helvetica", fontSize=13,
+            textColor=colors.HexColor("#90CAF9"), spaceAfter=2 * mm),
+
+        "cover_meta": ParagraphStyle("cover_meta",
+            fontName="Helvetica", fontSize=10,
+            textColor=colors.HexColor("#BBDEFB"), spaceAfter=2 * mm),
+
+        # Table cells
+        "t_head": ParagraphStyle("t_head",
+            fontName="Helvetica-Bold", fontSize=8, textColor=WHITE,
+            alignment=TA_CENTER),
+
+        "t_cell": ParagraphStyle("t_cell",
+            fontName="Helvetica", fontSize=8.5, textColor=NEAR_BLACK,
+            alignment=TA_CENTER, leading=11),
+
+        "t_cell_l": ParagraphStyle("t_cell_l",
+            fontName="Helvetica", fontSize=8.5, textColor=NEAR_BLACK,
+            leading=11),
+    }
+
+
+# ─── Data analysis ────────────────────────────────────────────────────────────
+
+def _calc_stats(participants):
+    n = len(participants)
+    if n == 0:
+        return {}
+
+    c_scores  = [p["c_score"]  for p in participants]
+    d_scores  = [p["d_score"]  for p in participants]
+    co_scores = [p["co_score"] for p in participants]
+
+    c_avg  = round(sum(c_scores)  / n, 1)
+    d_avg  = round(sum(d_scores)  / n, 1)
+    co_avg = round(sum(co_scores) / n, 1)
+
+    c_high  = sum(1 for p in participants if p.get("c_level")  == "High")
+    d_high  = sum(1 for p in participants if p.get("d_level")  == "High")
+    co_high = sum(1 for p in participants if p.get("co_level") == "High")
+
+    overall_avg = round((c_avg + d_avg + co_avg) / 3, 1)
+
+    strengths = []
+    dev_areas = []
+    for dim, avg in [("Communication", c_avg),
+                     ("Decision Making", d_avg),
+                     ("Collaboration", co_avg)]:
+        (strengths if avg >= 60 else dev_areas).append(dim)
+
+    archetype_counts = Counter(p["archetype"] for p in participants)
+    role_counts      = Counter(p.get("role", "Unknown") for p in participants)
+
+    return {
+        "n": n,
+        "c_avg": c_avg,   "d_avg": d_avg,   "co_avg": co_avg,
+        "c_high": c_high, "d_high": d_high, "co_high": co_high,
+        "c_low": n - c_high, "d_low": n - d_high, "co_low": n - co_high,
+        "overall_avg": overall_avg,
+        "archetype_counts": archetype_counts,
+        "role_counts": role_counts,
+        "strengths": strengths,
+        "dev_areas": dev_areas,
+    }
+
+
+def _overview_text(stats):
+    oa = stats["overall_avg"]
+    n  = stats["n"]
+    if oa >= 75:
+        tone = "strong overall performance"
+    elif oa >= 60:
+        tone = "solid overall performance with targeted areas to develop"
+    else:
+        tone = "a clear opportunity to invest in team-level capability building"
+
+    parts = [
+        f"Your team of {n} completed the Team Effectiveness Lab, "
+        f"demonstrating {tone} (team average: {oa}/100)."
+    ]
+    if stats["strengths"]:
+        parts.append(f"Collective strengths were observed in: {', '.join(stats['strengths'])}.")
+    if stats["dev_areas"]:
+        parts.append(f"Priority development areas are: {', '.join(stats['dev_areas'])}.")
+
+    n_archetypes = len(stats["archetype_counts"])
+    if n_archetypes >= 4:
+        parts.append(
+            "The team displays rich archetype diversity, combining complementary strengths "
+            "that — when well-coordinated — can cover the full range of team effectiveness."
+        )
+    elif n_archetypes <= 2:
+        top = stats["archetype_counts"].most_common(1)[0][0]
+        parts.append(
+            f"The team skews toward {top}-type profiles, creating a cohesive working style "
+            f"that may benefit from deliberately seeking out diverse perspectives."
+        )
+    return " ".join(parts)
+
+
+def _dim_insight(dim_name, avg, high_n, low_n, n):
+    pct = high_n / n * 100 if n else 0
+    if avg >= 75:
+        verdict = (f"a clear team strength — {high_n} of {n} scored High "
+                   f"({pct:.0f}%)")
+    elif avg >= 60:
+        verdict = (f"above the performance threshold — {high_n} High vs "
+                   f"{low_n} Low, with room to lift the lower-scoring members")
+    elif avg >= 45:
+        verdict = (f"a development priority — only {high_n} of {n} reached "
+                   f"the High threshold. Targeted coaching would move the needle quickly")
+    else:
+        verdict = (f"an urgent capability gap — {low_n} of {n} scored below "
+                   f"threshold. Structured intervention is recommended")
+    return f"<b>{dim_name}</b> (avg {avg}/100) is {verdict}."
+
+
+def _recommendations(stats):
     recs = []
 
-    # Always include: team debrief
-    recs.append((
-        "Host a Team Debrief Using Individual Profiles",
-        "Schedule a 30-minute team debrief where each participant shares one insight from their "
-        "individual profile PDF. Structured peer dialogue about working styles is one of the highest-ROI "
+    # Dimension-driven
+    if "Communication" in stats["dev_areas"]:
+        recs.append(
+            "Introduce structured communication rituals — daily stand-ups, async written "
+            "updates, or a weekly team letter — to build active listening and message clarity across the group."
+        )
+    if "Decision Making" in stats["dev_areas"]:
+        recs.append(
+            "Run monthly decision-making simulations or scenario reviews where team members "
+            "practise structured problem-solving under time pressure. Debrief each session as a team."
+        )
+    if "Collaboration" in stats["dev_areas"]:
+        recs.append(
+            "Assign cross-functional projects or deliberate pair-work rotations to build "
+            "collaborative norms and expand each person's working-style flexibility."
+        )
+
+    # Archetype-driven
+    ember_n = stats["archetype_counts"].get("Ember", 0)
+    if ember_n > 0:
+        recs.append(
+            f"Your {ember_n} Ember-profile participant(s) are in a development stage. "
+            "Assign a mentor from the team, define clear short-term stretch goals, "
+            "and provide frequent feedback checkpoints to accelerate their growth trajectory."
+        )
+
+    structured_n = (stats["archetype_counts"].get("Operator", 0) +
+                    stats["archetype_counts"].get("Architect", 0))
+    if structured_n >= stats["n"] * 0.6:
+        recs.append(
+            "The team leans heavily toward structured, systematic profiles. Periodically "
+            "introduce open-ended creative challenges or unstructured exploration time to "
+            "build adaptability and innovative thinking."
+        )
+
+    communicative_n = (stats["archetype_counts"].get("Signal", 0) +
+                       stats["archetype_counts"].get("Navigator", 0))
+    if communicative_n >= stats["n"] * 0.6:
+        recs.append(
+            "Strong communicators and adaptors dominate the team. Channel this energy into "
+            "formal knowledge-sharing programmes, mentoring of junior staff, or cross-team liaison roles."
+        )
+
+    # Universal closer
+    recs.append(
+        "Host a 30-minute team debrief using the individual profile PDFs as conversation "
+        "starters. Structured peer dialogue about working styles is one of the highest-ROI "
         "investments a manager can make in psychological safety and team cohesion."
-    ))
-
-    # If Ember archetypes present
-    ember_count = archetype_counts.get("Ember", 0)
-    if ember_count > 0 and len(recs) < 3:
-        plural = ember_count > 1
-        recs.append((
-            f"Mentoring for {'Emerging Contributors' if plural else 'an Emerging Contributor'}",
-            f"Your {ember_count} Ember-profile participant{'s are' if plural else ' is'} in a development stage. "
-            "Assign a mentor from the team, define clear short-term stretch goals, and provide frequent "
-            "feedback checkpoints to accelerate their growth trajectory."
-        ))
-
-    # Dimension-specific recommendations
-    if "Decision Making & Strategy" in dev_areas and len(recs) < 3:
-        avg_d = sum(p["decision_score"] for p in participants) / n
-        recs.append((
-            "Introduce a Lightweight Decision-Making Framework",
-            f"The team averaged {avg_d:.1f} in Decision Making & Strategy  -  below the 60-point threshold. "
-            "Introduce a simple protocol such as a RACI matrix or pre-mortem practice for your next three "
-            "significant decisions. This builds the muscle systematically without requiring major process overhaul."
-        ))
-
-    if "Collaboration & Teamwork" in dev_areas and len(recs) < 3:
-        avg_co = sum(p["collab_score"] for p in participants) / n
-        recs.append((
-            "Structured Collaboration & Teamwork Practice",
-            f"With a team Collaboration & Teamwork average of {avg_co:.1f}, the group benefits from making "
-            "collaboration explicit. Run your next project kick-off using a working agreement  -  30 minutes "
-            "defining how decisions will be made, how disagreement will be handled, and how progress will be shared."
-        ))
-
-    if "Communication" in dev_areas and len(recs) < 3:
-        avg_c = sum(p["comm_score"] for p in participants) / n
-        recs.append((
-            "Communication Clarity Initiative",
-            f"The team's Communication average of {avg_c:.1f} signals opportunities to improve how information "
-            "flows. Introduce a 'clarity check' habit: after any briefing, ask the receiver to summarise what "
-            "they heard. This single practice dramatically reduces miscommunication-driven rework."
-        ))
-
-    return recs[:3]
-
-
-#  Main entry point 
-def generate_manager_report_bytes(
-    manager_name: str,
-    company: str,
-    workshop_date: str,
-    participants: list,
-    folder_url: str = None,
-) -> bytes:
-    """
-    Generate a 4-page team manager report PDF, return raw bytes.
-
-    participants: list of dicts with keys:
-        name (str), archetype (str),
-        comm_score (int 0-100), decision_score (int 0-100), collab_score (int 0-100)
-
-    folder_url: optional Google Drive folder URL  -  renders a clickable button on page 4.
-    """
-    if not participants:
-        raise ValueError("participants list must not be empty")
-
-    buf = io.BytesIO()
-    c   = rl_canvas.Canvas(buf, pagesize=A4)
-    n   = len(participants)
-
-    avg_comm     = sum(p["comm_score"]     for p in participants) / n
-    avg_decision = sum(p["decision_score"] for p in participants) / n
-    avg_collab   = sum(p["collab_score"]   for p in participants) / n
-    overall_avg  = (avg_comm + avg_decision + avg_collab) / 3
-
-    comm_high     = sum(1 for p in participants if p["comm_score"]     >= 60)
-    decision_high = sum(1 for p in participants if p["decision_score"] >= 60)
-    collab_high   = sum(1 for p in participants if p["collab_score"]   >= 60)
-    comm_low      = n - comm_high
-    decision_low  = n - decision_high
-    collab_low    = n - collab_high
-
-    strengths = [d for d, a in [
-        ("Communication",              avg_comm),
-        ("Decision Making & Strategy", avg_decision),
-        ("Collaboration & Teamwork",   avg_collab),
-    ] if a >= 60]
-
-    dev_areas = [d for d, a in [
-        ("Communication",              avg_comm),
-        ("Decision Making & Strategy", avg_decision),
-        ("Collaboration & Teamwork",   avg_collab),
-    ] if a < 60]
-
-    archetype_counts = {}
-    for p in participants:
-        arch = p.get("archetype", "Unknown")
-        archetype_counts[arch] = archetype_counts.get(arch, 0) + 1
-
-    recommendations = generate_recommendations(
-        participants, strengths, dev_areas, archetype_counts, n
     )
 
-    draw_cover(c, manager_name, company, workshop_date)
-    c.showPage()
+    return recs[:5]
 
-    draw_page2(c, company, participants, n, overall_avg,
-               avg_comm, avg_decision,
-               comm_high, comm_low, decision_high, decision_low,
-               strengths, dev_areas, archetype_counts)
-    c.showPage()
 
-    draw_page3(c, company, n, avg_collab, collab_high, collab_low, strengths, dev_areas)
-    c.showPage()
+# ─── Report section builders ──────────────────────────────────────────────────
 
-    draw_page4(c, company, participants, recommendations, folder_url=folder_url)
+def _section_cover(team_name, workshop_date, manager_name, st):
+    story = []
+    story.append(Spacer(1, 14 * mm))
 
-    c.save()
+    # Brand wordmark
+    story.append(Paragraph(
+        "The Performance Lens",
+        ParagraphStyle("logo_txt", fontName="Helvetica-Bold",
+                       fontSize=20, textColor=SKY_BLUE)))
+    story.append(Paragraph(
+        "by Saigon Young Professionals",
+        ParagraphStyle("logo_sub", fontName="Helvetica",
+                       fontSize=10, textColor=colors.HexColor("#90CAF9"))))
+    story.append(Spacer(1, 18 * mm))
+
+    # Main title
+    story.append(Paragraph("TEAM<br/>DIAGNOSTIC<br/>REPORT", st["cover_title"]))
+
+    # Sky accent rule
+    story.append(HRFlowable(width=BODY_W, thickness=2,
+                             color=SKY_BLUE, spaceAfter=5 * mm))
+
+    # Team + date
+    story.append(Paragraph(team_name.upper(), st["cover_sub"]))
+    story.append(Paragraph(f"Workshop date: {workshop_date}", st["cover_meta"]))
+
+    story.append(Spacer(1, 50 * mm))
+
+    # Manager line
+    story.append(Paragraph(
+        f"Prepared for {manager_name}",
+        ParagraphStyle("mgr", fontName="Helvetica-Bold",
+                       fontSize=11, textColor=WHITE)))
+    story.append(Paragraph(
+        "Team Effectiveness Lab  ·  Confidential",
+        ParagraphStyle("conf", fontName="Helvetica",
+                       fontSize=9, textColor=colors.HexColor("#90CAF9"))))
+
+    # Switch template BEFORE the page break so page 2 gets the Content template
+    story.append(NextPageTemplate("Content"))
+    story.append(PageBreak())
+    return story
+
+
+def _section_snapshot(stats, st):
+    story = []
+    story.append(Paragraph("Team at a Glance", st["section_title"]))
+    story.append(HRFlowable(width=BODY_W, thickness=1,
+                             color=LIGHT_BLUE, spaceAfter=3 * mm))
+
+    # Overview paragraph
+    story.append(Paragraph(_overview_text(stats), st["body"]))
+    story.append(Spacer(1, 3 * mm))
+
+    # Stat boxes
+    n_boxes = 4
+    gap     = 4 * mm
+    box_w   = (BODY_W - gap * (n_boxes - 1)) / n_boxes
+
+    dominant = (stats["archetype_counts"].most_common(1)[0][0]
+                if stats["archetype_counts"] else "—")
+    boxes = [
+        StatBox(stats["n"],               "Participants",  DARK_BLUE,  box_w),
+        StatBox(f"{stats['overall_avg']}", "Avg Score",     SKY_BLUE,   box_w),
+        StatBox(len(stats["strengths"]),   "Strengths",     SUCCESS,    box_w),
+        StatBox(len(stats["dev_areas"]),   "Dev Areas",     WARNING,    box_w),
+    ]
+    row = Table([[b for b in boxes]], colWidths=[box_w] * n_boxes,
+                hAlign="LEFT")
+    row.setStyle(TableStyle([
+        ("LEFTPADDING",   (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 0),
+        ("TOPPADDING",    (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ("COLPADDING",    (0, 0), (-1, -1), gap / 2),
+    ]))
+    story.append(row)
+    story.append(Spacer(1, 5 * mm))
+
+    # Archetype distribution table
+    story.append(Paragraph("Archetype Distribution", st["sub_heading"]))
+
+    rows = [["Archetype", "Count", "% Team", "Profile"]]
+    for arch, cnt in sorted(stats["archetype_counts"].items(), key=lambda x: -x[1]):
+        pct = f"{cnt / stats['n'] * 100:.0f}%"
+        rows.append([arch, str(cnt), pct, ARCHETYPE_SUMMARY.get(arch, "")])
+
+    arch_table = Table(rows,
+                       colWidths=[34 * mm, 16 * mm, 18 * mm, BODY_W - 68 * mm])
+    ts = [
+        ("BACKGROUND",    (0, 0), (-1, 0),  DARK_BLUE),
+        ("TEXTCOLOR",     (0, 0), (-1, 0),  WHITE),
+        ("FONTNAME",      (0, 0), (-1, 0),  "Helvetica-Bold"),
+        ("FONTSIZE",      (0, 0), (-1, 0),  8),
+        ("FONTNAME",      (0, 1), (-1, -1), "Helvetica"),
+        ("FONTSIZE",      (0, 1), (-1, -1), 8.5),
+        ("ALIGN",         (0, 0), (-1, -1), "LEFT"),
+        ("ALIGN",         (1, 0), (2, -1),  "CENTER"),
+        ("ROWBACKGROUNDS",(0, 1), (-1, -1), [WHITE, LIGHT_BLUE]),
+        ("GRID",          (0, 0), (-1, -1), 0.5, colors.HexColor("#DEE2E6")),
+        ("TOPPADDING",    (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 5),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 5),
+    ]
+    for i, (arch, _) in enumerate(
+            sorted(stats["archetype_counts"].items(), key=lambda x: -x[1]), 1):
+        col = ARCHETYPE_COLOURS.get(arch, MID_GREY)
+        ts += [("TEXTCOLOR", (0, i), (0, i), col),
+               ("FONTNAME",  (0, i), (0, i), "Helvetica-Bold")]
+
+    arch_table.setStyle(TableStyle(ts))
+    story.append(arch_table)
+    return story
+
+
+def _section_dimensions(stats, st):
+    story = []
+    story.append(Spacer(1, 5 * mm))
+    story.append(Paragraph("Dimension Analysis", st["section_title"]))
+    story.append(HRFlowable(width=BODY_W, thickness=1,
+                             color=LIGHT_BLUE, spaceAfter=3 * mm))
+    story.append(Paragraph(
+        "Scores are normalised 0–100 per participant based on their role-specific question set. "
+        "The dashed line marks the 60-point High/Low threshold.",
+        st["caption"]))
+    story.append(Spacer(1, 2 * mm))
+
+    dims = [
+        ("Communication",  stats["c_avg"],  stats["c_high"],  stats["c_low"]),
+        ("Decision Making", stats["d_avg"], stats["d_high"],  stats["d_low"]),
+        ("Collaboration",   stats["co_avg"], stats["co_high"], stats["co_low"]),
+    ]
+    for label, avg, high_n, low_n in dims:
+        story.append(DimensionBar(label, avg, high_n, low_n))
+        story.append(Spacer(1, 1 * mm))
+        story.append(Paragraph(
+            _dim_insight(label, avg, high_n, low_n, stats["n"]), st["body"]))
+        desc = DIMENSION_DESCRIPTIONS.get(label, "")
+        if desc:
+            story.append(Paragraph(desc, st["caption"]))
+        story.append(Spacer(1, 2 * mm))
+
+    # Strengths / dev areas callout
+    story.append(Spacer(1, 2 * mm))
+    col_w = (BODY_W - 5 * mm) / 2
+
+    s_lines = ("<b>✓ Team Strengths</b><br/>" +
+               ("<br/>".join(f"• {x}" for x in stats["strengths"])
+                if stats["strengths"] else "No dimensions currently above threshold."))
+    d_lines = ("<b>△ Development Areas</b><br/>" +
+               ("<br/>".join(f"• {x}" for x in stats["dev_areas"])
+                if stats["dev_areas"] else "All dimensions above threshold — great result!"))
+
+    callout = Table(
+        [[Paragraph(s_lines, ParagraphStyle("s", fontName="Helvetica", fontSize=9,
+                                             textColor=colors.HexColor("#065F46"),
+                                             leading=14)),
+          Paragraph(d_lines, ParagraphStyle("d", fontName="Helvetica", fontSize=9,
+                                             textColor=colors.HexColor("#92400E"),
+                                             leading=14))]],
+        colWidths=[col_w, col_w]
+    )
+    callout.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, 0), colors.HexColor("#D1FAE5")),
+        ("BACKGROUND", (1, 0), (1, 0), colors.HexColor("#FEF3C7")),
+        ("TOPPADDING",    (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 9),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 9),
+        ("VALIGN",        (0, 0), (-1, -1), "TOP"),
+        ("COLPADDING",    (0, 0), (-1, -1), 2.5),
+    ]))
+    story.append(callout)
+    return story
+
+
+def _section_individuals(participants, st):
+    story = []
+    story.append(PageBreak())
+    story.append(Paragraph("Individual Profiles", st["section_title"]))
+    story.append(HRFlowable(width=BODY_W, thickness=1,
+                             color=LIGHT_BLUE, spaceAfter=3 * mm))
+    story.append(Paragraph(
+        "Normalised scores (0–100) for each team member alongside their archetype classification. "
+        "↑ = High (≥60)  ↓ = Low (<60).",
+        st["caption"]))
+    story.append(Spacer(1, 2 * mm))
+
+    headers = ["Name", "Role", "Archetype", "Comm", "Decision", "Collab"]
+    cws     = [44 * mm, 22 * mm, 28 * mm, 22 * mm, 24 * mm, 22 * mm]
+
+    def fmt(val, level):
+        marker = "↑" if level == "High" else "↓"
+        return f"{round(val):.0f} {marker}"
+
+    rows = [headers]
+    for p in sorted(participants, key=lambda x: x.get("name", "")):
+        rows.append([
+            p.get("name", "—"),
+            p.get("role", "—"),
+            p.get("archetype", "—"),
+            fmt(p["c_score"],  p.get("c_level", "")),
+            fmt(p["d_score"],  p.get("d_level", "")),
+            fmt(p["co_score"], p.get("co_level", "")),
+        ])
+
+    table = Table(rows, colWidths=cws)
+    ts = [
+        ("BACKGROUND",    (0, 0),  (-1, 0),  DARK_BLUE),
+        ("TEXTCOLOR",     (0, 0),  (-1, 0),  WHITE),
+        ("FONTNAME",      (0, 0),  (-1, 0),  "Helvetica-Bold"),
+        ("FONTSIZE",      (0, 0),  (-1, 0),  8),
+        ("FONTNAME",      (0, 1),  (-1, -1), "Helvetica"),
+        ("FONTSIZE",      (0, 1),  (-1, -1), 8.5),
+        ("ALIGN",         (0, 0),  (-1, -1), "CENTER"),
+        ("ALIGN",         (0, 0),  (0,  -1), "LEFT"),
+        ("ROWBACKGROUNDS",(0, 1),  (-1, -1), [WHITE, LIGHT_BLUE]),
+        ("GRID",          (0, 0),  (-1, -1), 0.5, colors.HexColor("#DEE2E6")),
+        ("TOPPADDING",    (0, 0),  (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0),  (-1, -1), 5),
+        ("LEFTPADDING",   (0, 0),  (-1, -1), 5),
+        ("RIGHTPADDING",  (0, 0),  (-1, -1), 5),
+    ]
+    for i, p in enumerate(
+            sorted(participants, key=lambda x: x.get("name", "")), 1):
+        col = ARCHETYPE_COLOURS.get(p.get("archetype", ""), NEAR_BLACK)
+        ts += [("TEXTCOLOR", (2, i), (2, i), col),
+               ("FONTNAME",  (2, i), (2, i), "Helvetica-Bold")]
+
+    table.setStyle(TableStyle(ts))
+    story.append(table)
+    return story
+
+
+def _section_recommendations(stats, st):
+    story = []
+    story.append(Spacer(1, 6 * mm))
+    story.append(Paragraph("Manager Recommendations", st["section_title"]))
+    story.append(HRFlowable(width=BODY_W, thickness=1,
+                             color=LIGHT_BLUE, spaceAfter=3 * mm))
+    story.append(Paragraph(
+        "These recommendations are drawn from your team's dimension profile and archetype distribution. "
+        "They are prioritised by likely impact given the team's specific results.",
+        st["caption"]))
+    story.append(Spacer(1, 2 * mm))
+
+    for i, rec in enumerate(_recommendations(stats), 1):
+        num_style = ParagraphStyle(
+            "rn", fontName="Helvetica-Bold", fontSize=14,
+            textColor=SKY_BLUE, alignment=TA_CENTER)
+        rec_style = ParagraphStyle(
+            "rt", fontName="Helvetica", fontSize=9,
+            textColor=NEAR_BLACK, leading=14)
+        row = Table(
+            [[Paragraph(str(i), num_style),
+              Paragraph(rec, rec_style)]],
+            colWidths=[12 * mm, BODY_W - 12 * mm]
+        )
+        row.setStyle(TableStyle([
+            ("VALIGN",        (0, 0), (-1, -1), "TOP"),
+            ("TOPPADDING",    (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 3),
+            ("RIGHTPADDING",  (0, 0), (-1, -1), 3),
+        ]))
+        story.append(row)
+        if i < len(_recommendations(stats)):
+            story.append(HRFlowable(width=BODY_W, thickness=0.5,
+                                     color=LIGHT_BLUE, spaceAfter=1 * mm))
+
+    # Closing note
+    story.append(Spacer(1, 7 * mm))
+    story.append(HRFlowable(width=BODY_W, thickness=1, color=LIGHT_BLUE))
+    story.append(Spacer(1, 4 * mm))
+    story.append(Paragraph(
+        "Individual profile PDFs have been sent directly to each participant. "
+        "You also have access to the team data sheet shared separately, which "
+        "contains all scores in a searchable format. "
+        "For questions about the Team Effectiveness Lab, contact your SYP facilitator.",
+        ParagraphStyle("closing", fontName="Helvetica", fontSize=8,
+                       textColor=MID_GREY, leading=12)
+    ))
+    return story
+
+
+# ─── Master build function ────────────────────────────────────────────────────
+
+def _enrich_participant(p: dict) -> dict:
+    """
+    Ensures each participant dict has c_level / d_level / co_level.
+    If the caller omitted them, derive from the normalised scores
+    using the standard threshold (≥ 60 = High, < 60 = Low).
+    Also coerces score values to float so arithmetic never breaks.
+    """
+    p = dict(p)
+    p["c_score"]  = float(p.get("c_score",  0) or 0)
+    p["d_score"]  = float(p.get("d_score",  0) or 0)
+    p["co_score"] = float(p.get("co_score", 0) or 0)
+    # Always derive binary High/Low from scores — the live scenario uses a
+    # 4-tier label (Advanced/Proficient/Developing/Foundational) which would
+    # break the High/Low counting logic in the report.
+    p["c_level"]  = "High" if p["c_score"]  >= 60 else "Low"
+    p["d_level"]  = "High" if p["d_score"]  >= 60 else "Low"
+    p["co_level"] = "High" if p["co_score"] >= 60 else "Low"
+    return p
+
+
+def generate_manager_report_pdf(data: dict) -> bytes:
+    """
+    Accepts the data dict (see module docstring for schema).
+    Returns the PDF as raw bytes.
+
+    c_level / d_level / co_level are optional — they are derived
+    from the normalised scores if not supplied by the caller.
+    """
+    team_name     = data.get("team_name",     "Your Team")
+    workshop_date = data.get("workshop_date",
+                             datetime.now().strftime("%d %B %Y"))
+    manager_name  = data.get("manager_name",  "Team Manager")
+    participants  = [_enrich_participant(p) for p in data.get("participants", [])]
+
+    stats = _calc_stats(participants)
+    st    = _styles()
+
+    buf = io.BytesIO()
+
+    doc = BaseDocTemplate(
+        buf,
+        pagesize=A4,
+        leftMargin=L_MARGIN,
+        rightMargin=R_MARGIN,
+        topMargin=T_MARGIN_CONTENT + 4 * mm,
+        bottomMargin=B_MARGIN + 4 * mm,
+    )
+
+    # Cover frame (taller — no header bar)
+    cover_frame = Frame(
+        L_MARGIN,
+        B_MARGIN,
+        BODY_W,
+        PAGE_H - T_MARGIN_COVER - B_MARGIN,
+        id="cover",
+    )
+    # Content frame (shorter — header + footer)
+    content_frame = Frame(
+        L_MARGIN,
+        B_MARGIN + 4 * mm,
+        BODY_W,
+        PAGE_H - T_MARGIN_CONTENT - B_MARGIN - 4 * mm,
+        id="content",
+    )
+
+    doc.addPageTemplates([
+        PageTemplate(id="Cover",   frames=[cover_frame],   onPage=_draw_cover),
+        PageTemplate(id="Content", frames=[content_frame], onPage=_draw_content),
+    ])
+
+    story = []
+    story += _section_cover(team_name, workshop_date, manager_name, st)
+    story += _section_snapshot(stats, st)
+    story += _section_dimensions(stats, st)
+    story += _section_individuals(participants, st)
+    story += _section_recommendations(stats, st)
+
+    doc.build(story)
     buf.seek(0)
     return buf.read()
+
+
+# ─── Flask route (copy into your Railway app.py) ─────────────────────────────
+
+def print_flask_snippet():
+    print("""
+# ─────────────────────────────────────────────────────────────────────────────
+# ADD TO YOUR RAILWAY app.py
+# ─────────────────────────────────────────────────────────────────────────────
+import io
+from flask import request, send_file, jsonify
+from generate_manager_report import generate_manager_report_pdf
+
+@app.route("/generate-manager-report", methods=["POST"])
+def manager_report():
+    data = request.get_json(force=True)
+    if not data or "participants" not in data:
+        return jsonify({"error": "participants array is required"}), 400
+    if len(data["participants"]) == 0:
+        return jsonify({"error": "participants array must not be empty"}), 400
+    try:
+        pdf_bytes = generate_manager_report_pdf(data)
+        safe_name = data.get("team_name", "Team").replace(" ", "_")
+        return send_file(
+            io.BytesIO(pdf_bytes),
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=f"SYP_Manager_Report_{safe_name}.pdf",
+        )
+    except Exception as e:
+        app.logger.error(f"Manager report generation failed: {e}")
+        return jsonify({"error": str(e)}), 500
+# ─────────────────────────────────────────────────────────────────────────────
+""")
+
+
+# ─── Sample data + CLI entrypoint ────────────────────────────────────────────
+
+SAMPLE_DATA = {
+    "team_name":     "AED Global",
+    "workshop_date": "6 May 2026",
+    "manager_name":  "Sarah Mitchell",
+    "manager_email": "sarah@aedglobal.com",
+    "participants": [
+        {
+            "name": "Alice Nguyen",   "role": "Guide",
+            "c_score": 78, "d_score": 42, "co_score": 85,
+            "c_level": "High", "d_level": "Low",  "co_level": "High",
+            "archetype": "Signal"
+        },
+        {
+            "name": "Ben Tran",       "role": "Builder",
+            "c_score": 65, "d_score": 71, "co_score": 68,
+            "c_level": "High", "d_level": "High", "co_level": "High",
+            "archetype": "Operator"
+        },
+        {
+            "name": "Chi Pham",       "role": "Observer",
+            "c_score": 55, "d_score": 80, "co_score": 45,
+            "c_level": "Low",  "d_level": "High", "co_level": "Low",
+            "archetype": "Architect"
+        },
+        {
+            "name": "Duc Le",         "role": "Guide",
+            "c_score": 45, "d_score": 38, "co_score": 40,
+            "c_level": "Low",  "d_level": "Low",  "co_level": "Low",
+            "archetype": "Ember"
+        },
+        {
+            "name": "Emma Hoang",     "role": "Builder",
+            "c_score": 72, "d_score": 66, "co_score": 74,
+            "c_level": "High", "d_level": "High", "co_level": "High",
+            "archetype": "Operator"
+        },
+        {
+            "name": "Feng Liu",       "role": "Observer",
+            "c_score": 48, "d_score": 74, "co_score": 80,
+            "c_level": "Low",  "d_level": "High", "co_level": "High",
+            "archetype": "Navigator"
+        },
+    ]
+}
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        with open(sys.argv[1]) as f:
+            data = json.load(f)
+        out = sys.argv[2] if len(sys.argv) > 2 else "SYP_Manager_Report.pdf"
+    else:
+        data = SAMPLE_DATA
+        out  = "SYP_Manager_Report_Sample.pdf"
+
+    pdf = generate_manager_report_pdf(data)
+
+    with open(out, "wb") as f:
+        f.write(pdf)
+
+    print(f"✓  PDF generated: {out}  ({len(pdf):,} bytes)")
+    print(f"   Team: {data.get('team_name')}  |  {len(data.get('participants', []))} participants")
+    print()
+    print_flask_snippet()

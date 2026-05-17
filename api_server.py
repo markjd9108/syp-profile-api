@@ -12,7 +12,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from generate_syp_profiles_improved import generate_profile_bytes, ARCHETYPES
-from generate_manager_report import generate_manager_report_bytes
+from generate_manager_report import generate_manager_report_pdf
 
 app = FastAPI(
     title="SYP Profile Generator API",
@@ -36,34 +36,32 @@ class ProfileRequest(BaseModel):
     comm_score: int         = Field(..., ge=0, description="Communication score 0-100")
     decision_score: int     = Field(..., ge=0, description="Decision Making score 0-100")
     collab_score: int       = Field(..., ge=0, description="Collaboration score 0-100")
-    context_score: Optional[float] = Field(None, description="Session context quality 1-5")
-    state_score: Optional[float]   = Field(None, description="Session readiness state 1-5")
-    response_format: Optional[str] = Field("binary", description="binary or base64")
+    context_score: Optional[float] = Field(None, description="Session context quality 1–5 (challenge + representativeness avg)")
+    state_score: Optional[float]   = Field(None, description="Session readiness state 1–5 (energy and focus)")
+    response_format: Optional[str] = Field("binary", description="'binary' returns raw PDF, 'base64' returns JSON with base64-encoded PDF")
 
 # --- Manager report models ---
 class ManagerReportParticipant(BaseModel):
     name: str           = Field(..., description="Participant full name")
-    archetype: str      = Field(..., description="Archetype name")
+    archetype: str      = Field(..., description="Archetype: Signal, Navigator, Anchor, Generalist, Full Spectrum, Developing")
     comm_score: int     = Field(..., ge=0, le=100)
     decision_score: int = Field(..., ge=0, le=100)
     collab_score: int   = Field(..., ge=0, le=100)
     role: Optional[str] = Field(None)
 
 class ManagerReportRequest(BaseModel):
-    manager_name: str                            = Field(..., description="Manager name")
+    manager_name: str                            = Field(..., description="Manager's name")
     company: str                                 = Field("", description="Company name")
-    participants: List[ManagerReportParticipant] = Field(..., description="Participants")
+    workshop_date: Optional[str]                 = Field(None, description="Workshop date string e.g. 'May 2026'")
+    folder_url: Optional[str]                    = Field(None, description="Google Drive folder URL (ignored by PDF generator)")
+    participants: List[ManagerReportParticipant] = Field(..., description="List of participant data")
     response_format: Optional[str]               = Field("binary")
-
-# --- Health check ---
-@app.get("/")
-def health():
-    return {"status": "ok", "version": "1.3.0"}
 
 # --- Individual participant profile ---
 @app.post("/generate")
 def generate(req: ProfileRequest):
     key = req.archetype.lower().strip().replace(" ", "_")
+    # Apply backward-compat alias if needed
     key = LEGACY_ALIAS.get(key, key)
     if key not in ARCHETYPES:
         raise HTTPException(
@@ -107,11 +105,21 @@ def generate_manager_report(req: ManagerReportRequest):
     if not req.participants:
         raise HTTPException(status_code=400, detail="No participants provided.")
     try:
-        pdf_bytes = generate_manager_report_bytes(
-            manager_name=req.manager_name,
-            company=req.company,
-            participants=[p.dict() for p in req.participants],
-        )
+        pdf_bytes = generate_manager_report_pdf({
+            "manager_name":  req.manager_name,
+            "team_name":     req.company,
+            "workshop_date": req.workshop_date or "",
+            "participants": [
+                {
+                    "name":      p.name,
+                    "archetype": p.archetype,
+                    "c_score":   p.comm_score,
+                    "d_score":   p.decision_score,
+                    "co_score":  p.collab_score,
+                }
+                for p in req.participants
+            ],
+        })
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 

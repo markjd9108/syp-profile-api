@@ -136,6 +136,11 @@ def generate_manager_report(req: ManagerReportRequest):
         headers={"Content-Disposition": f'attachment; filename="SYP_Manager_Report_{safe_name}.pdf"'},
     )
 
+# --- Health check ---
+@app.get("/")
+def health_check():
+    return {"status": "ok"}
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))

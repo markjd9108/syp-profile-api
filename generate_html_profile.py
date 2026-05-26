@@ -331,6 +331,22 @@ def inject_participant_data(archetype_key: str, participant: dict) -> str:
         SAMPLE["collab_hp"],  new_collab_hp
     )
 
+    # ── 7. Cohort snapshot text (page 1 right panel) ──────────────────────────────
+    # These plain-text lines are NOT touched by replace_score_section (which only
+    # handles the bar/gauge section on page 2).  Replace them explicitly.
+    t = t.replace(
+        f'Communication&nbsp;&nbsp;&nbsp;&nbsp;{old_comm} · cohort {SAMPLE["comm_avg"]} · high performers {SAMPLE["comm_hp"]}',
+        f'Communication&nbsp;&nbsp;&nbsp;&nbsp;{new_comm} · cohort {new_comm_avg} · high performers {new_comm_hp}'
+    )
+    t = t.replace(
+        f'Decision-Making&nbsp;&nbsp;{old_dec} · cohort {SAMPLE["dec_avg"]} · high performers {SAMPLE["dec_hp"]}',
+        f'Decision-Making&nbsp;&nbsp;{new_dec} · cohort {new_dec_avg} · high performers {new_dec_hp}'
+    )
+    t = t.replace(
+        f'Collaboration&nbsp;&nbsp;&nbsp;&nbsp;{old_collab} · cohort {SAMPLE["collab_avg"]} · high performers {SAMPLE["collab_hp"]}',
+        f'Collaboration&nbsp;&nbsp;&nbsp;&nbsp;{new_collab} · cohort {new_collab_avg} · high performers {new_collab_hp}'
+    )
+
     # ── Re-encode template JSON and splice back into outer HTML ──────────────────
     # Escape </script> as / to prevent premature script tag closure in HTML
     new_json = json.dumps(t).replace('</script>', '<\\u002Fscript>')

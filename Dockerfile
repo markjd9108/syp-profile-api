@@ -17,8 +17,6 @@ COPY api_server.py .
 # Copy HTML profile templates
 COPY templates/ ./templates/
 
-# Copy brand assets
-COPY tpl_logo_inverse.png .
 
 EXPOSE 8000
 

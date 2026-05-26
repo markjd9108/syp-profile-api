@@ -1,21 +1,24 @@
-FROM python:3.11-slim
+FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
 
 WORKDIR /app
 
-# Install dependencies
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Playwright Chromium browser
+RUN playwright install chromium
+
 # Copy application files
-COPY generate_syp_profiles_improved.py .
+COPY generate_html_profile.py .
 COPY generate_manager_report.py .
 COPY api_server.py .
 
-# Copy brand assets (logo) - use JSON form for paths with special chars
-COPY ["SYP Brand Assets/Logos/SYP Logo+Wordmark Black PNG.png", "./SYP Brand Assets/Logos/SYP Logo+Wordmark Black PNG.png"]
+# Copy HTML profile templates
+COPY templates/ ./templates/
 
-# Pre-generate white logo at build time
-RUN python3 -c "from generate_syp_profiles_improved import ensure_white_logo; ensure_white_logo()"
+# Copy brand assets
+COPY tpl_logo_inverse.png .
 
 EXPOSE 8000
 

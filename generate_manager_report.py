@@ -86,9 +86,9 @@ ARCHETYPE_COLOURS = {
     "Architect":     colors.HexColor("#6A1B9A"),
     "Operator":      colors.HexColor("#1565C0"),
     "Ember":         colors.HexColor("#757575"),
-    "Generalist":    colors.HexColor("#827717"),
-    "Full Spectrum": colors.HexColor("#4A148C"),
-    "Developing":    colors.HexColor("#BF360C"),
+    "Relay":    colors.HexColor("#827717"),
+    "Summit": colors.HexColor("#4A148C"),
+    "Compass":    colors.HexColor("#BF360C"),
 }
 
 ARCHETYPE_SUMMARY = {
@@ -103,9 +103,9 @@ ARCHETYPE_SUMMARY = {
     "Operator":      "Structured · Decisive · Coordinated — drives consistent execution",
     "Architect":     "Strategic · Analytical · Systematic — builds robust frameworks",
     "Ember":         "Developing · Potential · Emerging — growing toward full contribution",
-    "Generalist":    "Versatile · Balanced · Adaptive — draws on multiple strengths",
-    "Full Spectrum": "Multi-dimensional · Complex · Integrated — operates across all dimensions",
-    "Developing":    "Emerging · Growing · Potential — building toward full contribution",
+    "Relay":    "Versatile · Balanced · Adaptive — draws on multiple strengths",
+    "Summit": "Multi-dimensional · Complex · Integrated — operates across all dimensions",
+    "Compass":    "Emerging · Growing · Potential — building toward full contribution",
 }
 
 DIMENSION_DESCRIPTIONS = {
@@ -149,7 +149,7 @@ def _draw_content(canvas, doc):
 
     canvas.setFont("Helvetica-Bold", 8.5)
     canvas.setFillColor(WHITE)
-    canvas.drawString(L_MARGIN, PAGE_H - 12 * mm, "TEAM EFFECTIVENESS LAB")
+    canvas.drawString(L_MARGIN, PAGE_H - 12 * mm, "TEAM EFFECTIVENESS WORKSHOP")
 
     canvas.setFont("Helvetica", 7.5)
     canvas.setFillColor(colors.HexColor("#90CAF9"))
@@ -374,7 +374,7 @@ def _overview_text(stats):
         tone = "a clear opportunity to invest in team-level capability building"
 
     parts = [
-        f"Your team of {n} completed the Team Effectiveness Lab, "
+        f"Your team of {n} completed the Team Effectiveness Workshop, "
         f"demonstrating {tone} (team average: {oa}/100)."
     ]
     if stats["strengths"]:
@@ -506,7 +506,7 @@ def _section_cover(team_name, workshop_date, manager_name, st):
         ParagraphStyle("mgr", fontName="Helvetica-Bold",
                        fontSize=11, textColor=WHITE)))
     story.append(Paragraph(
-        "Team Effectiveness Lab  ·  Confidential",
+        "Team Effectiveness Workshop  ·  Confidential",
         ParagraphStyle("conf", fontName="Helvetica",
                        fontSize=9, textColor=colors.HexColor("#90CAF9"))))
 
@@ -751,7 +751,7 @@ def _section_recommendations(stats, st):
         "Individual profile PDFs have been sent directly to each participant. "
         "You also have access to the team data sheet shared separately, which "
         "contains all scores in a searchable format. "
-        "For questions about the Team Effectiveness Lab, contact your SYP facilitator.",
+        "For questions about the Team Effectiveness Workshop, contact your SYP facilitator.",
         ParagraphStyle("closing", fontName="Helvetica", fontSize=8,
                        textColor=MID_GREY, leading=12)
     ))

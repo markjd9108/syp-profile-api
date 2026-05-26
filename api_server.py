@@ -1,147 +1,230 @@
 #!/usr/bin/env python3
 """
-SYP Team Effectiveness Lab — PDF Profile API Server v1.3
+TEW Profile API Server v2.0
 Endpoints:
-  POST /generate               — individual participant PDF
+  GET  /                       — health check
+  POST /generate               — individual participant PDF (HTML → Playwright)
+  POST /generate-cohort        — batch generate all participants in a cohort
   POST /generate-manager-report — team manager diagnostic report PDF
 """
 
-import os, base64, json
+import os, asyncio, base64, datetime, random, string
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from generate_syp_profiles_improved import generate_profile_bytes, ARCHETYPES
+
+from generate_html_profile import inject_participant_data, ARCHETYPE_FILES
 from generate_manager_report import generate_manager_report_pdf
 
-app = FastAPI(
-    title="SYP Profile Generator API",
-    description="Generates Team Effectiveness Lab PDFs — participant profiles and manager reports",
-    version="1.3.0",
-)
+# ── Playwright PDF renderer ────────────────────────────────────────────────────
+async def render_pdf(html: str) -> bytes:
+    from playwright.async_api import async_playwright
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page(viewport={"width": 1400, "height": 900})
+        await page.set_content(html, wait_until="networkidle", timeout=30000)
+        await page.wait_for_timeout(2000)
+        pdf_bytes = await page.pdf(
+            format="A4",
+            print_background=True,
+            margin={"top": "0", "bottom": "0", "left": "0", "right": "0"}
+        )
+        await browser.close()
+    return pdf_bytes
 
-# Backward-compat aliases: old archetype keys → new keys
-LEGACY_ALIAS = {
-    "operator":  "navigator",
-    "architect": "generalist",
-    "connector": "anchor",
-    "ember":     "developing",
+def generate_pdf_sync(html: str) -> bytes:
+    return asyncio.run(render_pdf(html))
+
+# ── Archetype normalisation ────────────────────────────────────────────────────
+ARCHETYPE_ALIASES = {
+    "operator": "navigator", "architect": "relay", "connector": "anchor",
+    "ember": "compass", "developing": "compass",
+    "anchor": "anchor", "compass": "compass", "navigator": "navigator",
+    "relay": "relay", "signal": "signal", "summit": "summit",
 }
 
-# --- Individual profile models ---
-class ProfileRequest(BaseModel):
-    archetype: str          = Field(..., description="Archetype key: signal, navigator, anchor, generalist, full_spectrum, developing")
-    participant_name: str   = Field(..., description="Participant's full name")
-    company: str            = Field("",  description="Company name")
-    comm_score: int         = Field(..., ge=0, description="Communication score 0-100")
-    decision_score: int     = Field(..., ge=0, description="Decision Making score 0-100")
-    collab_score: int       = Field(..., ge=0, description="Collaboration score 0-100")
-    context_score: Optional[float] = Field(None, description="Session context quality 1–5 (challenge + representativeness avg)")
-    state_score: Optional[float]   = Field(None, description="Session readiness state 1–5 (energy and focus)")
-    response_format: Optional[str] = Field("binary", description="'binary' returns raw PDF, 'base64' returns JSON with base64-encoded PDF")
+def resolve_archetype(raw: str) -> str:
+    key = raw.strip().lower()
+    if key not in ARCHETYPE_ALIASES:
+        raise HTTPException(400, f"Unknown archetype '{raw}'. Valid: {list(ARCHETYPE_FILES)}")
+    return ARCHETYPE_ALIASES[key]
 
-# --- Manager report models ---
-class ManagerReportParticipant(BaseModel):
-    name: str           = Field(..., description="Participant full name")
-    archetype: str      = Field(..., description="Archetype: Signal, Navigator, Anchor, Generalist, Full Spectrum, Developing")
-    comm_score: int     = Field(..., ge=0, le=100)
+def make_profile_id(archetype: str) -> str:
+    now = datetime.datetime.now()
+    suffix = ''.join(random.choices(string.digits, k=3))
+    return f"TPL-{now.strftime('%y%m')}-{archetype[0].upper()}-{suffix}"
+
+# ── Models ─────────────────────────────────────────────────────────────────────
+class ProfileRequest(BaseModel):
+    archetype:        str  = Field(...)
+    participant_name: str  = Field(...)
+    company:          str  = Field("")
+    cohort:           str  = Field("")
+    comm_score:       int  = Field(..., ge=0, le=100)
+    decision_score:   int  = Field(..., ge=0, le=100)
+    collab_score:     int  = Field(..., ge=0, le=100)
+    comm_avg:         Optional[float] = None
+    decision_avg:     Optional[float] = None
+    collab_avg:       Optional[float] = None
+    comm_hp:          Optional[float] = None
+    decision_hp:      Optional[float] = None
+    collab_hp:        Optional[float] = None
+    cohort_size:      Optional[int]   = None
+    cohort_pct:       Optional[int]   = None
+    assessed_date:    Optional[str]   = None
+    profile_id:       Optional[str]   = None
+    response_format:  Optional[str]   = Field("binary")
+
+class CohortParticipant(BaseModel):
+    name: str; email: str; archetype: str; company: str = ""; cohort: str = ""
+    comm_score: int = Field(..., ge=0, le=100)
     decision_score: int = Field(..., ge=0, le=100)
-    collab_score: int   = Field(..., ge=0, le=100)
-    role: Optional[str] = Field(None)
+    collab_score: int = Field(..., ge=0, le=100)
+    comm_avg: Optional[float] = None; decision_avg: Optional[float] = None
+    collab_avg: Optional[float] = None; comm_hp: Optional[float] = None
+    decision_hp: Optional[float] = None; collab_hp: Optional[float] = None
+    cohort_size: Optional[int] = None; cohort_pct: Optional[int] = None
+
+class CohortRequest(BaseModel):
+    workshop_code: str
+    participants: List[CohortParticipant]
+
+class ManagerParticipant(BaseModel):
+    name: str; archetype: str
+    comm_score: int = Field(..., ge=0, le=100)
+    decision_score: int = Field(..., ge=0, le=100)
+    collab_score: int = Field(..., ge=0, le=100)
+    role: Optional[str] = None
 
 class ManagerReportRequest(BaseModel):
-    manager_name: str                            = Field(..., description="Manager's name")
-    company: str                                 = Field("", description="Company name")
-    workshop_date: Optional[str]                 = Field(None, description="Workshop date string e.g. 'May 2026'")
-    folder_url: Optional[str]                    = Field(None, description="Google Drive folder URL (ignored by PDF generator)")
-    participants: List[ManagerReportParticipant] = Field(..., description="List of participant data")
-    response_format: Optional[str]               = Field("binary")
+    manager_name: str; company: str; workshop_code: str = ""; workshop_date: str = ""
+    participants: List[ManagerParticipant]
+    response_format: Optional[str] = Field("binary")
 
-# --- Individual participant profile ---
+class ScoreEntry(BaseModel):
+    comm:     float = Field(..., ge=0, le=100)
+    decision: float = Field(..., ge=0, le=100)
+    collab:   float = Field(..., ge=0, le=100)
+
+class ComputeAveragesRequest(BaseModel):
+    scores: List[ScoreEntry]
+
+# ── App ────────────────────────────────────────────────────────────────────────
+app = FastAPI(title="TEW Profile API", version="2.0.0")
+
+@app.get("/")
+def health():
+    return {"status": "ok", "version": "2.0.0", "archetypes": list(ARCHETYPE_FILES)}
+
+def _build_participant_dict(name, company, cohort, assessed_date, profile_id,
+                             comm_score, dec_score, collab_score,
+                             comm_avg, dec_avg, collab_avg,
+                             comm_hp, dec_hp, collab_hp,
+                             cohort_size, cohort_pct):
+    now = datetime.datetime.now()
+    d = {
+        "name": name, "company": company or "Company",
+        "cohort": cohort or "TEW",
+        "assessed_date": assessed_date or now.strftime("%B %d, %Y").replace(" 0", " "),
+        "profile_id": profile_id,
+        "month_year": now.strftime("%B %Y"),
+        "comm_score": comm_score, "dec_score": dec_score, "collab_score": collab_score,
+    }
+    if comm_avg     is not None: d["comm_avg"]    = comm_avg
+    if dec_avg      is not None: d["dec_avg"]     = dec_avg
+    if collab_avg   is not None: d["collab_avg"]  = collab_avg
+    if comm_hp      is not None: d["comm_hp"]     = comm_hp
+    if dec_hp       is not None: d["dec_hp"]      = dec_hp
+    if collab_hp    is not None: d["collab_hp"]   = collab_hp
+    if cohort_size  is not None: d["cohort_size"] = cohort_size
+    if cohort_pct   is not None: d["cohort_pct"]  = cohort_pct
+    return d
+
+@app.post("/compute-averages")
+def compute_averages(req: ComputeAveragesRequest):
+    n = len(req.scores)
+    if n == 0:
+        raise HTTPException(400, "No scores provided")
+    comm_avg     = round(sum(s.comm     for s in req.scores) / n, 1)
+    decision_avg = round(sum(s.decision for s in req.scores) / n, 1)
+    collab_avg   = round(sum(s.collab   for s in req.scores) / n, 1)
+    return {
+        "cohort_size":   n,
+        "comm_avg":      comm_avg,
+        "decision_avg":  decision_avg,
+        "collab_avg":    collab_avg,
+    }
+
 @app.post("/generate")
 def generate(req: ProfileRequest):
-    key = req.archetype.lower().strip().replace(" ", "_")
-    # Apply backward-compat alias if needed
-    key = LEGACY_ALIAS.get(key, key)
-    if key not in ARCHETYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unknown archetype '{req.archetype}'. Valid: {list(ARCHETYPES.keys())}"
-        )
-    comm     = min(max(req.comm_score,     0), 100)
-    decision = min(max(req.decision_score, 0), 100)
-    collab   = min(max(req.collab_score,   0), 100)
-    try:
-        pdf_bytes = generate_profile_bytes(
-            archetype_key=key,
-            participant_name=req.participant_name,
-            company=req.company,
-            comm_score=comm,
-            decision_score=decision,
-            collab_score=collab,
-            context_score=req.context_score,
-            state_score=req.state_score,
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
-
-    if req.response_format == "base64":
-        return {
-            "filename":     f"SYP_{req.participant_name.replace(' ', '_')}_Profile.pdf",
-            "archetype":    ARCHETYPES[key]["name"],
-            "content_type": "application/pdf",
-            "data":         base64.b64encode(pdf_bytes).decode("utf-8"),
-        }
-    safe_name = req.participant_name.replace(" ", "_")
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="SYP_{safe_name}_Profile.pdf"'},
+    arch_key = resolve_archetype(req.archetype)
+    pid = req.profile_id or make_profile_id(arch_key)
+    participant = _build_participant_dict(
+        req.participant_name, req.company, req.cohort, req.assessed_date, pid,
+        req.comm_score, req.decision_score, req.collab_score,
+        req.comm_avg, req.decision_avg, req.collab_avg,
+        req.comm_hp, req.decision_hp, req.collab_hp,
+        req.cohort_size, req.cohort_pct
     )
+    try:
+        html = inject_participant_data(arch_key, participant)
+        pdf_bytes = generate_pdf_sync(html)
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
-# --- Manager overview report ---
+    safe = req.participant_name.replace(" ", "_")
+    fname = f"TEW_{safe}_Profile.pdf"
+    if req.response_format == "base64":
+        return {"filename": fname, "content_type": "application/pdf",
+                "data": base64.b64encode(pdf_bytes).decode()}
+    return Response(content=pdf_bytes, media_type="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="{fname}"'})
+
+@app.post("/generate-cohort")
+def generate_cohort(req: CohortRequest):
+    results = []
+    for p in req.participants:
+        arch_key = resolve_archetype(p.archetype)
+        pid = make_profile_id(arch_key)
+        participant = _build_participant_dict(
+            p.name, p.company, p.cohort or req.workshop_code, None, pid,
+            p.comm_score, p.decision_score, p.collab_score,
+            p.comm_avg, p.decision_avg, p.collab_avg,
+            p.comm_hp, p.decision_hp, p.collab_hp,
+            p.cohort_size, p.cohort_pct
+        )
+        try:
+            html = inject_participant_data(arch_key, participant)
+            pdf_bytes = generate_pdf_sync(html)
+            results.append({"name": p.name, "email": p.email, "archetype": arch_key,
+                             "profile_id": pid, "status": "ok",
+                             "pdf_base64": base64.b64encode(pdf_bytes).decode()})
+        except Exception as e:
+            results.append({"name": p.name, "email": p.email, "status": "error", "error": str(e)})
+    return {"workshop_code": req.workshop_code, "count": len(results), "results": results}
+
 @app.post("/generate-manager-report")
 def generate_manager_report(req: ManagerReportRequest):
-    if not req.participants:
-        raise HTTPException(status_code=400, detail="No participants provided.")
     try:
         pdf_bytes = generate_manager_report_pdf({
-            "manager_name":  req.manager_name,
-            "team_name":     req.company,
-            "workshop_date": req.workshop_date or "",
-            "participants": [
-                {
-                    "name":      p.name,
-                    "archetype": p.archetype,
-                    "c_score":   p.comm_score,
-                    "d_score":   p.decision_score,
-                    "co_score":  p.collab_score,
-                }
-                for p in req.participants
-            ],
+            "manager_name": req.manager_name, "company": req.company,
+            "workshop_code": req.workshop_code, "workshop_date": req.workshop_date,
+            "participants": [{"name": p.name, "archetype": p.archetype,
+                               "comm_score": p.comm_score, "decision_score": p.decision_score,
+                               "collab_score": p.collab_score, "role": p.role}
+                              for p in req.participants],
         })
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
-
+        raise HTTPException(500, str(e))
+    safe = req.manager_name.replace(" ", "_")
+    fname = f"TEW_Leader_Insight_Report_{safe}.pdf"
     if req.response_format == "base64":
-        return {
-            "filename":     f"SYP_Manager_Report_{req.manager_name.replace(' ', '_')}.pdf",
-            "content_type": "application/pdf",
-            "data":         base64.b64encode(pdf_bytes).decode("utf-8"),
-        }
-    safe_name = req.manager_name.replace(" ", "_")
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="SYP_Manager_Report_{safe_name}.pdf"'},
-    )
-
-# --- Health check ---
-@app.get("/")
-def health_check():
-    return {"status": "ok"}
+        return {"filename": fname, "content_type": "application/pdf",
+                "data": base64.b64encode(pdf_bytes).decode()}
+    return Response(content=pdf_bytes, media_type="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="{fname}"'})
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run("api_server:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))

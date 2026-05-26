@@ -25,9 +25,9 @@ async def render_pdf(html: str) -> bytes:
         # Landscape viewport matches A4 landscape (297mm × 210mm at 96dpi ≈ 1122 × 794)
         page = await browser.new_page(viewport={"width": 1400, "height": 900})
         await page.set_content(html, wait_until="networkidle", timeout=30000)
-              # After networkidle, block any new requests so emulate_media(screen) cannot
-              # trigger font/CDN fetches that would hang page.pdf() indefinitely
-              await page.route("**", lambda route: route.abort())
+        # After networkidle, block any new requests so emulate_media(screen) cannot
+        # trigger font/CDN fetches that would hang page.pdf() indefinitely
+        await page.route("**", lambda route: route.abort())
         # Use screen media so @media print colour inversions (white bg) are never triggered
         await page.emulate_media(media="screen")
         # Kill entrance animations so every element is fully visible before capture

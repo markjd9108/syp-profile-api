@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TEW Profile API Server v2.0
+TEW Profile API Server v2.0.1
 Endpoints:
   GET  /                       — health check
   POST /generate               — individual participant PDF (HTML → Playwright)
@@ -22,11 +22,26 @@ async def render_pdf(html: str) -> bytes:
     from playwright.async_api import async_playwright
     async with async_playwright() as p:
         browser = await p.chromium.launch()
+        # Landscape viewport matches A4 landscape (297mm × 210mm at 96dpi ≈ 1122 × 794)
         page = await browser.new_page(viewport={"width": 1400, "height": 900})
         await page.set_content(html, wait_until="networkidle", timeout=30000)
-        await page.wait_for_timeout(2000)
+        # Kill entrance animations so every element is fully visible before capture
+        await page.add_style_tag(content="""
+            *, *::before, *::after {
+                animation-duration: 0s !important;
+                animation-delay: 0s !important;
+                transition-duration: 0s !important;
+                transition-delay: 0s !important;
+            }
+            .rise, .rise-1, .rise-2, .rise-3, .rise-4, .rise-5 {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        """)
+        await page.wait_for_timeout(3000)
         pdf_bytes = await page.pdf(
             format="A4",
+            landscape=True,          # templates are designed for A4 landscape
             print_background=True,
             margin={"top": "0", "bottom": "0", "left": "0", "right": "0"}
         )
@@ -111,11 +126,11 @@ class ComputeAveragesRequest(BaseModel):
     scores: List[ScoreEntry]
 
 # ── App ────────────────────────────────────────────────────────────────────────
-app = FastAPI(title="TEW Profile API", version="2.0.0")
+app = FastAPI(title="TEW Profile API", version="2.0.1")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.0.0", "archetypes": list(ARCHETYPE_FILES)}
+    return {"status": "ok", "version": "2.0.1", "archetypes": list(ARCHETYPE_FILES)}
 
 def _build_participant_dict(name, company, cohort, assessed_date, profile_id,
                              comm_score, dec_score, collab_score,
@@ -143,6 +158,9 @@ def _build_participant_dict(name, company, cohort, assessed_date, profile_id,
 
 @app.post("/compute-averages")
 def compute_averages(req: ComputeAveragesRequest):
+    """Receive a list of participant scores, return cohort averages.
+    Used by Make.com batch scenario to calculate cohort stats before
+    generating individual profiles."""
     n = len(req.scores)
     if n == 0:
         raise HTTPException(400, "No scores provided")

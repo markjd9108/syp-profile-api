@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TEW Profile API Server v2.0.3
+TEW Profile API Server v2.0.4
 Endpoints:
   GET  /                       — health check
   POST /generate               — individual participant PDF (HTML → Playwright)
@@ -17,13 +17,14 @@ from typing import Optional, List
 from generate_html_profile import inject_participant_data, ARCHETYPE_FILES
 from generate_manager_report import generate_manager_report_pdf
 
-# ── Playwright PDF renderer ────────────────────────────────────────────────────
+# ── Playwright PDF renderer ───────────────────────────────────────────────────
 async def render_pdf(html: str) -> bytes:
     from playwright.async_api import async_playwright
     async with async_playwright() as p:
         browser = await p.chromium.launch()
-        # Landscape viewport matches A4 landscape (297mm × 210mm at 96dpi ≈ 1122 × 794)
-        page = await browser.new_page(viewport={"width": 1400, "height": 900})
+        # Landscape viewport = A4 landscape at 96dpi (297mm × 210mm ≈ 1122 × 794 px)
+        # Using exact A4 width prevents right-edge content clipping in the PDF
+        page = await browser.new_page(viewport={"width": 1122, "height": 794})
         await page.set_content(html, wait_until="networkidle", timeout=30000)
         # After networkidle, block any new requests so emulate_media(screen) cannot
         # trigger font/CDN fetches that would hang page.pdf() indefinitely
@@ -41,6 +42,10 @@ async def render_pdf(html: str) -> bytes:
             .rise, .rise-1, .rise-2, .rise-3, .rise-4, .rise-5 {
                 opacity: 1 !important;
                 transform: none !important;
+            }
+            /* Cap archetype name font size so all names fit the left grid column */
+            h1.display-black {
+                font-size: 80px !important;
             }
         """)
         await page.wait_for_timeout(3000)
@@ -131,11 +136,11 @@ class ComputeAveragesRequest(BaseModel):
     scores: List[ScoreEntry]
 
 # ── App ────────────────────────────────────────────────────────────────────────
-app = FastAPI(title="TEW Profile API", version="2.0.3")
+app = FastAPI(title="TEW Profile API", version="2.0.4")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.0.3", "archetypes": list(ARCHETYPE_FILES)}
+    return {"status": "ok", "version": "2.0.4", "archetypes": list(ARCHETYPE_FILES)}
 
 def _build_participant_dict(name, company, cohort, assessed_date, profile_id,
                              comm_score, dec_score, collab_score,

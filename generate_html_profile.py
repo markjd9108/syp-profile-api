@@ -69,8 +69,8 @@ def _show_band_only(t: str, comm_score, dec_score, collab_score) -> str:
     css = ('<style id="tpl-band-only">'
            '.gauge-axis,.gauge-number .denom,.cohort-position,.cohort-legend,'
            '.cohort-avg-line,.cohort-top-line,.cohort-bar-scale{display:none !important}'
-           '.gauge-number .num{font-size:22px !important;letter-spacing:.01em !important;'
-           'line-height:1.12 !important;white-space:nowrap}'
+           '.gauge-number .num{font-size:33px !important;font-weight:800 !important;'
+           'letter-spacing:0 !important;line-height:1 !important;white-space:nowrap}'
            '</style>')
     for sc in (comm_score, dec_score, collab_score):
         sc = int(sc)

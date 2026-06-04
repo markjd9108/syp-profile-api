@@ -12,7 +12,7 @@ import os, asyncio, base64, datetime, random, string
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from generate_html_profile import inject_participant_data, ARCHETYPE_FILES
 from generate_manager_report import generate_manager_report_pdf
@@ -99,6 +99,8 @@ class ProfileRequest(BaseModel):
     cohort_pct:       Optional[int]   = None
     assessed_date:    Optional[str]   = None
     profile_id:       Optional[str]   = None
+    working_style:    Optional[Dict[str, str]] = Field(
+        None, description="Working Style answers ws_q1..ws_q9 (option text or A-D); resolved server-side")
     response_format:  Optional[str]   = Field("binary")
 
 class CohortParticipant(BaseModel):
@@ -195,6 +197,8 @@ def generate(req: ProfileRequest):
         req.comm_hp, req.decision_hp, req.collab_hp,
         req.cohort_size, req.cohort_pct
     )
+    if req.working_style:
+        participant["working_style"] = req.working_style
     try:
         html = inject_participant_data(arch_key, participant)
         pdf_bytes = generate_pdf_sync(html)

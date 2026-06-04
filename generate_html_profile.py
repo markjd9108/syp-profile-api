@@ -16,6 +16,15 @@ import datetime
 # ── Directory containing the 6 HTML templates ──────────────────────────────────
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
 
+# Working Style (V3) — shared content/resolver + HTML renderer
+try:
+    from working_style import build_blocks as _ws_build_blocks
+    from working_style_html import render_working_style_section as _ws_render
+except Exception:
+    _ws_build_blocks = None
+    _ws_render = None
+
+
 # ── Sample data baked into every template (what we're replacing) ───────────────
 SAMPLE = {
     "name":       "Alex Nguyen",
@@ -346,6 +355,19 @@ def inject_participant_data(archetype_key: str, participant: dict) -> str:
         f'Collaboration&nbsp;&nbsp;&nbsp;&nbsp;{old_collab} · cohort {SAMPLE["collab_avg"]} · high performers {SAMPLE["collab_hp"]}',
         f'Collaboration&nbsp;&nbsp;&nbsp;&nbsp;{new_collab} · cohort {new_collab_avg} · high performers {new_collab_hp}'
     )
+
+    # ── Working Style layer (V3): insert before the performance scoring section ──
+    ws = participant.get("working_style")
+    if ws and _ws_render and _ws_build_blocks:
+        _ws_blocks = ws if isinstance(ws, list) else (
+            _ws_build_blocks(ws) if isinstance(ws, dict)
+            and all(f"ws_q{i}" in ws for i in range(1, 10)) else None)
+        if _ws_blocks:
+            _anchor = "<!-- ============== DIMENSION CARDS ============== -->"
+            if _anchor in t:
+                t = t.replace(_anchor, _ws_render(_ws_blocks) + "\n\n    " + _anchor, 1)
+            else:
+                raise RuntimeError("Working Style anchor (DIMENSION CARDS) not found in template")
 
     # ── Re-encode template JSON and splice back into outer HTML ──────────────────
     # Escape </script> as / to prevent premature script tag closure in HTML

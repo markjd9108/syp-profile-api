@@ -16,7 +16,7 @@ from collections import Counter
 import re
 from working_style_content import (
     KEYED, TIEBREAK, DIMENSION_QUESTIONS, DIMENSION_PREFIX, WORKING_STYLE_CONTENT,
-    OPTION_TEXTS,
+    OPTION_TEXTS, COMPLEMENTS,
 )
 
 DIMENSIONS = ('Communication', 'Decision-Making', 'Collaboration')
@@ -141,6 +141,7 @@ def build_blocks(answers):
             "summary": c["summary"],
             "bullets": c["bullets"],
             "closer_lines": closer_lines(r),
+            "complement": COMPLEMENTS.get(r["primary"]),
             "resolved": r,
         })
     return blocks

@@ -61,6 +61,29 @@ def get_band(score: int):
     if score >= 40: return "emerging",   "Emerging",   40
     return            "foundation",  "Foundation", 0
 
+def _show_band_only(t: str, comm_score, dec_score, collab_score) -> str:
+    """Participant-facing de-scoring (#2): show the BAND, not the number.
+    Swaps each gauge number for its band word, hides the numeric axis, the
+    '/ 100' denominator, and all cohort comparison/ranking. Raw scores are
+    unaffected upstream (still written to the Sheet/dataset)."""
+    css = ('<style id="tpl-band-only">'
+           '.gauge-axis,.gauge-number .denom,.cohort-position,.cohort-legend,'
+           '.cohort-avg-line,.cohort-top-line,.cohort-bar-scale{display:none !important}'
+           '.gauge-number .num{font-size:22px !important;letter-spacing:.01em !important;'
+           'line-height:1.12 !important;white-space:nowrap}'
+           '</style>')
+    for sc in (comm_score, dec_score, collab_score):
+        sc = int(sc)
+        _key, label, _start = get_band(sc)
+        t = t.replace(f'<div class="num band-text">{sc}</div>',
+                      f'<div class="num band-text">{label}</div>')
+    # strip numeric ranges from the band legend (#2)
+    t = t.replace(
+        '<span class="text-[var(--fg-2)]">Foundation 0–39</span> · Emerging 40–59 · Developing 60–79 · Strong 80–100',
+        '<span class="text-[var(--fg-2)]">Foundation</span> · Emerging · Developing · Strong')
+    return css + t
+
+
 def score_to_dot(score: int):
     """Return (cx, cy) for the gauge dot SVG position."""
     angle = (1 - score / 100) * math.pi
@@ -355,6 +378,9 @@ def inject_participant_data(archetype_key: str, participant: dict) -> str:
         f'Collaboration&nbsp;&nbsp;&nbsp;&nbsp;{old_collab} · cohort {SAMPLE["collab_avg"]} · high performers {SAMPLE["collab_hp"]}',
         f'Collaboration&nbsp;&nbsp;&nbsp;&nbsp;{new_collab} · cohort {new_collab_avg} · high performers {new_collab_hp}'
     )
+
+    # ── #2 De-score: show band only, drop numbers + cohort ranking ──
+    t = _show_band_only(t, new_comm, new_dec, new_collab)
 
     # ── Working Style layer (V3): insert before the performance scoring section ──
     ws = participant.get("working_style")

@@ -62,7 +62,7 @@ WORKING_STYLE_CONTENT = {
     },
     'Direct & To-the-Point': {
         "dimension": 'Communication',
-        "summary": 'You get to the point and you appreciate the same in return. You stay clear even when a message is uncomfortable, and you keep conversations moving toward a resolution.',
+        "summary": 'You get to the point and you appreciate the same in return. You prefer to name a hard thing plainly rather than talk around it, and you keep conversations moving toward a resolution.',
         "bullets": [
             'Lead with the headline and the ask',
             'Keep updates short and skip the long preamble',
@@ -231,4 +231,25 @@ OPTION_TEXTS = {
         "Adapt to how the team operates and find your place within it",
         "Name what you're seeing and try to surface the dynamic openly",
     ],
+}
+
+# Complementary working styles (#8). For each style, the style that best complements it
+# (a different style whose strengths balance yours) + a short, non-evaluative reason.
+# PROPOSAL — pairings are a first pass, intended to be reviewed/tuned in the Word doc.
+COMPLEMENTS = {
+    # Communication
+    "Considered & Thorough":   {"style": "Direct & To-the-Point",   "reason": "they bring pace and momentum to your depth and care"},
+    "Direct & To-the-Point":   {"style": "Warm & Attuned",          "reason": "they read how a message lands while you keep things moving"},
+    "Warm & Attuned":          {"style": "Direct & To-the-Point",   "reason": "they bring clarity and momentum while you keep the room with you"},
+    "Curious & Questioning":   {"style": "Considered & Thorough",   "reason": "they turn your questions into a settled, organised view"},
+    # Decision-Making
+    "Measured & Analytical":   {"style": "Decisive & Committed",    "reason": "they bring the momentum to commit once you have weighed it"},
+    "Decisive & Committed":    {"style": "Measured & Analytical",   "reason": "they bring the careful read before you make the call"},
+    "Consultative & Inclusive":{"style": "Decisive & Committed",    "reason": "they help land the call once the thinking is done"},
+    "Adaptive & Iterative":    {"style": "Measured & Analytical",   "reason": "they bring a steady baseline to build and adjust from"},
+    # Collaboration
+    "Self-Directed & Focused": {"style": "Close & Collaborative",   "reason": "they bring the build-together energy around your focused ownership"},
+    "Close & Collaborative":   {"style": "Self-Directed & Focused", "reason": "they bring independent drive and clear ownership to your connection"},
+    "Flexible & Versatile":    {"style": "Candid & Open",           "reason": "they put what matters on the table while you adapt around it"},
+    "Candid & Open":           {"style": "Flexible & Versatile",    "reason": "they adapt and smooth things while you keep it honest and clear"},
 }

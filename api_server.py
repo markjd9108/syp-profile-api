@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TEW Profile API Server v2.0.4
+TEW Profile API Server v2.0.5
 Endpoints:
   GET  /                       — health check
   POST /generate               — individual participant PDF (HTML → Playwright)
@@ -145,11 +145,11 @@ class ComputeAveragesRequest(BaseModel):
     scores: List[ScoreEntry]
 
 # ── App ────────────────────────────────────────────────────────────────────────
-app = FastAPI(title="TEW Profile API", version="2.0.4")
+app = FastAPI(title="TEW Profile API", version="2.0.5")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.0.4", "archetypes": list(ARCHETYPE_FILES)}
+    return {"status": "ok", "version": "2.0.5", "archetypes": list(ARCHETYPE_FILES)}
 
 def _build_participant_dict(name, company, cohort, assessed_date, profile_id,
                              comm_score, dec_score, collab_score,

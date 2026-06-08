@@ -82,8 +82,10 @@ def _show_band_only(t: str, comm_score, dec_score, collab_score) -> str:
         '<span class="text-[var(--fg-2)]">Foundation 0–39</span> · Emerging 40–59 · Developing 60–79 · Strong 80–100',
         '<span style="color:#F87171">Foundation</span> · <span style="color:#FBBF24">Emerging</span> · '
         '<span style="color:#60A5FA">Developing</span> · <span style="color:#34D399">Strong</span>')
-    # remove the old numeric scale tick-marks from the gauge arc (no numbers shown now)
-    t = re.sub(r'<g stroke="rgba\(170,195,240,0\.28\)" stroke-width="1">.*?</g>', '', t, flags=re.DOTALL)
+    # remove the old numeric scale tick-marks from the gauge arc (no numbers shown now).
+    # Broadened to catch any opacity / stroke-width / whitespace variant of the tick group.
+    t = re.sub(r'<g\s+stroke="rgba\(\s*170\s*,\s*195\s*,\s*240[^"]*"[^>]*>.*?</g>',
+               '', t, flags=re.DOTALL)
     return css + t
 
 

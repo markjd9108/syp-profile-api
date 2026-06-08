@@ -80,7 +80,8 @@ def _show_band_only(t: str, comm_score, dec_score, collab_score) -> str:
     # strip numeric ranges from the band legend (#2)
     t = t.replace(
         '<span class="text-[var(--fg-2)]">Foundation 0–39</span> · Emerging 40–59 · Developing 60–79 · Strong 80–100',
-        '<span class="text-[var(--fg-2)]">Foundation</span> · Emerging · Developing · Strong')
+        '<span style="color:#F87171">Foundation</span> · <span style="color:#FBBF24">Emerging</span> · '
+        '<span style="color:#60A5FA">Developing</span> · <span style="color:#34D399">Strong</span>')
     return css + t
 
 

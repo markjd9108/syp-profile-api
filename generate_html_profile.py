@@ -129,7 +129,7 @@ def _polish_profile(t, comm_score=None, dec_score=None, collab_score=None):
             teaser = ('<div class="relative z-10 px-6 pb-6">'
                       '<div class="eyebrow text-white/55 mb-2">At a glance</div>'
                       '<div class="text-white/55 text-[11px] leading-[1.5]" style="margin-bottom:10px;">'
-                      'Three dimensions, each shown as a band &mdash; how you showed up under pressure today.</div>'
+                      'Three areas, each shown as a band. This is how you worked under pressure today.</div>'
                       + gauges +
                       '<div style="border-top:1px solid rgba(255,255,255,.10);padding-top:12px;">'
                       '<div class="text-white text-[12px] font-semibold">Your Working Style</div>'
@@ -141,7 +141,7 @@ def _polish_profile(t, comm_score=None, dec_score=None, collab_score=None):
                       'border-radius:9px;padding:9px 12px;">'
                       '<span style="color:#7BBDF4;font-size:14px;font-weight:800;">&rarr;</span>'
                       '<span class="text-white text-[11.5px]" style="line-height:1.4;">'
-                      'Then turn to <b>Your next three moves</b> &mdash; small, practical things to try this week.'
+                      'Then read <b>Your next three moves</b> &mdash; small, simple things to try this week.'
                       '</span></div>'
                       '</div>')
             t = t[:c] + teaser + t[end:]

@@ -42,7 +42,7 @@ _CSS = """
   --ws-sky:#3E9BFF;--ws-sky2:#1E88E5;--ws-ink:#EAF1FF;--ws-soft:#A9BCDC;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   background:linear-gradient(165deg,#0E2148 0%,#0A1733 100%);
-  border:1px solid var(--ws-line);border-radius:20px;padding:34px 34px 22px;margin:0 0 38px;color:var(--ws-ink);}
+  border:1px solid var(--ws-line);border-radius:20px;padding:34px 34px 22px;margin:34px 0 38px;color:var(--ws-ink);}
 .ws-zone .ws-head{border-bottom:1px solid var(--ws-line);padding-bottom:18px;margin-bottom:8px;}
 .ws-zone .ws-eyebrow{text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:700;color:var(--ws-sky);}
 .ws-zone h2.ws-title{font-size:27px;line-height:1.12;font-weight:800;color:#fff;margin:7px 0 7px;}
@@ -167,7 +167,7 @@ def render_working_style_section(blocks):
             p.append('<div class="ws-comp">'
                      f'<span class="ic">{_IC_PAIR}</span>'
                      '<p><span class="lab">You work best alongside</span>'
-                     f'someone who is <b>{_esc(comp["style"])}</b> — {_esc(comp["reason"])}.</p></div>')
+                     f'someone who is <b>{_esc(comp["style"])}</b>. {_esc(comp["reason"])}</p></div>')
         p.append('</div>')
     p.append('</div>')
     p.append('</section>')

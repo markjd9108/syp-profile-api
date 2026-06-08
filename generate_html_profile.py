@@ -84,6 +84,57 @@ def _show_band_only(t: str, comm_score, dec_score, collab_score) -> str:
     return css + t
 
 
+def _balanced_div_end(t, start):
+    """Given index of a '<div' opening at `start`, return index just past its matching </div>."""
+    import re as _re
+    depth = 0; i = start
+    for m in _re.finditer(r'<div\b|</div>', t[start:]):
+        tok = m.group(0)
+        depth += 1 if tok == '<div' else -1
+        if depth == 0:
+            return start + m.end()
+    return -1
+
+
+def _polish_profile(t, comm_score=None, dec_score=None, collab_score=None):
+    """Round-2 layout polish (#2 cohort, #11 numbers, #12 framework width, #8 bullets)."""
+    import re as _re
+    # (a) Remove the cover Cohort Snapshot panel entirely (scores + cohort comparison)
+    c = t.find('<!-- Cohort snapshot bars -->')
+    if c != -1:
+        d = t.find('<div', c)
+        end = _balanced_div_end(t, d)
+        if end != -1:
+            t = t[:c] + t[end:]
+
+    # (b) CSS: enlarge the 01/02/03 move numbers; ensure no stray cohort text shows
+    css = ('<style id="tpl-polish">'
+           '.num-badge{font-size:26px !important;font-weight:800 !important;'
+           'font-family:"Barlow","Inter",sans-serif !important;color:var(--fg-1,#EAF1FF) !important;'
+           'letter-spacing:0 !important;}'
+           '.cohort-bars,.cohort-legend,.cohort-position{display:none !important}'
+           '</style>')
+    t = css + t
+
+    # (c) Framework Priority paragraph: run full width (drop the 78ch cap)
+    t = t.replace('text-[14px] text-[var(--fg-2)] leading-[1.7] mb-6 max-w-[78ch]',
+                  'text-[14px] text-[var(--fg-2)] leading-[1.7] mb-6')
+
+    # (d) Score-card paragraphs under each arch -> bullet list (easier to scan)
+    def _to_bullets(m):
+        body = m.group(1).strip()
+        parts = [p.strip() for p in _re.split(r'(?<=[.!?])\s+', body) if p.strip()]
+        lis = ''.join(f'<li style="position:relative;padding-left:16px;margin-bottom:6px;">'
+                      f'<span style="position:absolute;left:0;top:8px;width:5px;height:5px;'
+                      f'border-radius:50%;background:var(--c-soft,#7BBDF4);"></span>{p}</li>'
+                      for p in parts)
+        return ('<ul class="text-[13.5px] text-[var(--fg-2)] leading-[1.6] mt-6" '
+                'style="list-style:none;padding:0;margin-top:18px;">' + lis + '</ul>')
+    t = _re.sub(r'<p class="text-\[13\.5px\] text-\[var\(--fg-2\)\] leading-\[1\.65\] mt-6">(.*?)</p>',
+                _to_bullets, t, flags=_re.DOTALL)
+    return t
+
+
 def score_to_dot(score: int):
     """Return (cx, cy) for the gauge dot SVG position."""
     angle = (1 - score / 100) * math.pi
@@ -381,6 +432,7 @@ def inject_participant_data(archetype_key: str, participant: dict) -> str:
 
     # ── #2 De-score: show band only, drop numbers + cohort ranking ──
     t = _show_band_only(t, new_comm, new_dec, new_collab)
+    t = _polish_profile(t, new_comm, new_dec, new_collab)
 
     # ── Working Style layer (V3): insert before the performance scoring section ──
     ws = participant.get("working_style")

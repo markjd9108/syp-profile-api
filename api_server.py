@@ -49,10 +49,17 @@ async def render_pdf(html: str) -> bytes:
             }
         """)
         await page.wait_for_timeout(3000)
+        # Render as a SINGLE tall page sized to the content, so cards never split
+        # across page breaks and there is no trailing blank space after the footer.
+        content_h = await page.evaluate("Math.ceil(document.documentElement.scrollHeight)")
+        # NB: page.pdf() must use inch units; "px" units swap the page dimensions.
+        w_in = 1122 / 96.0
+        h_in = (content_h + 2) / 96.0
         pdf_bytes = await page.pdf(
-            format="A4",
-            landscape=True,          # templates are designed for A4 landscape
+            width=f"{w_in}in",
+            height=f"{h_in}in",
             print_background=True,
+            page_ranges="1",
             margin={"top": "0", "bottom": "0", "left": "0", "right": "0"}
         )
         await browser.close()

@@ -9,6 +9,7 @@ archetype template. Visual-first for ESL readers: a per-dimension icon, a visual
 style card. Supporting language is kept alongside the visuals.
 """
 import html as _html
+import math
 from working_style import build_blocks
 
 WS_SUBHEAD = ("How you naturally work — your preferences, strengths, and the conditions that "
@@ -56,16 +57,15 @@ _CSS = """
 .ws-zone .ws-name{font-size:21px;font-weight:800;color:#fff;margin:0 0 8px;}
 .ws-zone .ws-summary{font-size:14px;line-height:1.55;color:var(--ws-ink);margin:0 0 16px;}
 /* style-mix visual */
-.ws-zone .ws-mix{margin:0 0 18px;}
-.ws-zone .ws-mixrow{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
-.ws-zone .ws-mixlabel{flex:0 0 132px;font-size:12.5px;font-weight:700;color:var(--ws-ink);text-align:right;}
-.ws-zone .ws-mixlabel small{display:block;font-weight:600;font-size:10px;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--ws-soft);}
-.ws-zone .ws-bar{height:12px;border-radius:7px;background:linear-gradient(90deg,var(--ws-sky2),var(--ws-sky));}
-.ws-zone .ws-bar.primary{width:100%;}
-.ws-zone .ws-bar.shade{width:58%;opacity:.62;}
-.ws-zone .ws-bar.thread{width:34%;opacity:.40;}
-.ws-zone .ws-mixnote{font-size:12px;color:var(--ws-soft);font-style:italic;margin:6px 0 0 144px;line-height:1.45;}
+.ws-zone .ws-mix{margin:2px 0 18px;}
+.ws-zone .ws-donutwrap{display:flex;align-items:center;gap:20px;margin-bottom:6px;}
+.ws-zone .ws-donut{width:104px;height:104px;flex:0 0 104px;}
+.ws-zone .ws-legend{display:flex;flex-direction:column;gap:9px;}
+.ws-zone .ws-leg{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--ws-ink);}
+.ws-zone .ws-leg small{display:block;font-weight:600;font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ws-soft);margin-bottom:1px;}
+.ws-zone .ws-dot{width:11px;height:11px;flex:0 0 11px;border-radius:3px;margin-top:2px;}
+.ws-zone .ws-mixnote{font-size:12px;color:var(--ws-soft);font-style:italic;margin:8px 0 0;line-height:1.45;}
 /* how-to-work chips */
 .ws-zone .ws-best{font-size:13px;font-weight:700;color:#fff;margin:2px 0 10px;letter-spacing:.01em;}
 .ws-zone .ws-chips{display:flex;flex-direction:column;gap:8px;margin:0 0 16px;}
@@ -95,19 +95,46 @@ def _esc(s):
     return _html.escape(s, quote=False)
 
 
+DONUT_COLORS = ["#1E88E5", "#5BA8F2", "#A7CFF7"]
+
+
+def _donut(segs):
+    cx = cy = 21.0; rad = 15.2; sw = 7.0
+    parts = []; cum = 0.0
+    for i, (_kind, _name, frac) in enumerate(segs):
+        color = DONUT_COLORS[min(i, 2)]
+        if frac >= 0.999:
+            parts.append(f'<circle cx="{cx}" cy="{cy}" r="{rad}" fill="none" '
+                         f'stroke="{color}" stroke-width="{sw}"/>')
+        else:
+            a0 = -90 + cum * 360; a1 = -90 + (cum + frac) * 360
+            x0 = cx + rad * math.cos(math.radians(a0)); y0 = cy + rad * math.sin(math.radians(a0))
+            x1 = cx + rad * math.cos(math.radians(a1)); y1 = cy + rad * math.sin(math.radians(a1))
+            large = 1 if (a1 - a0) > 180 else 0
+            parts.append(f'<path d="M{x0:.2f},{y0:.2f} A{rad},{rad} 0 {large} 1 {x1:.2f},{y1:.2f}" '
+                         f'fill="none" stroke="{color}" stroke-width="{sw}"/>')
+        cum += frac
+    return f'<svg viewBox="0 0 42 42" class="ws-donut" aria-hidden="true">{"".join(parts)}</svg>'
+
+
 def _mix(block):
-    """Visual style-mix bars (primary / shade / thread) + supporting language."""
+    """Compact donut showing the primary / shade / thread proportions + labels + supporting text."""
     r = block["resolved"]
-    rows = [f'<div class="ws-mixrow"><div class="ws-mixlabel"><small>Mainly</small>{_esc(r["primary"])}</div>'
-            f'<div class="ws-bar primary"></div></div>']
-    if r.get("secondary"):
-        rows.append(f'<div class="ws-mixrow"><div class="ws-mixlabel"><small>A shade of</small>{_esc(r["secondary"])}</div>'
-                    f'<div class="ws-bar shade"></div></div>')
-    if r.get("third"):
-        rows.append(f'<div class="ws-mixrow"><div class="ws-mixlabel"><small>A thread of</small>{_esc(r["third"])}</div>'
-                    f'<div class="ws-bar thread"></div></div>')
+    if r["pattern"] == "Pure":
+        segs = [("Mainly", r["primary"], 1.0)]
+    elif r["pattern"] == "Blend":
+        segs = [("Mainly", r["primary"], 0.66), ("A shade of", r["secondary"], 0.34)]
+    else:
+        segs = [("Mainly", r["primary"], 0.50), ("A shade of", r["secondary"], 0.30),
+                ("A thread of", r["third"], 0.20)]
+    donut = _donut(segs)
+    legend = "".join(
+        f'<div class="ws-leg"><span class="ws-dot" style="background:{DONUT_COLORS[min(i,2)]}"></span>'
+        f'<span><small>{_esc(kind)}</small>{_esc(name)}</span></div>'
+        for i, (kind, name, _f) in enumerate(segs))
     notes = "".join(f'<div class="ws-mixnote">{_esc(line)}</div>' for line in block["closer_lines"])
-    return '<div class="ws-mix">' + "".join(rows) + notes + '</div>'
+    return ('<div class="ws-mix"><div class="ws-donutwrap">' + donut +
+            '<div class="ws-legend">' + legend + '</div></div>' + notes + '</div>')
 
 
 def render_working_style_section(blocks):

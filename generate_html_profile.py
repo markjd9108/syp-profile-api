@@ -171,6 +171,28 @@ def _polish_profile(t, comm_score=None, dec_score=None, collab_score=None):
                 'style="list-style:none;padding:0;margin-top:18px;">' + lis + '</ul>')
     t = _re.sub(r'<p class="text-\[13\.5px\] text-\[var\(--fg-2\)\] leading-\[1\.65\] mt-6">(.*?)</p>',
                 _to_bullets, t, flags=_re.DOTALL)
+
+    # (e) "What stood out" footer stats: drop cohort columns + numbers, keep band only
+    def _remove_col(tt, label):
+        es = tt.find('<div class="eyebrow mb-1.5">' + label + '</div>')
+        if es == -1:
+            return tt
+        wrap = tt.rfind('<div', 0, es)
+        end = _balanced_div_end(tt, wrap)
+        return tt[:wrap] + tt[end:] if end != -1 else tt
+    t = _remove_col(t, "Cohort rank")
+    t = _remove_col(t, "Cohort avg")
+    # rebalance the footer grids now that a column is gone
+    t = t.replace('mt-7 pt-5 border-t hairline grid grid-cols-3 gap-6',
+                  'mt-7 pt-5 border-t hairline grid grid-cols-2 gap-6')
+    t = t.replace('mt-7 pt-5 border-t hairline grid grid-cols-2 md:grid-cols-4 gap-6',
+                  'mt-7 pt-5 border-t hairline grid grid-cols-2 md:grid-cols-3 gap-6')
+    # "Score" label reads odd with a band -> "Band"
+    t = t.replace('<div class="eyebrow mb-1.5">Score</div>', '<div class="eyebrow mb-1.5">Band</div>')
+    # strip leading "<number> · " from the band-value cells (e.g. "82 · Strong" -> "Strong")
+    t = _re.sub(r'(font-medium tabular"[^>]*>)\s*\d+\s*·\s*', r'\1', t)
+    # remove the "48 → 60" numeric progress labels
+    t = _re.sub(r'<div class="mono text-\[9\.5px\][^"]*"[^>]*>\s*\d+\s*→\s*\d+\s*</div>', '', t)
     return t
 
 

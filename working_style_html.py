@@ -47,43 +47,45 @@ _CSS = """
 .ws-zone .ws-eyebrow{text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:700;color:var(--ws-sky);}
 .ws-zone h2.ws-title{font-size:27px;line-height:1.12;font-weight:800;color:#fff;margin:7px 0 7px;}
 .ws-zone .ws-subhead{font-size:13.5px;color:var(--ws-soft);max-width:62ch;margin:0;}
-.ws-zone .ws-block{padding:22px 0 4px;border-top:1px solid var(--ws-line);}
-.ws-zone .ws-block:first-of-type{border-top:none;}
+.ws-zone .ws-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.ws-zone .ws-block{background:rgba(255,255,255,.035);border:1px solid var(--ws-line);
+  border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;}
 .ws-zone .ws-dimrow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .ws-zone .ws-dimicon{width:30px;height:30px;flex:0 0 30px;border-radius:9px;display:flex;align-items:center;
   justify-content:center;background:rgba(62,155,255,.14);color:var(--ws-sky);}
 .ws-zone .ws-dimicon svg{width:18px;height:18px;}
 .ws-zone .ws-dim{text-transform:uppercase;letter-spacing:.16em;font-size:10.5px;font-weight:700;color:var(--ws-sky);}
-.ws-zone .ws-name{font-size:21px;font-weight:800;color:#fff;margin:0 0 8px;}
-.ws-zone .ws-summary{font-size:14px;line-height:1.55;color:var(--ws-ink);margin:0 0 16px;}
+.ws-zone .ws-name{font-size:18px;font-weight:800;color:#fff;margin:0 0 8px;line-height:1.15;}
+.ws-zone .ws-summary{font-size:12.5px;line-height:1.5;color:var(--ws-ink);margin:0 0 14px;}
 /* style-mix visual */
 .ws-zone .ws-mix{margin:2px 0 18px;}
-.ws-zone .ws-donutwrap{display:flex;align-items:center;gap:20px;margin-bottom:6px;}
-.ws-zone .ws-donut{width:104px;height:104px;flex:0 0 104px;}
+.ws-zone .ws-donutwrap{display:flex;align-items:center;gap:13px;margin-bottom:6px;}
+.ws-zone .ws-donut{width:74px;height:74px;flex:0 0 74px;}
 .ws-zone .ws-legend{display:flex;flex-direction:column;gap:9px;}
-.ws-zone .ws-leg{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--ws-ink);}
+.ws-zone .ws-leg{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;font-weight:700;color:var(--ws-ink);line-height:1.2;}
 .ws-zone .ws-leg small{display:block;font-weight:600;font-size:9.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--ws-soft);margin-bottom:1px;}
 .ws-zone .ws-dot{width:11px;height:11px;flex:0 0 11px;border-radius:3px;margin-top:2px;}
-.ws-zone .ws-mixnote{font-size:12px;color:var(--ws-soft);font-style:italic;margin:8px 0 0;line-height:1.45;}
+.ws-zone .ws-mixnote{font-size:10.5px;color:var(--ws-soft);font-style:italic;margin:7px 0 0;line-height:1.4;}
 /* how-to-work chips */
-.ws-zone .ws-best{font-size:13px;font-weight:700;color:#fff;margin:2px 0 10px;letter-spacing:.01em;}
+.ws-zone .ws-best{font-size:12px;font-weight:700;color:#fff;margin:4px 0 8px;letter-spacing:.01em;}
 .ws-zone .ws-chips{display:flex;flex-direction:column;gap:8px;margin:0 0 16px;}
-.ws-zone .ws-chip{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.045);
-  border:1px solid var(--ws-line);border-radius:11px;padding:11px 14px;}
-.ws-zone .ws-chip .ic{width:24px;height:24px;flex:0 0 24px;border-radius:50%;display:flex;align-items:center;
+.ws-zone .ws-chip{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.05);
+  border:1px solid var(--ws-line);border-radius:9px;padding:8px 11px;}
+.ws-zone .ws-chip .ic{width:20px;height:20px;flex:0 0 20px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;background:var(--ws-sky2);color:#fff;}
 .ws-zone .ws-chip .ic svg{width:14px;height:14px;}
-.ws-zone .ws-chip span{font-size:13.5px;line-height:1.4;color:var(--ws-ink);}
+.ws-zone .ws-chip span{font-size:12px;line-height:1.35;color:var(--ws-ink);}
 /* complement card */
-.ws-zone .ws-comp{display:flex;align-items:flex-start;gap:12px;background:rgba(62,155,255,.12);
+.ws-zone .ws-comp{display:flex;align-items:flex-start;gap:9px;margin-top:auto;background:rgba(62,155,255,.12);
   border:1px solid rgba(62,155,255,.34);border-left:3px solid var(--ws-sky);border-radius:11px;
   padding:13px 16px;margin:2px 0 4px;}
 .ws-zone .ws-comp .ic{width:26px;height:26px;flex:0 0 26px;color:var(--ws-sky);margin-top:1px;}
-.ws-zone .ws-comp p{font-size:13px;line-height:1.5;color:var(--ws-ink);margin:0;}
+.ws-zone .ws-comp p{font-size:11.5px;line-height:1.45;color:var(--ws-ink);margin:0;}
 .ws-zone .ws-comp b{color:#fff;}
 .ws-zone .ws-comp .lab{display:block;text-transform:uppercase;letter-spacing:.12em;font-size:9.5px;
   font-weight:700;color:var(--ws-sky);margin-bottom:3px;}
+@media (max-width:760px){.ws-zone .ws-grid{grid-template-columns:1fr;}}
 @media (max-width:640px){.ws-zone{padding:22px 18px 12px;border-radius:14px;}
   .ws-zone h2.ws-title{font-size:22px;}.ws-zone .ws-name{font-size:19px;}
   .ws-zone .ws-mixlabel{flex-basis:96px;font-size:11.5px;}.ws-zone .ws-mixnote{margin-left:0;}}
@@ -145,6 +147,7 @@ def render_working_style_section(blocks):
     p.append('<h2 class="ws-title">How you naturally work</h2>')
     p.append(f'<p class="ws-subhead">{_esc(WS_SUBHEAD)}</p>')
     p.append('</div>')
+    p.append('<div class="ws-grid">')
     for b in blocks:
         dim = b["dimension"]
         p.append('<div class="ws-block">')
@@ -166,6 +169,7 @@ def render_working_style_section(blocks):
                      '<p><span class="lab">You work best alongside</span>'
                      f'someone who is <b>{_esc(comp["style"])}</b> — {_esc(comp["reason"])}.</p></div>')
         p.append('</div>')
+    p.append('</div>')
     p.append('</section>')
     return "\n".join(p)
 

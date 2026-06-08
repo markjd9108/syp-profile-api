@@ -105,23 +105,43 @@ def _polish_profile(t, comm_score=None, dec_score=None, collab_score=None):
         d = t.find('<div', c)
         end = _balanced_div_end(t, d)
         if end != -1:
-            _row = ('<div style="display:flex;gap:10px;align-items:flex-start;">'
-                    '<span style="flex:0 0 6px;width:6px;height:6px;border-radius:50%;'
-                    'background:#7BBDF4;margin-top:6px;"></span><div>'
-                    '<div class="text-white text-[12.5px] font-semibold" style="letter-spacing:.01em;">{t}</div>'
-                    '<div class="text-white/55 text-[11px] leading-[1.5]" style="margin-top:1px;">{d}</div>'
-                    '</div></div>')
-            rows = "".join(_row.format(t=ti, d=di) for ti, di in [
-                ("How you scored", "Where you are most consistent under pressure — shown as a band for each of the three dimensions."),
-                ("Your archetype", "The pattern across your dimensions, and the working profile it points to."),
-                ("Your Working Style", "How you naturally prefer to work — and how others can work best with you."),
-                ("Your next three moves", "Three short, practical things to try in your next meeting."),
-            ])
+            _BANDCOL = {"strong": "#34D399", "developing": "#60A5FA",
+                        "emerging": "#FBBF24", "foundation": "#F87171"}
+            def _mini(dim_label, score):
+                key, label, _a = get_band(int(score))
+                col = _BANDCOL.get(key, "#7BBDF4")
+                return (f'<div style="flex:1;text-align:center;min-width:0;">'
+                        f'<div class="text-white/50" style="font-size:8px;letter-spacing:.09em;'
+                        f'text-transform:uppercase;margin-bottom:2px;">{dim_label}</div>'
+                        f'<svg viewBox="0 0 90 50" style="width:100%;max-width:80px;display:inline-block;">'
+                        f'<path d="M7 46 A 38 38 0 0 1 83 46" fill="none" stroke="rgba(255,255,255,.14)" '
+                        f'stroke-width="6" stroke-linecap="round"/>'
+                        f'<path d="M7 46 A 38 38 0 0 1 83 46" fill="none" stroke="{col}" stroke-width="6" '
+                        f'stroke-linecap="round" pathLength="100" stroke-dasharray="{int(score)} 100"/>'
+                        f'</svg>'
+                        f'<div style="font-size:10.5px;font-weight:800;color:{col};margin-top:-3px;">{label}</div>'
+                        f'</div>')
+            gauges = ('<div style="display:flex;gap:6px;margin:4px 0 14px;">'
+                      + _mini("Communication", comm_score)
+                      + _mini("Decision-Making", dec_score)
+                      + _mini("Collaboration", collab_score) + '</div>')
             teaser = ('<div class="relative z-10 px-6 pb-6">'
-                      '<div class="eyebrow text-white/55 mb-3">What is inside</div>'
-                      '<div style="display:flex;flex-direction:column;gap:13px;">' + rows + '</div>'
-                      '<div class="text-white/45 text-[10.5px] mono" style="margin-top:16px;letter-spacing:.02em;">'
-                      'Take your time — each section is built to be useful.</div>'
+                      '<div class="eyebrow text-white/55 mb-2">At a glance</div>'
+                      '<div class="text-white/55 text-[11px] leading-[1.5]" style="margin-bottom:10px;">'
+                      'Three dimensions, each shown as a band &mdash; how you showed up under pressure today.</div>'
+                      + gauges +
+                      '<div style="border-top:1px solid rgba(255,255,255,.10);padding-top:12px;">'
+                      '<div class="text-white text-[12px] font-semibold">Your Working Style</div>'
+                      '<div class="text-white/55 text-[11px] leading-[1.5]" style="margin-top:1px;">'
+                      'A non-evaluative read on how you naturally prefer to work &mdash; and how others can '
+                      'work best with you.</div></div>'
+                      '<div style="margin-top:13px;display:flex;align-items:center;gap:8px;'
+                      'background:rgba(123,189,244,.12);border:1px solid rgba(123,189,244,.30);'
+                      'border-radius:9px;padding:9px 12px;">'
+                      '<span style="color:#7BBDF4;font-size:14px;font-weight:800;">&rarr;</span>'
+                      '<span class="text-white text-[11.5px]" style="line-height:1.4;">'
+                      'Then turn to <b>Your next three moves</b> &mdash; small, practical things to try this week.'
+                      '</span></div>'
                       '</div>')
             t = t[:c] + teaser + t[end:]
 

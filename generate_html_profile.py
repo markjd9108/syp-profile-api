@@ -70,7 +70,13 @@ def _show_band_only(t: str, comm_score, dec_score, collab_score) -> str:
            '.gauge-axis,.gauge-number .denom,.cohort-position,.cohort-legend,'
            '.cohort-avg-line,.cohort-top-line,.cohort-bar-scale{display:none !important}'
            '.gauge-number .num{font-size:33px !important;font-weight:800 !important;'
-           'letter-spacing:0 !important;line-height:1 !important;white-space:nowrap}'
+           'letter-spacing:0 !important;line-height:1 !important;white-space:nowrap;'
+           # Solid band colour instead of clipped-gradient text. The gradient
+           # `background-clip:text` leaves a thin gradient strip above the word
+           # in the Chromium PDF pipeline (a faint line over "Strong" etc.).
+           'background:none !important;-webkit-background-clip:border-box !important;'
+           'background-clip:border-box !important;-webkit-text-fill-color:var(--c) !important;'
+           'color:var(--c) !important}'
            '</style>')
     for sc in (comm_score, dec_score, collab_score):
         sc = int(sc)

@@ -99,13 +99,31 @@ def _balanced_div_end(t, start):
 def _polish_profile(t, comm_score=None, dec_score=None, collab_score=None):
     """Round-2 layout polish (#2 cohort, #11 numbers, #12 framework width, #8 bullets)."""
     import re as _re
-    # (a) Remove the cover Cohort Snapshot panel entirely (scores + cohort comparison)
+    # (a) Replace the cover Cohort Snapshot panel with a teaser "What's inside" summary
     c = t.find('<!-- Cohort snapshot bars -->')
     if c != -1:
         d = t.find('<div', c)
         end = _balanced_div_end(t, d)
         if end != -1:
-            t = t[:c] + t[end:]
+            _row = ('<div style="display:flex;gap:10px;align-items:flex-start;">'
+                    '<span style="flex:0 0 6px;width:6px;height:6px;border-radius:50%;'
+                    'background:#7BBDF4;margin-top:6px;"></span><div>'
+                    '<div class="text-white text-[12.5px] font-semibold" style="letter-spacing:.01em;">{t}</div>'
+                    '<div class="text-white/55 text-[11px] leading-[1.5]" style="margin-top:1px;">{d}</div>'
+                    '</div></div>')
+            rows = "".join(_row.format(t=ti, d=di) for ti, di in [
+                ("How you scored", "Where you are most consistent under pressure — shown as a band for each of the three dimensions."),
+                ("Your archetype", "The pattern across your dimensions, and the working profile it points to."),
+                ("Your Working Style", "How you naturally prefer to work — and how others can work best with you."),
+                ("Your next three moves", "Three short, practical things to try in your next meeting."),
+            ])
+            teaser = ('<div class="relative z-10 px-6 pb-6">'
+                      '<div class="eyebrow text-white/55 mb-3">What is inside</div>'
+                      '<div style="display:flex;flex-direction:column;gap:13px;">' + rows + '</div>'
+                      '<div class="text-white/45 text-[10.5px] mono" style="margin-top:16px;letter-spacing:.02em;">'
+                      'Take your time — each section is built to be useful.</div>'
+                      '</div>')
+            t = t[:c] + teaser + t[end:]
 
     # (b) CSS: enlarge the 01/02/03 move numbers; ensure no stray cohort text shows
     css = ('<style id="tpl-polish">'

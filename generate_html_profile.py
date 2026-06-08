@@ -149,7 +149,7 @@ def _polish_profile(t, comm_score=None, dec_score=None, collab_score=None):
     # (b) CSS: enlarge the 01/02/03 move numbers; ensure no stray cohort text shows
     css = ('<style id="tpl-polish">'
            '.num-badge{font-size:26px !important;font-weight:800 !important;'
-           'font-family:"Barlow","Inter",sans-serif !important;color:var(--fg-1,#EAF1FF) !important;'
+           'font-family:"Barlow","Inter",sans-serif !important;color:#7BBDF4 !important;'
            'letter-spacing:0 !important;}'
            '.cohort-bars,.cohort-legend,.cohort-position{display:none !important}'
            '</style>')
@@ -189,9 +189,36 @@ def _polish_profile(t, comm_score=None, dec_score=None, collab_score=None):
                   'mt-7 pt-5 border-t hairline grid grid-cols-2 md:grid-cols-3 gap-6')
     # "Score" label reads odd with a band -> "Band"
     t = t.replace('<div class="eyebrow mb-1.5">Score</div>', '<div class="eyebrow mb-1.5">Band</div>')
-    # strip leading "<number> · " from the band-value cells (e.g. "82 · Strong" -> "Strong")
-    t = _re.sub(r'(font-medium tabular"[^>]*>)\s*\d+\s*·\s*', r'\1', t)
-    # remove the "48 → 60" numeric progress labels
+    # Show the INDIVIDUAL's band per dimension (numbers stay in the data for managers).
+    if comm_score is not None:
+        _DS = {"Communication": int(comm_score), "Decision-Making": int(dec_score),
+               "Decision Making": int(dec_score), "Collaboration": int(collab_score)}
+        _BC = {"strong": "#34D399", "developing": "#60A5FA", "emerging": "#FBBF24", "foundation": "#F87171"}
+        _ORD = ["foundation", "emerging", "developing", "strong"]
+        _LBL = {"foundation": "Foundation", "emerging": "Emerging", "developing": "Developing", "strong": "Strong"}
+        def _cell(score, up=False):
+            k, _l, _a = get_band(int(score))
+            if up:
+                k = _ORD[min(_ORD.index(k) + 1, 3)]
+            return '<span style="color:' + _BC[k] + '">' + _LBL[k] + '</span>'
+        ms = _re.search(r'>Dimension</div>\s*<div class="text-\[13\.5px\] font-medium">([^<]+)</div>', t)
+        mg = _re.search(r'>Linked to</div>\s*<div class="text-\[13\.5px\] font-medium">([^<]+)</div>', t)
+        sdim = ms.group(1).strip() if ms else None
+        gdim = mg.group(1).strip() if mg else None
+        if sdim in _DS:
+            t = _re.sub(r'(>Band</div>\s*<div class="text-\[13\.5px\] font-medium tabular"[^>]*>)[^<]*(</div>)',
+                        lambda mm: mm.group(1) + _cell(_DS[sdim]) + mm.group(2), t, count=1)
+        if gdim in _DS:
+            t = _re.sub(r'(>Current</div>\s*<div class="text-\[13\.5px\] font-medium tabular"[^>]*>)[^<]*(</div>)',
+                        lambda mm: mm.group(1) + _cell(_DS[gdim]) + mm.group(2), t, count=1)
+            t = _re.sub(r'(>30-day target</div>\s*<div class="text-\[13\.5px\] font-medium tabular"[^>]*>)[^<]*(</div>)',
+                        lambda mm: mm.group(1) + _cell(_DS[gdim], up=True) + mm.group(2), t, count=1)
+    # remove the score-based growth progress bar (not band-only) + its "48 -> 60" label
+    _gp = t.find('<div class="growth-progress')
+    if _gp != -1:
+        _ge = _balanced_div_end(t, _gp)
+        if _ge != -1:
+            t = t[:_gp] + t[_ge:]
     t = _re.sub(r'<div class="mono text-\[9\.5px\][^"]*"[^>]*>\s*\d+\s*→\s*\d+\s*</div>', '', t)
     return t
 

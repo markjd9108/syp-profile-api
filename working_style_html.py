@@ -15,26 +15,97 @@ from working_style import build_blocks
 WS_SUBHEAD = ("How you like to work — your preferences, your strengths, and what helps you "
               "do your best.")
 
-# ── Inline SVG icons (stroke style, currentColor) ────────────────────────────────
-_IC_COMM = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
-            'stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 '
-            '8.5 8.5 8.5 0 0 1-3.8-.9L3 20l1.4-4.2A8.5 8.5 0 1 1 21 11.5z"/></svg>')
-_IC_DEC  = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
-            'stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M12 9c0 3-4 '
-            '3-4 6a4 4 0 0 0 8 0c0-3-4-3-4-6z" opacity="0"/><path d="M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 '
-            '6z"/><path d="M18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M12 9c0 3-6 3-6 6"/><path '
-            'd="M12 9c0 3 6 3 6 6"/></svg>')
-_IC_COLL = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
-            'stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 '
-            '0 0-4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path '
-            'd="M16 3.13A4 4 0 0 1 16 11"/></svg>')
-_IC_CHECK= ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" '
-            'stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>')
-_IC_PAIR = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
-            'stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle '
-            'cx="17" cy="9" r="2.4"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M15 20a4.5 4.5 0 '
-            '0 1 6-4"/></svg>')
+# ── Inline SVG icons (solid filled flat style, currentColor) ────────────────────
+_IC_COMM = ('<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2.5h16a2 2 0 0 1 2 2v10a2 2 '
+            '0 0 1-2 2h-7.2L8 20.5v-4H4a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2z"/>'
+            '<circle cx="8" cy="9.5" r="1.2" fill="#fff" opacity=".9"/>'
+            '<circle cx="12" cy="9.5" r="1.2" fill="#fff" opacity=".9"/>'
+            '<circle cx="16" cy="9.5" r="1.2" fill="#fff" opacity=".9"/></svg>')
+_IC_DEC  = ('<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.1 2.6 22 11.5a1.6 1.6 0 0 1 '
+            '0 2.3l-8.9 8.9a1.6 1.6 0 0 1-2.3 0L2 13.8a1.6 1.6 0 0 1 0-2.3l8.9-8.9a1.6 1.6 0 0 1 '
+            '2.2 0z"/><path d="m15.8 9.4-4.6 4.7-2.4-2.4" fill="none" stroke="#fff" '
+            'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>')
+_IC_COLL = ('<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8.8" cy="12" r="6.3" '
+            'opacity=".62"/><circle cx="15.2" cy="12" r="6.3" opacity=".62"/>'
+            '<path d="M12 6.6a6.3 6.3 0 0 1 0 10.8 6.3 6.3 0 0 1 0-10.8z"/></svg>')
+_IC_CHECK= ('<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 5.7a1.5 1.5 0 0 1 0 2.1'
+            'l-9.2 9.2a1.5 1.5 0 0 1-2.1 0L3.7 11.7a1.5 1.5 0 1 1 2.1-2.1l4.2 4.2 8.2-8.2a1.5 1.5 '
+            '0 0 1 2.1 0z"/></svg>')
+_IC_PAIR = ('<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8.6" cy="7.6" r="3.4"/>'
+            '<path d="M2.2 19.6a6.4 6.4 0 0 1 12.8 0v.4H2.2z"/>'
+            '<circle cx="16.7" cy="8.4" r="2.7" opacity=".6"/>'
+            '<path d="M16.6 20c0-2.1-.6-4-1.7-5.5a5.6 5.6 0 0 1 6.9 5.1v.4z" opacity=".6"/></svg>')
 _DIM_ICON = {"Communication": _IC_COMM, "Decision-Making": _IC_DEC, "Collaboration": _IC_COLL}
+
+# ── Style-specific icons (one per working style) ────────────────────────────────
+# Solid filled style (flat, two-tone): main silhouette in currentColor, interior
+# details in white, secondary elements at reduced opacity — matching the flat
+# marketing-icon reference style rather than thin outlines.
+_S = '<svg viewBox="0 0 24 24" fill="currentColor">{}</svg>'
+STYLE_ICONS = {
+    # Communication
+    "Direct & To-the-Point":    _S.format(
+        '<path d="M3 9.3h9.5V5.6c0-.88 1.06-1.32 1.7-.7l6.5 6.4c.4.39.4 1.01 0 1.4l-6.5 6.4'
+        'c-.64.62-1.7.18-1.7-.7v-3.7H3a1 1 0 0 1-1-1v-3.4a1 1 0 0 1 1-1z"/>'),
+    "Considered & Thorough":    _S.format(
+        '<path d="M6.5 2A1.5 1.5 0 0 0 5 3.5V21a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 21'
+        'V7.5L13.5 2z"/>'
+        '<path d="M13.5 2v4a1.5 1.5 0 0 0 1.5 1.5h4z" fill="#fff" opacity=".4"/>'
+        '<rect x="8" y="11" width="8" height="1.7" rx=".85" fill="#fff" opacity=".9"/>'
+        '<rect x="8" y="14.4" width="8" height="1.7" rx=".85" fill="#fff" opacity=".9"/>'
+        '<rect x="8" y="17.8" width="5.4" height="1.7" rx=".85" fill="#fff" opacity=".9"/>'),
+    "Warm & Attuned":           _S.format(
+        '<path d="M12 21.3 10.55 20C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 '
+        '4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z"/>'),
+    "Curious & Questioning":    _S.format(
+        '<path d="M4 2.5h16A2 2 0 0 1 22 4.5v11a2 2 0 0 1-2 2h-7.2L8 21.5v-4H4a2 2 0 0 1-2-2v-11'
+        'a2 2 0 0 1 2-2z"/>'
+        '<path d="M9.7 7.6a2.6 2.6 0 0 1 5.1.75c0 1.7-2.4 2.1-2.4 3.55" fill="none" '
+        'stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>'
+        '<circle cx="12.4" cy="14.6" r="1.15" fill="#fff"/>'),
+    # Decision-Making
+    "Measured & Analytical":    _S.format(
+        '<rect x="3.5" y="13" width="4.4" height="8" rx="1"/>'
+        '<rect x="9.8" y="8" width="4.4" height="13" rx="1" opacity=".75"/>'
+        '<rect x="16.1" y="3" width="4.4" height="18" rx="1"/>'),
+    "Decisive & Committed":     _S.format(
+        '<path d="M13.2 2 4.3 13.1c-.45.56-.05 1.4.67 1.4h4.53l-1 7.5 8.9-11.1c.45-.56.05-1.4'
+        '-.67-1.4h-4.53z"/>'),
+    "Consultative & Inclusive": _S.format(
+        '<circle cx="5.3" cy="8.2" r="2.3" opacity=".55"/>'
+        '<path d="M.8 15.4a4.5 4.5 0 0 1 6.5-4 7.3 7.3 0 0 0-2.4 4z" opacity=".55"/>'
+        '<circle cx="18.7" cy="8.2" r="2.3" opacity=".55"/>'
+        '<path d="M23.2 15.4a4.5 4.5 0 0 0-6.5-4 7.3 7.3 0 0 1 2.4 4z" opacity=".55"/>'
+        '<circle cx="12" cy="7" r="3.1"/>'
+        '<path d="M6.3 15.9a5.7 5.7 0 0 1 11.4 0v.6H6.3z"/>'),
+    "Adaptive & Iterative":     _S.format(
+        '<path d="M12 3.5a8.5 8.5 0 0 1 7.9 5.4h2.6l-4.2 4.9-4.2-4.9h3a5.7 5.7 0 0 0-9.8-1.1'
+        'L5 6.1A8.46 8.46 0 0 1 12 3.5z"/>'
+        '<path d="M12 20.5a8.5 8.5 0 0 1-7.9-5.4H1.5l4.2-4.9 4.2 4.9h-3a5.7 5.7 0 0 0 9.8 1.1'
+        'l2.3 1.7a8.46 8.46 0 0 1-7 2.6z" opacity=".75"/>'),
+    # Collaboration
+    "Self-Directed & Focused":  _S.format(
+        '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 3.2a6.8 6.8 0 1 1 0 13.6 6.8 6.8 0 '
+        '0 1 0-13.6z" fill-rule="evenodd"/>'
+        '<path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6zm0 2.4a1.4 1.4 0 1 1 0 2.8 '
+        '1.4 1.4 0 0 1 0-2.8z" fill-rule="evenodd" opacity=".75"/>'
+        '<circle cx="12" cy="12" r="1.4"/>'),
+    "Close & Collaborative":    _S.format(
+        '<circle cx="8.6" cy="7.6" r="3.4"/>'
+        '<path d="M2.2 19.6a6.4 6.4 0 0 1 12.8 0v.4H2.2z"/>'
+        '<circle cx="16.7" cy="8.4" r="2.7" opacity=".6"/>'
+        '<path d="M16.6 20c0-2.1-.6-4-1.7-5.5a5.6 5.6 0 0 1 6.9 5.1v.4z" opacity=".6"/>'),
+    "Flexible & Versatile":     _S.format(
+        '<path d="M12 1.8 15.2 5.5h-2.1v3.6h-2.2V5.5H8.8z"/>'
+        '<path d="M12 22.2 8.8 18.5h2.1v-3.6h2.2v3.6h2.1z"/>'
+        '<path d="M1.8 12 5.5 8.8v2.1h3.6v2.2H5.5v2.1z" opacity=".75"/>'
+        '<path d="M22.2 12 18.5 15.2v-2.1h-3.6v-2.2h3.6V8.8z" opacity=".75"/>'
+        '<circle cx="12" cy="12" r="2.1"/>'),
+    "Candid & Open":            _S.format(
+        '<path d="M12 4.8C5.8 4.8 2 12 2 12s3.8 7.2 10 7.2S22 12 22 12s-3.8-7.2-10-7.2z"/>'
+        '<circle cx="12" cy="12" r="3.4" fill="#fff" opacity=".92"/>'
+        '<circle cx="12" cy="12" r="1.6"/>'),
+}
 
 _CSS = """
 <style>
@@ -55,7 +126,12 @@ _CSS = """
   justify-content:center;background:rgba(62,155,255,.14);color:var(--ws-sky);}
 .ws-zone .ws-dimicon svg{width:18px;height:18px;}
 .ws-zone .ws-dim{text-transform:uppercase;letter-spacing:.16em;font-size:10.5px;font-weight:700;color:var(--ws-sky);}
-.ws-zone .ws-name{font-size:18px;font-weight:800;color:#fff;margin:0 0 8px;line-height:1.15;}
+.ws-zone .ws-namerow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 0 8px;}
+.ws-zone .ws-name{font-size:18px;font-weight:800;color:#fff;margin:0;line-height:1.15;}
+.ws-zone .ws-styleicon{width:46px;height:46px;flex:0 0 46px;border-radius:13px;display:flex;
+  align-items:center;justify-content:center;background:rgba(62,155,255,.14);
+  border:1px solid rgba(62,155,255,.30);color:var(--ws-sky);}
+.ws-zone .ws-styleicon svg{width:27px;height:27px;}
 .ws-zone .ws-summary{font-size:12.5px;line-height:1.5;color:var(--ws-ink);margin:0 0 14px;}
 /* style-mix visual */
 .ws-zone .ws-mix{margin:2px 0 18px;}
@@ -154,7 +230,11 @@ def render_working_style_section(blocks):
         p.append('<div class="ws-dimrow">'
                  f'<span class="ws-dimicon">{_DIM_ICON.get(dim, "")}</span>'
                  f'<span class="ws-dim">{_esc(dim)}</span></div>')
-        p.append(f'<div class="ws-name">{_esc(b["style_name"])}</div>')
+        _sicon = STYLE_ICONS.get(b["style_name"], "")
+        p.append('<div class="ws-namerow">'
+                 f'<div class="ws-name">{_esc(b["style_name"])}</div>'
+                 + (f'<span class="ws-styleicon">{_sicon}</span>' if _sicon else "")
+                 + '</div>')
         p.append(f'<p class="ws-summary">{_esc(b["summary"])}</p>')
         p.append(_mix(b))
         p.append('<p class="ws-best">People work best with you when they:</p>')

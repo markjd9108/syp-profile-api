@@ -134,8 +134,8 @@ _OPEN_BALANCED = [
 _STYLE_SENT = [
     "How you get there will look like you: {c} in how you communicate, {d} in "
     "how you decide, {co} in how you work with others.",
-    "Your route there is your own: {c} communication, {d} decisions, and a "
-    "{co} way of working with others.",
+    "The way there will be your own: {c} in communication, {d} in how you "
+    "decide, and {co} in how you collaborate.",
 ]
 
 

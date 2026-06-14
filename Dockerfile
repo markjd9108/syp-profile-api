@@ -11,6 +11,7 @@ RUN playwright install chromium
 
 # Copy application files
 COPY generate_html_profile.py .
+COPY lead_engine.py .
 # Working Style (V3) layer modules
 COPY working_style.py .
 COPY working_style_content.py .

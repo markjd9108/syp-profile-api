@@ -10,7 +10,7 @@ Endpoints:
 
 import os, asyncio, base64, datetime, random, string
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 
@@ -149,7 +149,27 @@ app = FastAPI(title="TEW Profile API", version="2.1.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.1.0", "archetypes": list(ARCHETYPE_FILES)}
+    return {"status": "ok", "version": "2.2.0", "archetypes": list(ARCHETYPE_FILES)}
+
+_ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+
+@app.get("/assets/resource-pack")
+def asset_resource_pack():
+    """Static take-home Resource Pack PDF (same file for every participant)."""
+    path = os.path.join(_ASSETS_DIR, "resource_pack.pdf")
+    if not os.path.exists(path):
+        raise HTTPException(404, "resource pack not found")
+    return FileResponse(path, media_type="application/pdf",
+                        filename="The Team Effectiveness Workshop Resource Pack.pdf")
+
+@app.get("/assets/field-guide")
+def asset_field_guide():
+    """Static Leadership Field Guide PDF (same file for every leader)."""
+    path = os.path.join(_ASSETS_DIR, "field_guide.pdf")
+    if not os.path.exists(path):
+        raise HTTPException(404, "field guide not found")
+    return FileResponse(path, media_type="application/pdf",
+                        filename="The Leadership Field Guide.pdf")
 
 def _build_participant_dict(name, company, cohort, assessed_date, profile_id,
                              comm_score, dec_score, collab_score,

@@ -22,6 +22,9 @@ COPY api_server.py .
 # Copy HTML profile templates
 COPY templates/ ./templates/
 
+# Static take-home assets (Resource Pack, Leadership Field Guide)
+COPY assets/ ./assets/
+
 
 EXPOSE 8000
 

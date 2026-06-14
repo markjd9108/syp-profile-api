@@ -3,4 +3,7 @@ __pycache__/
 .env
 syp_logo_white_wm.png
 *.pdf
+# but DO ship the static take-home assets served by the API
+!assets/resource_pack.pdf
+!assets/field_guide.pdf
 .DS_Store

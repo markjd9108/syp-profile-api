@@ -75,37 +75,23 @@ WARNING     = colors.HexColor("#D97706")
 WHITE       = colors.white
 
 ARCHETYPE_COLOURS = {
-    # Current archetype names
-    "Relay":         colors.HexColor("#2E75B6"),
-    "Navigator":     colors.HexColor("#00838F"),
-    "Signal":        colors.HexColor("#E65100"),
+    # Current archetype names (the only six in use)
     "Anchor":        colors.HexColor("#B71C1C"),
     "Compass":       colors.HexColor("#6A1B9A"),
+    "Navigator":     colors.HexColor("#00838F"),
+    "Relay":         colors.HexColor("#2E75B6"),
+    "Signal":        colors.HexColor("#E65100"),
     "Summit":        colors.HexColor("#1B5E20"),
-    # Legacy names (backward compat)
-    "Architect":     colors.HexColor("#6A1B9A"),
-    "Operator":      colors.HexColor("#1565C0"),
-    "Ember":         colors.HexColor("#757575"),
-    "Relay":    colors.HexColor("#827717"),
-    "Summit": colors.HexColor("#4A148C"),
-    "Compass":    colors.HexColor("#BF360C"),
 }
 
 ARCHETYPE_SUMMARY = {
-    # Current archetype names
-    "Relay":         "Collaborative · Adaptive · Connector — keeps the team moving together",
-    "Navigator":     "Decisive · Structured · Strategic — charts the course under pressure",
-    "Signal":        "Communicative · Expressive · Inclusive — connects and energises the team",
-    "Anchor":        "Dependable · Clear · Stable — provides reliable grounding",
-    "Compass":       "Analytical · Systematic · Strategic — builds robust frameworks",
-    "Summit":        "Visionary · Integrating · Elevating — lifts the team to new levels",
-    # Legacy names (backward compat)
-    "Operator":      "Structured · Decisive · Coordinated — drives consistent execution",
-    "Architect":     "Strategic · Analytical · Systematic — builds robust frameworks",
-    "Ember":         "Developing · Potential · Emerging — growing toward full contribution",
-    "Relay":    "Versatile · Balanced · Adaptive — draws on multiple strengths",
-    "Summit": "Multi-dimensional · Complex · Integrated — operates across all dimensions",
-    "Compass":    "Emerging · Growing · Potential — building toward full contribution",
+    # Current archetype names (the only six in use)
+    "Anchor":        "Steady and clear. Holds the team together when pressure rises.",
+    "Compass":       "Analytical and methodical. Works through options before committing.",
+    "Navigator":     "Decisive under pressure. Keeps direction clear when the path is not.",
+    "Relay":         "Versatile and connective. Adapts across roles and keeps work moving.",
+    "Signal":        "Communicative and inclusive. Surfaces ideas and keeps people informed.",
+    "Summit":        "Strong across all three dimensions. Performs consistently under load.",
 }
 
 DIMENSION_DESCRIPTIONS = {
@@ -367,32 +353,32 @@ def _overview_text(stats):
     oa = stats["overall_avg"]
     n  = stats["n"]
     if oa >= 75:
-        tone = "strong overall performance"
+        tone = "scored strongly overall"
     elif oa >= 60:
-        tone = "solid overall performance with targeted areas to develop"
+        tone = "scored above the threshold overall, with specific areas to develop"
     else:
-        tone = "a clear opportunity to invest in team-level capability building"
+        tone = "scored below the threshold overall, which points to team-level work to do"
 
     parts = [
-        f"Your team of {n} completed the Team Effectiveness Workshop, "
-        f"demonstrating {tone} (team average: {oa}/100)."
+        f"Your team of {n} completed the Team Effectiveness Workshop and {tone} "
+        f"(team average: {oa}/100)."
     ]
     if stats["strengths"]:
-        parts.append(f"Collective strengths were observed in: {', '.join(stats['strengths'])}.")
+        parts.append(f"The team scored above the threshold in: {', '.join(stats['strengths'])}.")
     if stats["dev_areas"]:
-        parts.append(f"Priority development areas are: {', '.join(stats['dev_areas'])}.")
+        parts.append(f"The team scored below the threshold in: {', '.join(stats['dev_areas'])}.")
 
     n_archetypes = len(stats["archetype_counts"])
     if n_archetypes >= 4:
         parts.append(
-            "The team displays rich archetype diversity, combining complementary strengths "
-            "that — when well-coordinated — can cover the full range of team effectiveness."
+            "The team covers four or more archetypes. That range gives you different working "
+            "styles to draw on, provided you coordinate them deliberately."
         )
     elif n_archetypes <= 2:
         top = stats["archetype_counts"].most_common(1)[0][0]
         parts.append(
-            f"The team skews toward {top}-type profiles, creating a cohesive working style "
-            f"that may benefit from deliberately seeking out diverse perspectives."
+            f"Most of the team sits in the {top} archetype. The working style is consistent, "
+            f"so it is worth seeking out perspectives the group does not naturally produce."
         )
     return " ".join(parts)
 
@@ -400,17 +386,17 @@ def _overview_text(stats):
 def _dim_insight(dim_name, avg, high_n, low_n, n):
     pct = high_n / n * 100 if n else 0
     if avg >= 75:
-        verdict = (f"a clear team strength — {high_n} of {n} scored High "
+        verdict = (f"a team strength. {high_n} of {n} scored High "
                    f"({pct:.0f}%)")
     elif avg >= 60:
-        verdict = (f"above the performance threshold — {high_n} High vs "
-                   f"{low_n} Low, with room to lift the lower-scoring members")
+        verdict = (f"above the threshold. {high_n} scored High and {low_n} scored Low, "
+                   f"so there is room to bring the lower scores up")
     elif avg >= 45:
-        verdict = (f"a development priority — only {high_n} of {n} reached "
-                   f"the High threshold. Targeted coaching would move the needle quickly")
+        verdict = (f"a development priority. Only {high_n} of {n} reached the High "
+                   f"threshold. Targeted coaching here would show results quickly")
     else:
-        verdict = (f"an urgent capability gap — {low_n} of {n} scored below "
-                   f"threshold. Structured intervention is recommended")
+        verdict = (f"a capability gap. {low_n} of {n} scored below the threshold. "
+                   f"A structured intervention is recommended")
     return f"<b>{dim_name}</b> (avg {avg}/100) is {verdict}."
 
 
@@ -420,51 +406,52 @@ def _recommendations(stats):
     # Dimension-driven
     if "Communication" in stats["dev_areas"]:
         recs.append(
-            "Introduce structured communication rituals — daily stand-ups, async written "
-            "updates, or a weekly team letter — to build active listening and message clarity across the group."
+            "Set up regular communication routines: daily stand-ups, written async updates, "
+            "or a weekly team note. The aim is to make active listening and clear messaging a habit "
+            "rather than something that happens only when there is time for it."
         )
     if "Decision Making" in stats["dev_areas"]:
         recs.append(
-            "Run monthly decision-making simulations or scenario reviews where team members "
-            "practise structured problem-solving under time pressure. Debrief each session as a team."
+            "Run the exercises again as monthly scenario reviews, where the team works through a "
+            "structured problem under time pressure. Debrief each session together and name what "
+            "made the decision easier or harder."
         )
     if "Collaboration" in stats["dev_areas"]:
         recs.append(
-            "Assign cross-functional projects or deliberate pair-work rotations to build "
-            "collaborative norms and expand each person's working-style flexibility."
+            "Assign cross-functional projects or rotate pair-work deliberately. This builds shared "
+            "working norms and widens each person's range of working styles."
         )
 
     # Archetype-driven
-    ember_n = stats["archetype_counts"].get("Ember", 0)
-    if ember_n > 0:
+    anchor_n = stats["archetype_counts"].get("Anchor", 0)
+    if anchor_n > 0:
         recs.append(
-            f"Your {ember_n} Ember-profile participant(s) are in a development stage. "
-            "Assign a mentor from the team, define clear short-term stretch goals, "
-            "and provide frequent feedback checkpoints to accelerate their growth trajectory."
+            f"You have {anchor_n} Anchor profile(s). These people steady the team and keep it "
+            "together under pressure. Give them defined responsibility for group cohesion, and make "
+            "sure that work is recognised, because it is easy to overlook."
         )
 
-    structured_n = (stats["archetype_counts"].get("Operator", 0) +
-                    stats["archetype_counts"].get("Architect", 0))
+    structured_n = (stats["archetype_counts"].get("Navigator", 0) +
+                    stats["archetype_counts"].get("Compass", 0))
     if structured_n >= stats["n"] * 0.6:
         recs.append(
-            "The team leans heavily toward structured, systematic profiles. Periodically "
-            "introduce open-ended creative challenges or unstructured exploration time to "
-            "build adaptability and innovative thinking."
+            "The team leans toward structured, methodical profiles. Schedule some open-ended or "
+            "unstructured work so the group practises adapting when the path is not laid out for it."
         )
 
     communicative_n = (stats["archetype_counts"].get("Signal", 0) +
-                       stats["archetype_counts"].get("Navigator", 0))
+                       stats["archetype_counts"].get("Relay", 0))
     if communicative_n >= stats["n"] * 0.6:
         recs.append(
-            "Strong communicators and adaptors dominate the team. Channel this energy into "
-            "formal knowledge-sharing programmes, mentoring of junior staff, or cross-team liaison roles."
+            "The team is weighted toward communicators and adaptors. Direct that into knowledge-sharing, "
+            "mentoring of junior staff, or cross-team liaison roles, where the strength is most useful."
         )
 
     # Universal closer
     recs.append(
-        "Host a 30-minute team debrief using the individual profile PDFs as conversation "
-        "starters. Structured peer dialogue about working styles is one of the highest-ROI "
-        "investments a manager can make in psychological safety and team cohesion."
+        "Hold a 30-minute team debrief using the individual profile PDFs as the starting point. "
+        "Structured conversation about working styles is a low-cost, high-value use of a manager's "
+        "time, and it supports both psychological safety and team cohesion."
     )
 
     return recs[:5]
@@ -624,7 +611,7 @@ def _section_dimensions(stats, st):
                 if stats["strengths"] else "No dimensions currently above threshold."))
     d_lines = ("<b>△ Development Areas</b><br/>" +
                ("<br/>".join(f"• {x}" for x in stats["dev_areas"])
-                if stats["dev_areas"] else "All dimensions above threshold — great result!"))
+                if stats["dev_areas"] else "All three dimensions are above the threshold."))
 
     callout = Table(
         [[Paragraph(s_lines, ParagraphStyle("s", fontName="Helvetica", fontSize=9,
@@ -714,8 +701,8 @@ def _section_recommendations(stats, st):
     story.append(HRFlowable(width=BODY_W, thickness=1,
                              color=LIGHT_BLUE, spaceAfter=3 * mm))
     story.append(Paragraph(
-        "These recommendations are drawn from your team's dimension profile and archetype distribution. "
-        "They are prioritised by likely impact given the team's specific results.",
+        "These recommendations are based on your team's dimension scores and archetype distribution. "
+        "They are ordered by likely impact given the team's results.",
         st["caption"]))
     story.append(Spacer(1, 2 * mm))
 
@@ -749,8 +736,8 @@ def _section_recommendations(stats, st):
     story.append(Spacer(1, 4 * mm))
     story.append(Paragraph(
         "Individual profile PDFs have been sent directly to each participant. "
-        "You also have access to the team data sheet shared separately, which "
-        "contains all scores in a searchable format. "
+        "You also have the team data sheet, shared separately, which contains all scores "
+        "in a searchable format. "
         "For questions about the Team Effectiveness Workshop, contact your SYP facilitator.",
         ParagraphStyle("closing", fontName="Helvetica", fontSize=8,
                        textColor=MID_GREY, leading=12)
@@ -894,25 +881,25 @@ SAMPLE_DATA = {
             "name": "Ben Tran",       "role": "Builder",
             "c_score": 65, "d_score": 71, "co_score": 68,
             "c_level": "High", "d_level": "High", "co_level": "High",
-            "archetype": "Operator"
+            "archetype": "Navigator"
         },
         {
             "name": "Chi Pham",       "role": "Observer",
             "c_score": 55, "d_score": 80, "co_score": 45,
             "c_level": "Low",  "d_level": "High", "co_level": "Low",
-            "archetype": "Architect"
+            "archetype": "Compass"
         },
         {
             "name": "Duc Le",         "role": "Guide",
             "c_score": 45, "d_score": 38, "co_score": 40,
             "c_level": "Low",  "d_level": "Low",  "co_level": "Low",
-            "archetype": "Ember"
+            "archetype": "Anchor"
         },
         {
             "name": "Emma Hoang",     "role": "Builder",
             "c_score": 72, "d_score": 66, "co_score": 74,
             "c_level": "High", "d_level": "High", "co_level": "High",
-            "archetype": "Operator"
+            "archetype": "Navigator"
         },
         {
             "name": "Feng Liu",       "role": "Observer",

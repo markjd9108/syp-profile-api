@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-TEW Profile API Server v2.1.0
+TEW Profile API Server v2.3.0
 Endpoints:
   GET  /                       — health check
   POST /generate               — individual participant PDF (HTML → Playwright)
   POST /generate-cohort        — batch generate all participants in a cohort
   POST /generate-manager-report — team manager diagnostic report PDF
+  POST /generate-leader-report  — dynamic Leadership Insight Report PDF (multi-page Letter)
 """
 
 import os, asyncio, base64, datetime, random, string
@@ -16,6 +17,9 @@ from typing import Optional, List, Dict
 
 from generate_html_profile import inject_participant_data, ARCHETYPE_FILES
 from generate_manager_report import generate_manager_report_pdf
+import generate_leader_report
+import team_lead_engine
+import working_style as working_style_mod
 
 # ── Playwright PDF renderer ───────────────────────────────────────────────────
 async def render_pdf(html: str) -> bytes:
@@ -68,6 +72,45 @@ async def render_pdf(html: str) -> bytes:
 def generate_pdf_sync(html: str) -> bytes:
     return asyncio.run(render_pdf(html))
 
+# ── Multi-page PDF renderer (Leadership Insight Report) ───────────────────────
+# Unlike render_pdf (single tall page for individual profiles), this honours the
+# design's @page Letter size + break-after:page so the 12-section report paginates
+# correctly. Fonts are inlined as data: URIs, so no external fetch is required.
+async def render_pdf_paged(html: str) -> bytes:
+    from playwright.async_api import async_playwright
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+        await page.set_content(html, wait_until="networkidle", timeout=60000)
+        # Block any new requests so a stray external reference cannot hang page.pdf()
+        await page.route("**", lambda route: route.abort())
+        # Kill entrance animations so every element is fully painted before capture
+        await page.add_style_tag(content="""
+            *, *::before, *::after {
+                animation-duration: 0s !important;
+                animation-delay: 0s !important;
+                transition-duration: 0s !important;
+                transition-delay: 0s !important;
+            }
+            .rise, .rise-1, .rise-2, .rise-3, .rise-4, .rise-5 {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        """)
+        await page.wait_for_timeout(1500)
+        # prefer_css_page_size honours the design's @page Letter rule; do NOT
+        # emulate screen media and do NOT compute a single tall page.
+        pdf_bytes = await page.pdf(
+            prefer_css_page_size=True,
+            print_background=True,
+            margin={"top": "0", "bottom": "0", "left": "0", "right": "0"},
+        )
+        await browser.close()
+    return pdf_bytes
+
+def generate_pdf_paged_sync(html: str) -> bytes:
+    return asyncio.run(render_pdf_paged(html))
+
 # ── Archetype normalisation ────────────────────────────────────────────────────
 ARCHETYPE_ALIASES = {
     "operator": "navigator", "architect": "relay", "connector": "anchor",
@@ -82,10 +125,25 @@ def resolve_archetype(raw: str) -> str:
         raise HTTPException(400, f"Unknown archetype '{raw}'. Valid: {list(ARCHETYPE_FILES)}")
     return ARCHETYPE_ALIASES[key]
 
-def make_profile_id(archetype: str) -> str:
-    now = datetime.datetime.now()
+def _norm_cohort(cohort: str) -> str:
+    """Normalise a cohort/workshop code to the sheet's canonical form (UPPER, no spaces)."""
+    return (cohort or "").strip().upper().replace(" ", "")
+
+def make_profile_id(archetype: str, cohort: str = "", seq: Optional[int] = None) -> str:
+    """Fallback Profile ID in the canonical TPL-<COHORT>-NN scheme.
+
+    The AUTHORITATIVE id is the Google Sheet column-V value (ARRAYFORMULA,
+    sequential per cohort) and is passed in as `profile_id`; this is only used
+    when none is supplied, and now mirrors that scheme so every code path agrees:
+      - cohort + sequence  -> TPL-<COHORT>-<NN>   (matches the sheet exactly)
+      - cohort, no sequence -> TPL-<COHORT>-U<NNN> (U = unsequenced fallback)
+      - no cohort at all    -> TPL-NOCODE-U<NNN>   (unroutable; caller flags it)
+    """
+    code = _norm_cohort(cohort) or "NOCODE"
+    if seq is not None:
+        return f"TPL-{code}-{seq:02d}"
     suffix = ''.join(random.choices(string.digits, k=3))
-    return f"TPL-{now.strftime('%y%m')}-{archetype[0].upper()}-{suffix}"
+    return f"TPL-{code}-U{suffix}"
 
 # ── Models ─────────────────────────────────────────────────────────────────────
 class ProfileRequest(BaseModel):
@@ -112,6 +170,7 @@ class ProfileRequest(BaseModel):
 
 class CohortParticipant(BaseModel):
     name: str; email: str; archetype: str; company: str = ""; cohort: str = ""
+    profile_id: Optional[str] = None   # authoritative sheet col-V id, if available
     comm_score: int = Field(..., ge=0, le=100)
     decision_score: int = Field(..., ge=0, le=100)
     collab_score: int = Field(..., ge=0, le=100)
@@ -136,6 +195,32 @@ class ManagerReportRequest(BaseModel):
     participants: List[ManagerParticipant]
     response_format: Optional[str] = Field("binary")
 
+
+class LeaderReportParticipant(BaseModel):
+    name: str
+    archetype: str
+    c_score: int = Field(..., ge=0, le=100, description="Communication")
+    d_score: int = Field(..., ge=0, le=100, description="Decision Making")
+    co_score: int = Field(..., ge=0, le=100, description="Collaboration")
+    focus: Optional[str] = Field(None, description="Stretch|Check-In (derived if omitted)")
+    # Provide EITHER an already-computed working_style dict, OR raw ws_answers (ws_q1..ws_q9)
+    working_style: Optional[Dict[str, Dict[str, str]]] = Field(
+        None, description="Per-dimension {name, description} keyed Communication/Decision Making/Collaboration")
+    ws_answers: Optional[Dict[str, str]] = Field(
+        None, description="Raw Working Style answers ws_q1..ws_q9 (A-D or option text); resolved server-side")
+
+class LeaderReportRequest(BaseModel):
+    company: str
+    cohort_code: str = ""
+    workshop_date: str = ""
+    leader_name: str = ""
+    benchmarks: Optional[Dict[str, int]] = Field(
+        default_factory=lambda: {"Communication": 62, "Decision Making": 58, "Collaboration": 64})
+    participants: List[LeaderReportParticipant]
+    narrative: Optional[Dict] = Field(
+        None, description="Optional pre-built narrative; if absent it is generated by team_lead_engine")
+    response_format: Optional[str] = Field("binary")
+
 class ScoreEntry(BaseModel):
     comm:     float = Field(..., ge=0, le=100)
     decision: float = Field(..., ge=0, le=100)
@@ -145,11 +230,14 @@ class ComputeAveragesRequest(BaseModel):
     scores: List[ScoreEntry]
 
 # ── App ────────────────────────────────────────────────────────────────────────
-app = FastAPI(title="TEW Profile API", version="2.1.0")
+app = FastAPI(title="TEW Profile API", version="2.3.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.2.0", "archetypes": list(ARCHETYPE_FILES)}
+    return {"status": "ok", "version": "2.3.1",
+            "archetypes": list(ARCHETYPE_FILES),
+            "endpoints": ["/generate", "/generate-cohort", "/generate-manager-report",
+                          "/generate-leader-report", "/compute-averages"]}
 
 _ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
 
@@ -216,7 +304,11 @@ def compute_averages(req: ComputeAveragesRequest):
 @app.post("/generate")
 def generate(req: ProfileRequest):
     arch_key = resolve_archetype(req.archetype)
-    pid = req.profile_id or make_profile_id(arch_key)
+    pid = req.profile_id or make_profile_id(arch_key, req.cohort)
+    if not req.profile_id and not _norm_cohort(req.cohort):
+        # No sheet id AND no cohort code: profile cannot be grouped or routed.
+        print(f"[WARN] /generate: '{req.participant_name}' has no profile_id and no "
+              f"cohort/workshop_code -> minted unroutable id {pid}", flush=True)
     participant = _build_participant_dict(
         req.participant_name, req.company, req.cohort, req.assessed_date, pid,
         req.comm_score, req.decision_score, req.collab_score,
@@ -243,11 +335,15 @@ def generate(req: ProfileRequest):
 @app.post("/generate-cohort")
 def generate_cohort(req: CohortRequest):
     results = []
-    for p in req.participants:
+    unroutable = not _norm_cohort(req.workshop_code)
+    for idx, p in enumerate(req.participants, start=1):
         arch_key = resolve_archetype(p.archetype)
-        pid = make_profile_id(arch_key)
+        cohort_code = p.cohort or req.workshop_code
+        # Prefer the authoritative sheet id; else mint the canonical sequential
+        # TPL-<COHORT>-NN (same scheme as the sheet), NN = position in this batch.
+        pid = p.profile_id or make_profile_id(arch_key, cohort_code, idx)
         participant = _build_participant_dict(
-            p.name, p.company, p.cohort or req.workshop_code, None, pid,
+            p.name, p.company, cohort_code, None, pid,
             p.comm_score, p.decision_score, p.collab_score,
             p.comm_avg, p.decision_avg, p.collab_avg,
             p.comm_hp, p.decision_hp, p.collab_hp,
@@ -261,7 +357,12 @@ def generate_cohort(req: CohortRequest):
                              "pdf_base64": base64.b64encode(pdf_bytes).decode()})
         except Exception as e:
             results.append({"name": p.name, "email": p.email, "status": "error", "error": str(e)})
-    return {"workshop_code": req.workshop_code, "count": len(results), "results": results}
+    out = {"workshop_code": req.workshop_code, "count": len(results), "results": results}
+    if unroutable:
+        out["warning"] = ("missing workshop_code — profiles minted under TPL-NOCODE-* "
+                          "and are not cohort-routable; set a workshop code before delivery")
+        print(f"[WARN] /generate-cohort: blank workshop_code for {len(results)} profiles", flush=True)
+    return out
 
 @app.post("/generate-manager-report")
 def generate_manager_report(req: ManagerReportRequest):
@@ -278,6 +379,71 @@ def generate_manager_report(req: ManagerReportRequest):
         raise HTTPException(500, str(e))
     safe = req.manager_name.replace(" ", "_")
     fname = f"TEW_Leader_Insight_Report_{safe}.pdf"
+    if req.response_format == "base64":
+        return {"filename": fname, "content_type": "application/pdf",
+                "data": base64.b64encode(pdf_bytes).decode()}
+    return Response(content=pdf_bytes, media_type="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="{fname}"'})
+
+
+# ── Leadership Insight Report (dynamic, multi-page) ──────────────────────────────
+# working_style.py emits dimension keys "Communication"/"Decision-Making"/"Collaboration"
+# (note the hyphen) via build_blocks(); the report generator expects "Decision Making".
+_WS_DIM_MAP = {
+    "Communication": "Communication",
+    "Decision-Making": "Decision Making",
+    "Collaboration": "Collaboration",
+}
+
+def _working_style_from_answers(ws_answers: dict) -> dict:
+    """Resolve raw ws_q1..ws_q9 answers into the per-dimension {name, description}
+    structure the leader-report generator consumes."""
+    blocks = working_style_mod.build_blocks(ws_answers)
+    out = {}
+    for b in blocks:
+        dim = _WS_DIM_MAP.get(b["dimension"], b["dimension"])
+        out[dim] = {"name": b["style_name"], "description": b.get("summary", "")}
+    return out
+
+@app.post("/generate-leader-report")
+def generate_leader_report_endpoint(req: LeaderReportRequest):
+    try:
+        participants = []
+        for p in req.participants:
+            ws = p.working_style
+            if not ws and p.ws_answers:
+                ws = _working_style_from_answers(p.ws_answers)
+            entry = {
+                "name": p.name, "archetype": p.archetype,
+                "c_score": p.c_score, "d_score": p.d_score, "co_score": p.co_score,
+            }
+            if p.focus:
+                entry["focus"] = p.focus
+            if ws:
+                entry["working_style"] = ws
+            participants.append(entry)
+
+        data = {
+            "company": req.company,
+            "cohort_code": req.cohort_code,
+            "workshop_date": req.workshop_date,
+            "leader_name": req.leader_name,
+            "benchmarks": req.benchmarks or {},
+            "participants": participants,
+        }
+
+        if req.narrative:
+            data["narrative"] = req.narrative
+        else:
+            data["narrative"] = team_lead_engine.build_team_narrative(data)
+
+        html = generate_leader_report.build_leader_report_html(data)
+        pdf_bytes = generate_pdf_paged_sync(html)
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+    safe = (req.company or "Team").replace(" ", "_")
+    fname = f"TEW_Leadership_Insight_Report_{safe}.pdf"
     if req.response_format == "base64":
         return {"filename": fname, "content_type": "application/pdf",
                 "data": base64.b64encode(pdf_bytes).decode()}

@@ -17,6 +17,9 @@ COPY working_style.py .
 COPY working_style_content.py .
 COPY working_style_html.py .
 COPY generate_manager_report.py .
+# Dynamic Leadership Insight Report (team layer)
+COPY generate_leader_report.py .
+COPY team_lead_engine.py .
 COPY api_server.py .
 
 # Copy HTML profile templates

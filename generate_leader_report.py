@@ -772,6 +772,73 @@ def _fixed_page(label, company, override_html=None) -> str:
     return pg
 
 
+# ── What to Expect Next (Section 9) — dynamic recommendation ──────────────────
+# Canonical focused-session names (one per dimension) + what each session builds.
+# Focused sessions are DEVELOPMENT, not assessment: they do NOT capture data or
+# produce a profile. Data is only captured in a full workshop.
+_FOCUS_SESSIONS = {
+    "Communication":   ("Communicating with Clarity",
+                        "sharpen precision, listening, and adapting the message under pressure"),
+    "Decision Making": ("Deciding with Conviction",
+                        "redistribute decision ownership and break deferral patterns"),
+    "Collaboration":   ("Collaborating Under Pressure",
+                        "build role flexibility, recovery under pressure, and coordination"),
+}
+
+def _replace_p_after(pg: str, start_phrase: str, new_inner: str) -> str:
+    """Replace the inner HTML of the <p> that contains `start_phrase`."""
+    i = pg.find(start_phrase)
+    if i < 0:
+        return pg
+    p_open = pg.rfind("<p", 0, i)
+    if p_open < 0:
+        return pg
+    gt = pg.find(">", p_open) + 1
+    pcl = pg.find("</p>", gt)
+    if pcl < 0:
+        return pg
+    return pg[:gt] + new_inner + pg[pcl:]
+
+def _build_whats_next(stats, company) -> str:
+    """Section 9. Recommend the focused session that matches THIS team's priority
+    dimension (by its correct name), make clear focused sessions do not capture
+    data, frame the annual program as workshop-bookended, and turn the CTA into a
+    real button to the for-business page."""
+    pg = _load_shell()["pages"]["Section 9"]
+    pr = stats.get("priority") or "Decision Making"
+    name, desc = _FOCUS_SESSIONS.get(pr, _FOCUS_SESSIONS["Decision Making"])
+    others = [f"{_FOCUS_SESSIONS[d][0]} ({d})"
+              for d in ("Communication", "Decision Making", "Collaboration") if d != pr]
+    other_named = " and ".join(others) if len(others) == 2 else ", ".join(others)
+
+    focus_inner = (
+        f"A single half-day session aimed at one dimension. For {_esc(company)}, the workshop data "
+        f"points to {pr}, which makes <strong style=\"color:#115A9C;font-weight:700;\">{name}</strong> "
+        f"the prescribed fit: it is built to {desc}. The format mirrors the workshop — pressure and "
+        "play, no lectures — but it is a development session, not an assessment, so it does not capture "
+        f"data or produce a new profile. {other_named} use the same format if a different priority emerges."
+    )
+    annual_inner = (
+        "A year-long program that bookends development with a full workshop at the start and another at "
+        "the end. Those two workshops are where the data is captured; comparing them shows movement "
+        "dimension by dimension and how the archetype mix has shifted. Focused sessions run in between to "
+        "build the priority areas. This path suits leaders who want data, not opinion, on whether the "
+        "team is developing."
+    )
+    pg = _replace_p_after(pg, "An ongoing measure of how the team develops", annual_inner)
+    pg = _replace_p_after(pg, "A single half-day session aimed at one dimension", focus_inner)
+
+    # CTA: plain text link -> styled button pointing at the real page (swap the
+    # opening tag only, so the label + arrow glyph are preserved untouched).
+    pg = pg.replace(
+        '<a href="#" style="font-size:12px;font-weight:700;color:#1E88E5;text-decoration:none;">',
+        '<a href="https://saigonyoungprofessionals.com/for-business/" target="_blank" '
+        'style="display:inline-block;background:#1E88E5;color:#fff;font-size:12px;font-weight:700;'
+        'text-decoration:none;padding:11px 24px;border-radius:8px;letter-spacing:0.02em;">',
+    )
+    return pg
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Pagination guard: split a too-tall table page across continuation pages
 # ──────────────────────────────────────────────────────────────────────────────
@@ -838,7 +905,8 @@ def build_leader_report_html(data: dict) -> str:
         _build_focus(stats, narrative),                          # 8  Who to focus on
         _fixed_page("Section 7", company),                       # 9  Profile guide
         _fixed_page("Section 8", company, narrative.get("page_action_plan")),    # 10 Action plan
-        _fixed_page("Section 9", company, narrative.get("page_whats_next")),     # 11 What's next
+        (_fixed_page("Section 9", company, narrative["page_whats_next"])         # 11 What's next
+         if narrative.get("page_whats_next") else _build_whats_next(stats, company)),
         _build_appendix(benchmarks),                             # 12 Appendix
     ]
 

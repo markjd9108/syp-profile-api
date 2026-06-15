@@ -204,12 +204,12 @@ def _compose_priority(f: dict) -> str:
     p, dims, bm = f["priority"], f["dims"], f["benchmarks"]
     below = f["below"][p]
     lead = f["leader_on"][p]
-    body = f"{p} is the lowest average at {dims[p]}, against a benchmark of {bm.get(p, 0)}."
+    body = f"{p} is the lowest at {dims[p]}, against a benchmark of {bm.get(p, 0)}."
     if f["spread"][p] >= 20 and lead is not None and below:
-        body += (f" The spread is wide: {lead['name']} leads at {_i(_dim_value(lead, p))} while "
-                 f"{_join(m['name'] for m in below)} sit below the line. The average flatters it.")
+        body += (f" Spread is wide: {lead['name']} leads at {_i(_dim_value(lead, p))} while "
+                 f"{_join(m['name'] for m in below)} sit below the line.")
     elif below:
-        body += f" {_join(m['name'] for m in below)} sit below the 60 line here."
+        body += f" {_join(m['name'] for m in below)} sit below 60."
     return body
 
 
@@ -217,10 +217,8 @@ def _compose_what_this_means(f: dict) -> str:
     s2, dims, bm = f["second"], f["dims"], f["benchmarks"]
     gap = dims[s2] - bm.get(s2, 0)
     if gap > 0:
-        return (f"{s2} also sits above benchmark at {dims[s2]}, a second team-level asset. "
-                "Two strong dimensions give the team a base to work from.")
-    return (f"{s2} sits near benchmark at {dims[s2]}. It is steady rather than a standout, "
-            "which keeps the team's read balanced rather than lopsided.")
+        return f"{s2} also sits above benchmark at {dims[s2]}, a second team-level asset."
+    return f"{s2} sits near benchmark at {dims[s2]}, steady rather than a standout."
 
 
 def _compose_team_shape(f: dict) -> str:
@@ -243,34 +241,27 @@ def _compose_structural_risk(f: dict) -> str:
     # A single decision-maker becomes a bottleneck.
     if navs == 1 and n >= 4:
         nav = next((m for m in f["members"] if m["archetype"] == "Navigator"), None)
-        who = f" {nav['name']} carries that load alone." if nav else ""
-        return ("With one Navigator on a team of " + str(n) + ", decision ownership concentrates "
-                "in a single person.{who} A risk worth watching is the bottleneck that forms when "
-                "that person is absent or stretched. One option is to name a second decision owner "
-                "before the dependency sets.").replace("{who}", who)
+        who = f" {nav['name']} holds it alone." if nav else ""
+        return (f"With one Navigator on a team of {n}, decision ownership sits with one person.{who} "
+                "The risk is a bottleneck if that person is absent. One option is to name a second owner.")
 
     # A Relay-heavy base funnels decisions to the few decisive members.
     if dom == "Relay" and counts.get("Relay", 0) >= max(3, n // 2) and decisive <= 2:
-        decisive_names = [m["name"] for m in f["members"]
-                          if m["archetype"] in ("Navigator", "Summit")]
-        tail = (f" Decisions can funnel to {_join(decisive_names)}." if decisive_names else "")
-        return ("A Relay-heavy base executes well on a clear brief, but it leans on a few members "
-                "to set direction." + tail + " A risk worth watching is decisions stacking on "
-                "those few. One option is to widen who is expected to make the call.")
+        names = [m["name"] for m in f["members"] if m["archetype"] in ("Navigator", "Summit")]
+        tail = f" toward {_join(names)}" if names else ""
+        return ("A Relay-heavy base executes well but leans on a few to set direction. "
+                f"The risk is decisions stacking{tail}. One option is to widen who makes the call.")
 
     # Decision Making is the weak dimension across the board.
     if f["priority"] == "Decision Making" and len(f["below"]["Decision Making"]) >= max(2, n // 2):
         names = [m["name"] for m in f["below"]["Decision Making"]]
-        return ("Decision Making is the thinnest dimension across the team, with "
-                f"{_join(names)} below the line. A risk worth watching is hesitation under time "
-                "pressure. Some teams in this position rehearse the call in the exercises before "
-                "it counts.")
+        return (f"Decision Making is the thinnest dimension, with {_join(names)} below the line. "
+                "The risk is hesitation under time pressure.")
 
-    # No clear single risk: name the mix and the dimension to watch.
+    # No clear single risk: name the dimension to watch.
     p = f["priority"]
-    return (f"No single structural fault dominates. The pattern to watch is {p} at {f['dims'][p]}: "
-            "a dimension that holds in calm conditions can thin out under pressure. One option is "
-            "to track it in the next round rather than assume it holds.")
+    return (f"No single fault dominates. Watch {p} at {f['dims'][p]}: it can thin out under pressure. "
+            "One option is to track it next round.")
 
 
 def _compose_working_style_summary(f: dict) -> str:
@@ -308,13 +299,11 @@ def _compose_focus(f: dict) -> dict:
             low_val = _i(_dim_value(m, low_dim))
             opener = (f"{low_dim} ({low_val}) was the constraint. "
                       '<span style="color:#0D2A66;font-style:italic;">An opener: '
-                      f'&ldquo;When the moment came on {low_dim.lower()}, what was your read, and '
-                      'what would have made you move sooner?&rdquo;</span>')
+                      f'&ldquo;On {low_dim.lower()}, what would have helped you move sooner?&rdquo;</span>')
         else:
-            opener = (f"A consistent performer at an average of {_i(m['avg'])}. "
+            opener = (f"Steady at an average of {_i(m['avg'])}. "
                       '<span style="color:#0D2A66;font-style:italic;">An opener: '
-                      "&ldquo;Where is a situation coming up where you would normally wait, but "
-                      'could lead?&rdquo;</span>')
+                      '&ldquo;Where could you lead a call you would normally wait on?&rdquo;</span>')
         out[m["name"]] = opener
     return out
 
@@ -351,6 +340,25 @@ _CONTRACTIONS = ("don't", "doesn't", "isn't", "aren't", "wasn't", "weren't",
 _REQUIRED_KEYS = ("headline", "strength", "priority", "what_this_means",
                   "team_shape", "structural_risk", "working_style_summary", "focus")
 
+# Hard word caps per field (mirror the prompt). Validation rejects output that runs
+# long so a rambling LLM response falls back to the concise composer rather than
+# overflowing the fixed-height report page.
+_WORD_CAPS = {
+    "headline": 22, "strength": 28, "priority": 34, "what_this_means": 24,
+    "team_shape": 26, "structural_risk": 40, "working_style_summary": 28,
+    "focus": 30,
+}
+_CAP_TOLERANCE = 1.3  # allow a little slack before rejecting
+
+def _word_count(text: str) -> int:
+    # strip HTML tags/entities so the cap reflects visible words, not markup
+    plain = re.sub(r"<[^>]+>", " ", str(text))
+    plain = re.sub(r"&[a-zA-Z]+;", " ", plain)
+    return len(plain.split())
+
+def _too_long(text: str, cap: int) -> bool:
+    return _word_count(text) > cap * _CAP_TOLERANCE
+
 _PROMPT = """You write the cohort-level narrative for The Performance Lens \
 "Leadership Insight Report", the team layer of a team-effectiveness assessment. \
 The reader is the team's leader.
@@ -367,26 +375,29 @@ game-changing, revolutionary, soft skills, superpower, elevate. Never write \
 "simulation" or "simulations"; call them "the exercises".
 - No exclamation marks. Do not invent any data that is not in the cohort facts below.
 
-WRITE these fields, each a short HTML-safe string (one to three sentences), using \
-the real numbers and names from the data:
-- headline: one diagnostic line. The team average, its strongest dimension, and \
-the dimension to watch.
-- strength: the strongest dimension, its score versus benchmark, and who leads it.
-- priority: the lowest dimension, its score versus benchmark, who sits below the \
-60 line, and whether the average hides a wide spread.
-- what_this_means: what the second dimension adds (its score versus benchmark).
-- team_shape: member count, average, and the archetype mix in plain words.
-- structural_risk: the one structural pattern in the mix (for example a \
+BREVITY (strict): This is a one-glance report. Be terse. Cut every word that does \
+not carry information. The word limits below are HARD MAXIMUMS, not targets — \
+shorter is better. Prefer one tight sentence over two loose ones. Do not restate \
+the data twice or explain what a score "means" in general terms.
+
+WRITE these fields, each a short HTML-safe string, using the real numbers and \
+names. Stay within the word cap on each:
+- headline: ONE sentence, max 22 words. Team average, strongest dimension, \
+dimension to watch.
+- strength: max 28 words. Strongest dimension, score vs benchmark, who leads it.
+- priority: max 34 words. Lowest dimension, score vs benchmark, who sits below \
+the 60 line, and whether the average hides a wide spread.
+- what_this_means: ONE sentence, max 24 words. What the second dimension adds.
+- team_shape: max 26 words. Member count, average, archetype mix in plain words.
+- structural_risk: max 40 words. The one structural pattern in the mix (e.g. a \
 Relay-heavy base funnelling decisions to a few, or a single Navigator becoming a \
-bottleneck). Name it, name the risk, offer one option. Do NOT prefix this value \
-with "The structural risk:"; the report adds that label itself. Write only the \
-sentence(s).
-- working_style_summary: how this team works, drawn only from the working-style \
-data given.
-- focus: an OBJECT keyed by participant name (use exactly the names listed), each \
-value a one-to-two sentence focus opener for that person. For a member below \
-threshold, name the constraining dimension and its score, then a question the \
-leader could ask. You may include a short italic opener span in the HTML.
+bottleneck): name it, name the risk, offer one option. Do NOT prefix with "The \
+structural risk:"; the report adds that label. Write only the sentence(s).
+- working_style_summary: max 28 words, drawn only from the working-style data given.
+- focus: an OBJECT keyed by participant name (use exactly the names listed). Each \
+value max 30 words: for a member below threshold name the constraining dimension \
+and its score, then one short question the leader could ask (you may wrap the \
+question in a short italic span). For a steady performer, one line plus a question.
 
 Cohort facts (do not contradict or exceed these):
 {data}
@@ -463,6 +474,8 @@ def _validate(narrative, member_names) -> bool:
               "team_shape", "structural_risk", "working_style_summary"):
         if _violates_voice(narrative.get(k, "")):
             return False
+        if _too_long(narrative.get(k, ""), _WORD_CAPS[k]):
+            return False
     focus = narrative.get("focus")
     if not isinstance(focus, dict) or not focus:
         return False
@@ -471,6 +484,8 @@ def _validate(narrative, member_names) -> bool:
         if not isinstance(v, str) or not v.strip():
             return False
         if _violates_voice(v):
+            return False
+        if _too_long(v, _WORD_CAPS["focus"]):
             return False
     return True
 

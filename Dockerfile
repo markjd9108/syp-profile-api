@@ -11,6 +11,8 @@ RUN playwright install chromium
 
 # Copy application files
 COPY generate_html_profile.py .
+# Redesigned hosted-HTML profile generator
+COPY inject_v2.py .
 COPY lead_engine.py .
 # Working Style (V3) layer modules
 COPY working_style.py .
@@ -24,6 +26,8 @@ COPY api_server.py .
 
 # Copy HTML profile templates
 COPY templates/ ./templates/
+# Redesigned self-contained HTML templates (hosted profiles)
+COPY templates_v2/ ./templates_v2/
 
 # Static take-home assets (Resource Pack, Leadership Field Guide)
 COPY assets/ ./assets/

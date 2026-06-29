@@ -9,13 +9,27 @@ Endpoints:
   POST /generate-leader-report  — dynamic Leadership Insight Report PDF (multi-page Letter)
 """
 
-import os, asyncio, base64, datetime, random, string
+import os, asyncio, base64, datetime, random, string, secrets, json, re
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import Response, FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 
 from generate_html_profile import inject_participant_data, ARCHETYPE_FILES
+import inject_v2
+
+# ── Hosted-profile store ──────────────────────────────────────────────────────
+# Self-contained redesigned HTML profiles served at /p/<slug>. Mount a Railway
+# Volume at PROFILE_STORE_DIR so links survive restarts/redeploys.
+PROFILE_STORE_DIR = os.environ.get("PROFILE_STORE_DIR", "/data/profiles")
+PUBLIC_BASE_URL = os.environ.get(
+    "PUBLIC_BASE_URL", "https://syp-profile-api-production.up.railway.app").rstrip("/")
+try:
+    os.makedirs(PROFILE_STORE_DIR, exist_ok=True)
+except Exception:
+    PROFILE_STORE_DIR = os.path.join(os.path.dirname(__file__), "profile_store")
+    os.makedirs(PROFILE_STORE_DIR, exist_ok=True)
+
 from generate_manager_report import generate_manager_report_pdf
 import generate_leader_report
 import team_lead_engine
@@ -331,6 +345,62 @@ def generate(req: ProfileRequest):
                 "data": base64.b64encode(pdf_bytes).decode()}
     return Response(content=pdf_bytes, media_type="application/pdf",
                     headers={"Content-Disposition": f'attachment; filename="{fname}"'})
+
+
+# ── Hosted redesigned HTML profile (View my profile link) ─────────────────────
+def _new_slug():
+    return secrets.token_hex(11)  # 22 hex chars, unguessable
+
+@app.post("/generate-hosted")
+def generate_hosted(req: ProfileRequest):
+    """Generate the REDESIGNED self-contained HTML profile, store it under an
+    unguessable slug, and return its public URL for the 'View my profile' button."""
+    arch_key = resolve_archetype(req.archetype)
+    pid = req.profile_id or make_profile_id(arch_key, req.cohort)
+    data = {
+        "name": req.participant_name, "company": req.company, "cohort": req.cohort,
+        "assessed_date": req.assessed_date, "profile_id": pid,
+        "comm_score": req.comm_score, "dec_score": req.decision_score,
+        "collab_score": req.collab_score, "working_style": req.working_style or {},
+    }
+    try:
+        html = inject_v2.inject(arch_key, data)
+    except Exception as e:
+        raise HTTPException(500, f"inject_v2 failed: {e}")
+
+    # stable slug per profile_id so re-runs overwrite instead of duplicating
+    slug = None
+    idx_path = os.path.join(PROFILE_STORE_DIR, "_index.json")
+    index = {}
+    if os.path.exists(idx_path):
+        try: index = json.load(open(idx_path, encoding="utf-8"))
+        except Exception: index = {}
+    if pid and pid in index:
+        slug = index[pid]
+    if not slug:
+        slug = _new_slug()
+        if pid:
+            index[pid] = slug
+            try: json.dump(index, open(idx_path, "w", encoding="utf-8"))
+            except Exception: pass
+    with open(os.path.join(PROFILE_STORE_DIR, slug + ".html"), "w", encoding="utf-8") as f:
+        f.write(html)
+    return {"slug": slug, "url": f"{PUBLIC_BASE_URL}/p/{slug}", "profile_id": pid}
+
+@app.get("/p/{slug}")
+def view_profile(slug: str):
+    """Serve a hosted profile. Private by obscurity; never indexed."""
+    if not re.fullmatch(r"[0-9a-f]{8,64}", slug or ""):
+        raise HTTPException(404, "Not found")
+    path = os.path.join(PROFILE_STORE_DIR, slug + ".html")
+    if not os.path.exists(path):
+        raise HTTPException(404, "Profile not found")
+    html = open(path, encoding="utf-8").read()
+    return HTMLResponse(content=html, headers={
+        "X-Robots-Tag": "noindex, nofollow, noarchive",
+        "Referrer-Policy": "no-referrer",
+        "Cache-Control": "private, no-store",
+    })
 
 @app.post("/generate-cohort")
 def generate_cohort(req: CohortRequest):

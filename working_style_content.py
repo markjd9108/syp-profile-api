@@ -62,7 +62,7 @@ WORKING_STYLE_CONTENT = {
     },
     'Direct & To-the-Point': {
         "dimension": 'Communication',
-        "summary": 'You get to the point and you appreciate the same in return. You prefer to name a hard thing plainly rather than talk around it, and you keep conversations moving toward a resolution.',
+        "summary": 'You get to the point and you appreciate the same in return. You name a hard thing plainly and keep the conversation moving toward a resolution.',
         "bullets": [
             'Lead with the headline and the ask',
             'Keep updates short and skip the long preamble',
@@ -248,7 +248,7 @@ COMPLEMENTS = {
         "reason": "You ask many questions to understand. They like a clear structure and finishing things. Together, your questions turn into a clear plan the team can follow."},
     # Decision-Making
     "Measured & Analytical":   {"style": "Decisive & Committed",
-        "reason": "You like to study the options first. They are ready to decide and act. Together, your careful thinking leads to action, not more thinking."},
+        "reason": "You like to study the options first. They are ready to decide and act. Together, your careful thinking turns into action the team can run with."},
     "Decisive & Committed":    {"style": "Measured & Analytical",
         "reason": "You decide quickly and move. They look closely at the details and the risks. Together, you stay fast but also careful."},
     "Consultative & Inclusive":{"style": "Decisive & Committed",
@@ -259,7 +259,7 @@ COMPLEMENTS = {
     "Self-Directed & Focused": {"style": "Close & Collaborative",
         "reason": "You like to own your work and focus. They like to work closely and keep people connected. Together, your focused work stays linked to the team."},
     "Close & Collaborative":   {"style": "Self-Directed & Focused",
-        "reason": "You like to work closely with others. They bring their own drive and take clear ownership. Together, your teamwork leads to real results, not just talk."},
+        "reason": "You like to work closely with others. They bring their own drive and take clear ownership. Together, your teamwork turns into real results the team can see."},
     "Flexible & Versatile":    {"style": "Candid & Open",
         "reason": "You adjust to what the team needs. They say the important things out loud. Together, you stay flexible and still deal with the real problems."},
     "Candid & Open":           {"style": "Flexible & Versatile",

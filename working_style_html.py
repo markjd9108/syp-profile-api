@@ -196,23 +196,15 @@ def _donut(segs):
 
 
 def _mix(block):
-    """Compact donut showing the primary / shade / thread proportions + labels + supporting text."""
+    """Compact donut showing the MAIN working style only (single, settled preference)."""
     r = block["resolved"]
-    if r["pattern"] == "Pure":
-        segs = [("Mainly", r["primary"], 1.0)]
-    elif r["pattern"] == "Blend":
-        segs = [("Mainly", r["primary"], 0.66), ("A shade of", r["secondary"], 0.34)]
-    else:
-        segs = [("Mainly", r["primary"], 0.50), ("A shade of", r["secondary"], 0.30),
-                ("A thread of", r["third"], 0.20)]
+    segs = [("Mainly", r["primary"], 1.0)]
     donut = _donut(segs)
-    legend = "".join(
-        f'<div class="ws-leg"><span class="ws-dot" style="background:{DONUT_COLORS[min(i,2)]}"></span>'
-        f'<span><small>{_esc(kind)}</small>{_esc(name)}</span></div>'
-        for i, (kind, name, _f) in enumerate(segs))
-    notes = "".join(f'<div class="ws-mixnote">{_esc(line)}</div>' for line in block["closer_lines"])
+    legend = (
+        f'<div class="ws-leg"><span class="ws-dot" style="background:{DONUT_COLORS[0]}"></span>'
+        f'<span><small>Mainly</small>{_esc(r["primary"])}</span></div>')
     return ('<div class="ws-mix"><div class="ws-donutwrap">' + donut +
-            '<div class="ws-legend">' + legend + '</div></div>' + notes + '</div>')
+            '<div class="ws-legend">' + legend + '</div></div></div>')
 
 
 def render_working_style_section(blocks):

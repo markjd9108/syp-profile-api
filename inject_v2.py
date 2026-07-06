@@ -12,7 +12,7 @@ import html as _html
 import working_style as ws_mod
 import dimension_content as dc
 import narrative_v2 as nv
-from working_style_html import render_working_style_section
+from working_style_html import render_working_style_section, STYLE_ICONS
 
 _DIR = os.path.join(os.path.dirname(__file__), "templates_v2")
 
@@ -175,6 +175,45 @@ def _set_working_style(t, answers):
     return t[:style_start] + rendered + t[sec_end:]
 
 
+def _set_tldr_lead(t, scores):
+    """Replace the baked 'Snapshot of the day' summary paragraph."""
+    lead = '<p class="tldr-lead">' + _esc(nv.render_tldr_lead(scores)) + '</p>'
+    return re.sub(r'<p class="tldr-lead">.*?</p>', lambda _m: lead, t, count=1, flags=re.S)
+
+
+def _set_tldr_heads(t, scores):
+    """Replace the two TL;DR strength/growth headlines with dynamic ones."""
+    hs = list(nv.heads(scores))
+    box = {"i": 0}
+    def repl(_m):
+        v = _esc(hs[box["i"]]) if box["i"] < len(hs) else _m.group(1)
+        box["i"] += 1
+        return '<div class="tldr-headline">' + v + '</div>'
+    return re.sub(r'<div class="tldr-headline">(.*?)</div>', repl, t, count=2, flags=re.S)
+
+
+def _set_tldr_ws(t, answers):
+    """Replace the 3 mini working-style chips in the TL;DR with the real styles."""
+    if not answers:
+        return t
+    try:
+        blocks = ws_mod.build_blocks(answers)
+    except Exception:
+        return t
+    bydim = {b["dimension"]: b["style_name"] for b in blocks}
+    cells = []
+    for dim in ("Communication", "Decision-Making", "Collaboration"):
+        style = bydim.get(dim, "")
+        icon = STYLE_ICONS.get(style, "")
+        cells.append(
+            '<a class="tldr-ws-cell" href="#sec-style"><span class="tldr-ws-icon">'
+            + icon + '</span><span class="tldr-ws-text"><span class="tldr-ws-dimlab">'
+            + dim + '</span><span class="tldr-ws-style">' + _html.escape(style, quote=False)
+            + '</span></span></a>')
+    grid = '<div class="tldr-ws-grid">' + ''.join(cells) + '</div>'
+    return re.sub(r'<div class="tldr-ws-grid">.*?</div>', lambda _m: grid, t, count=1, flags=re.S)
+
+
 def _replace_section(t, anchor, new_html):
     """Replace the whole <section ...>...</section> containing `anchor` with new_html.
     Sections here do not nest, so the first </section> after the anchor closes it."""
@@ -217,6 +256,11 @@ def inject(archetype, data):
               int(round(float(data["collab_score"]))) ]
     t = _set_scored_cards(t, scores)
     t = _set_tldr_donuts(t, scores)
+
+    # TL;DR "Snapshot of the day" panel — paragraph, mini working styles, strength/growth
+    t = _set_tldr_lead(t, scores)
+    t = _set_tldr_heads(t, scores)
+    t = _set_tldr_ws(t, data.get("working_style"))
 
     # dynamic performance narrative (Strength/Growth Edge, next moves + support, momentum)
     t = _replace_section(t, 'id="sec-stood-out"', nv.render_stood_out(scores))

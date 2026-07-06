@@ -127,6 +127,35 @@ GROWTH_BODY = {
 }
 
 
+# ── TL;DR "Snapshot of the day" one-line phrases ────────────────────────────────
+TLDR_STRONG = {
+    "comm": "you kept people clear and aligned",
+    "dec": "you were willing to make the call and keep things moving",
+    "collab": "you kept the team steady and connected",
+}
+TLDR_GROWTH = {
+    "comm": "making sure your message lands, not just gets said",
+    "dec": "backing yourself to make more of the calls",
+    "collab": "staying connected to the team when pressure rises",
+}
+
+
+def heads(scores):
+    """(strength_headline, growth_headline) — same as the What-stood-out cards."""
+    s_dim, g_dim = select(scores)
+    s_band = band_of(scores[DIM_ORDER.index(s_dim)])
+    tier = "established" if s_band in ("developing", "strong") else "emerging"
+    return STRENGTH[s_dim][tier][0], GROWTH_HEAD[g_dim]
+
+
+def render_tldr_lead(scores):
+    """Two-sentence summary paragraph for the 'Snapshot of the day' panel."""
+    s_dim, g_dim = select(scores)
+    return ("Your strongest area today was %s — %s. The clearest opportunity is %s — %s."
+            % (DIM_NAME[s_dim].lower(), TLDR_STRONG[s_dim],
+               DIM_NAME[g_dim].lower(), TLDR_GROWTH[g_dim]))
+
+
 def _esc(s):
     return _html.escape(s, quote=False)
 

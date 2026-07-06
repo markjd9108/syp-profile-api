@@ -22,7 +22,7 @@ Emerging 40-59, Developing 60-79, Strong 80+.
 BULLETS = {
     "comm": {
         "foundation": [
-            "Getting your message across took effort today — points sometimes "
+            "Getting your message across took effort today. Your points sometimes "
             "landed differently than you intended.",
             "The place to start: say less, make each thing clear, and check it "
             "landed before moving on.",
@@ -30,18 +30,18 @@ BULLETS = {
         "emerging": [
             "You communicate clearly when things are straightforward, but under "
             "pressure your message doesn't always land the first time.",
-            "Your next gain is checking for understanding — a short pause to "
+            "Your next gain is checking for understanding, with a short pause to "
             "confirm people got it before you move on.",
         ],
         "developing": [
             "You communicate clearly and keep information moving, so people "
             "generally stay pointed in the same direction.",
-            "The step toward Strong is adapting when your message isn't landing "
-            "— change how you say it rather than repeating it.",
+            "The step toward Strong is adapting when your message isn't landing, "
+            "by changing how you say it rather than repeating it.",
         ],
         "strong": [
-            "You communicate to be understood, not just heard — clear, precise, "
-            "and adjusted to your audience.",
+            "You communicate to be understood, not just heard. You are clear and "
+            "precise, and you adjust to your audience.",
             "You keep information moving and people aligned, which makes you a "
             "reference point others rely on.",
         ],
@@ -68,15 +68,15 @@ BULLETS = {
         "strong": [
             "You commit to a direction while others are still weighing options, "
             "and you own the outcome.",
-            "You create momentum by deciding — the scarcest and most valuable "
-            "thing a team has under pressure.",
+            "You create momentum by deciding, which keeps the team moving when it "
+            "matters most.",
         ],
     },
     "collab": {
         "foundation": [
             "When the group came under pressure, you focused on your own part "
             "more than on holding the team together.",
-            "The place to start: stay connected to the group — notice when others "
+            "The place to start: stay connected to the group. Notice when others "
             "need support, and offer it.",
         ],
         "emerging": [
@@ -92,7 +92,7 @@ BULLETS = {
             "pressure rises, not only when things are calm.",
         ],
         "strong": [
-            "When pressure rises you keep the team together — you stay steady "
+            "When pressure rises you keep the team together. You stay steady "
             "and keep others oriented.",
             "That composure is contagious: the group borrows its steadiness from "
             "you, which is what stops teams fragmenting.",
@@ -104,7 +104,7 @@ BULLETS = {
 STRONG = {
     "comm": {
         "what": "Being clear, checking that people understood, and rephrasing "
-                "when they didn't — instead of just repeating yourself.",
+                "when they didn't, instead of just repeating yourself.",
         "why": "It prevents the misunderstandings that cause most team problems.",
         "tips": {
             "foundation": "Before moving on, ask one question to confirm the "
@@ -121,7 +121,7 @@ STRONG = {
     },
     "dec": {
         "what": "Making a clear call with the information you have and adjusting "
-                "as you learn — instead of waiting until you're certain.",
+                "as you learn, instead of waiting until you're certain.",
         "why": "It keeps the team moving instead of waiting for direction.",
         "tips": {
             "foundation": "Next time a choice is unclear, pick a direction you "

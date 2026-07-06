@@ -12,7 +12,7 @@ import html as _html
 import math
 from working_style import build_blocks
 
-WS_SUBHEAD = ("How you like to work — your preferences, your strengths, and what helps you "
+WS_SUBHEAD = ("How you like to work: your preferences, your strengths, and what helps you "
               "do your best.")
 
 # ── Inline SVG icons (solid filled flat style, currentColor) ────────────────────

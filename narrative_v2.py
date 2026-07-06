@@ -99,7 +99,7 @@ GROWTH_BODY = {
                "explain something, ask a quick question to check the other person "
                "understood before you move on.",
         "developing": "You are close to strong here. The next step is to adapt when "
-               "your message is not landing — change how you say it instead of "
+               "your message is not landing, by changing how you say it instead of "
                "repeating it.",
         "strong": "Even your growth area is a strength. Keep it sharp by raising "
                "issues early and clearly, before you are asked.",
@@ -129,13 +129,16 @@ GROWTH_BODY = {
 
 # ── TL;DR "Snapshot of the day" one-line phrases ────────────────────────────────
 TLDR_STRONG = {
-    "comm": "you kept people clear and aligned",
-    "dec": "you were willing to make the call and keep things moving",
-    "collab": "you kept the team steady and connected",
+    "comm": "You kept people clear and aligned, so the team knew what was happening "
+            "and what to do",
+    "dec": "You were willing to make the call and keep things moving while others "
+           "were still weighing their options",
+    "collab": "You stayed calm under pressure and kept the people around you working "
+              "together",
 }
 TLDR_GROWTH = {
     "comm": "making sure your message lands, not just gets said",
-    "dec": "backing yourself to make more of the calls",
+    "dec": "backing yourself to make more of the calls when things are uncertain",
     "collab": "staying connected to the team when pressure rises",
 }
 
@@ -151,7 +154,8 @@ def heads(scores):
 def render_tldr_lead(scores):
     """Two-sentence summary paragraph for the 'Snapshot of the day' panel."""
     s_dim, g_dim = select(scores)
-    return ("Your strongest area today was %s — %s. The clearest opportunity is %s — %s."
+    return ("Your strongest area today was %s. %s. The area with the most room to "
+            "grow is %s, where the focus is %s."
             % (DIM_NAME[s_dim].lower(), TLDR_STRONG[s_dim],
                DIM_NAME[g_dim].lower(), TLDR_GROWTH[g_dim]))
 
@@ -256,17 +260,17 @@ def render_moves(scores):
 
     m1 = _move("01", "1", "Lead with your strength.",
         "In your next few meetings, lean on your %s: %s. It is your most reliable "
-        "contribution — use it on purpose." % (sN.lower(), sAct), "Every meeting")
+        "contribution, so use it on purpose." % (sN.lower(), sAct), "Every meeting")
     m2 = _move("02", "2", "Practise one new habit.",
-        "Pick one moment in your next meeting to %s. One clear moment is enough — it "
-        "adds up faster than trying to fix everything at once." % gAct, "1× per meeting")
+        "Pick one moment in your next meeting to %s. One clear moment is enough, and "
+        "it adds up faster than trying to fix everything at once." % gAct, "1× per meeting")
     m3 = _move("03", "3", "Ask for one piece of feedback.",
         "After a meeting, ask one person: “What is one thing I did that helped the "
         "team today?” What others notice first is often a better signal than what "
         "you feel most sure of.", "Weekly")
 
     sup1 = _support("30-day focus", "Start this week", "One clear moment per meeting.",
-        "This month, aim for one moment in each meeting where you %s — even when it "
+        "This month, aim for one moment in each meeting where you %s, even when it "
         "feels easier not to." % gAct)
     sup2 = _support("Mentor pairing", "2 chats", "Learn from someone strong at %s." % gN,
         "Pick someone on your team who is genuinely good at %s, watch how they do it, "
@@ -289,7 +293,7 @@ def render_moves(scores):
         '<div class="grid grid-cols-1 md:grid-cols-3 gap-5">' + m1 + m2 + m3 + '</div>'
         '<div class="mt-10 mb-4"><div class="eyebrow mb-1.5">Support your moves</div>'
         '<div class="text-[13px] text-[var(--fg-3)] max-w-[64ch]">A focus, a person, '
-        'and a learning habit — all pointed at your growth area.</div></div>'
+        'and a learning habit, all pointed at your growth area.</div></div>'
         '<div class="grid grid-cols-1 md:grid-cols-3 gap-5">' + sup1 + sup2 + sup3 +
         '</div></section>')
 
@@ -299,7 +303,7 @@ def render_momentum():
     steps = [
         ("This week", "Pick one move above and tell one person you are working on it. "
                        "Saying it out loud makes it stick."),
-        ("Day 15", "Check in with yourself — have you used your move at least twice?"),
+        ("Day 15", "Check in with yourself. Have you used your move at least twice?"),
         ("Day 30", "Re-read this profile and notice what feels different."),
     ]
     rows = "".join(
@@ -314,7 +318,7 @@ def render_momentum():
         '<h2 class="display text-[26px] tracking-tight mb-4">Keep the momentum going.</h2>'
         '<p class="text-[14px] text-[var(--fg-2)] leading-[1.7] max-w-[68ch] mb-7">'
         'Your leader has already received your profile. The real progress happens in '
-        'the meetings that follow this workshop — so pick one move from Section 04 and '
+        'the meetings that follow this workshop, so pick one move from Section 04 and '
         'use it this week.</p>'
         '<div class="grid gap-3 max-w-[70ch]">' + rows + '</div>'
         '</div></article></section>')

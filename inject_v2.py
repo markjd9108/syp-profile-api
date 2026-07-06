@@ -128,8 +128,8 @@ def inject(archetype, data):
     t = re.sub(r"TPL-2604-[A-Z]-074", pid or "TPL-XXXX", t)
     t = t.replace("Q2 2026", cohort)
     t = t.replace("TEW Q2", cohort)
-    t = re.sub(r'<div class="avatar">[A-Z]{1,3}</div>',
-               '<div class="avatar">%s</div>' % _initials(name), t)
+    t = re.sub(r'(<span class="avatar">)[A-Z]{1,3}(</span>)',
+               lambda m: m.group(1) + _initials(name) + m.group(2), t)
 
     # scores -> bands (How you scored cards + TLDR donuts)
     scores = [int(round(float(data["comm_score"]))),

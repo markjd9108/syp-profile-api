@@ -165,9 +165,9 @@ class ProfileRequest(BaseModel):
     participant_name: str  = Field(...)
     company:          str  = Field("")
     cohort:           str  = Field("")
-    comm_score:       int  = Field(..., ge=0, le=100)
-    decision_score:   int  = Field(..., ge=0, le=100)
-    collab_score:     int  = Field(..., ge=0, le=100)
+    comm_score:       float = Field(..., ge=0, le=100)
+    decision_score:   float = Field(..., ge=0, le=100)
+    collab_score:     float = Field(..., ge=0, le=100)
     comm_avg:         Optional[float] = None
     decision_avg:     Optional[float] = None
     collab_avg:       Optional[float] = None
@@ -185,9 +185,9 @@ class ProfileRequest(BaseModel):
 class CohortParticipant(BaseModel):
     name: str; email: str; archetype: str; company: str = ""; cohort: str = ""
     profile_id: Optional[str] = None   # authoritative sheet col-V id, if available
-    comm_score: int = Field(..., ge=0, le=100)
-    decision_score: int = Field(..., ge=0, le=100)
-    collab_score: int = Field(..., ge=0, le=100)
+    comm_score: float = Field(..., ge=0, le=100)
+    decision_score: float = Field(..., ge=0, le=100)
+    collab_score: float = Field(..., ge=0, le=100)
     comm_avg: Optional[float] = None; decision_avg: Optional[float] = None
     collab_avg: Optional[float] = None; comm_hp: Optional[float] = None
     decision_hp: Optional[float] = None; collab_hp: Optional[float] = None
@@ -199,9 +199,9 @@ class CohortRequest(BaseModel):
 
 class ManagerParticipant(BaseModel):
     name: str; archetype: str
-    comm_score: int = Field(..., ge=0, le=100)
-    decision_score: int = Field(..., ge=0, le=100)
-    collab_score: int = Field(..., ge=0, le=100)
+    comm_score: float = Field(..., ge=0, le=100)
+    decision_score: float = Field(..., ge=0, le=100)
+    collab_score: float = Field(..., ge=0, le=100)
     role: Optional[str] = None
 
 class ManagerReportRequest(BaseModel):
@@ -213,9 +213,9 @@ class ManagerReportRequest(BaseModel):
 class LeaderReportParticipant(BaseModel):
     name: str
     archetype: str
-    c_score: int = Field(..., ge=0, le=100, description="Communication")
-    d_score: int = Field(..., ge=0, le=100, description="Decision Making")
-    co_score: int = Field(..., ge=0, le=100, description="Collaboration")
+    c_score: float = Field(..., ge=0, le=100, description="Communication")
+    d_score: float = Field(..., ge=0, le=100, description="Decision Making")
+    co_score: float = Field(..., ge=0, le=100, description="Collaboration")
     focus: Optional[str] = Field(None, description="Stretch|Check-In (derived if omitted)")
     # Provide EITHER an already-computed working_style dict, OR raw ws_answers (ws_q1..ws_q9)
     working_style: Optional[Dict[str, Dict[str, str]]] = Field(

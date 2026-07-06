@@ -66,20 +66,48 @@ def _bullets_ul(items):
             'style="list-style:none;padding:0;margin-top:18px;">' + lis + '</ul>')
 
 
-def _strong_html(what, why, tip):
+_IC_STAR = ('<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;">'
+            '<path d="M12 2l2.9 6.26 6.9.56-5.24 4.52 1.62 6.74L12 16.9l-6.18 3.78 '
+            '1.62-6.74L2.2 8.82l6.9-.56z"/></svg>')
+_IC_BULB = ('<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;">'
+            '<path d="M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1zm3-19a7 7 0 0 0-4 12.74V16'
+            'a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1.26A7 7 0 0 0 12 2z"/></svg>')
+_IC_ARROW = ('<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;">'
+             '<path d="M4 11h12.17l-5.59-5.59L12 4l8 8-8 8-1.42-1.41L16.17 13H4z"/></svg>')
+
+
+def _chip(icon, label, text, mb, emphasis=False):
+    if emphasis:
+        box = ('background:rgba(62,155,255,.12);border:1px solid rgba(62,155,255,.34);'
+               'border-left:3px solid var(--c-soft,#7BBDF4);')
+        ic = ('width:22px;height:22px;flex:0 0 22px;color:var(--c-soft,#7BBDF4);'
+              'display:flex;align-items:center;justify-content:center;margin-top:1px;')
+        txt = 'var(--fg-1,#E7EEFB)'
+    else:
+        box = 'background:rgba(255,255,255,.04);border:1px solid rgba(120,170,235,.18);'
+        ic = ('width:22px;height:22px;flex:0 0 22px;border-radius:7px;'
+              'background:rgba(123,189,244,.14);color:var(--c-soft,#7BBDF4);'
+              'display:flex;align-items:center;justify-content:center;margin-top:1px;')
+        txt = 'var(--fg-2)'
+    return (
+        '<div style="display:flex;gap:9px;align-items:flex-start;border-radius:10px;'
+        'padding:9px 11px;margin-bottom:' + mb + ';' + box + '">'
+        '<span style="' + ic + '">' + icon + '</span>'
+        '<div><div style="font-size:9px;letter-spacing:.11em;text-transform:uppercase;'
+        'font-weight:700;color:var(--c-soft,#7BBDF4);margin-bottom:2px;">' + _esc(label) + '</div>'
+        '<div style="font-size:12px;line-height:1.4;color:' + txt + ';">' + _esc(text) + '</div>'
+        '</div></div>')
+
+
+def _strong_html(what, why, tip, band):
+    what_label = "What you're doing well" if band == "strong" else "What strong looks like"
     return (
         '<div style="margin-top:18px;padding-top:16px;'
         'border-top:1px solid rgba(170,195,240,0.12);">'
-        '<div style="font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;'
-        'color:var(--c-soft,#7BBDF4);font-weight:700;margin-bottom:8px;">'
-        'What strong looks like</div>'
-        '<p style="font-size:12.5px;color:var(--fg-2);line-height:1.55;margin:0 0 10px;">'
-        + _esc(what) + ' ' + _esc(why) + '</p>'
-        '<div style="font-size:12.5px;color:var(--fg-1,#E7EEFB);line-height:1.5;'
-        'background:rgba(123,189,244,0.08);border-left:2px solid var(--c-soft,#7BBDF4);'
-        'padding:8px 12px;border-radius:6px;">'
-        '<strong style="color:var(--c-soft,#7BBDF4);">Your next step:</strong> '
-        + _esc(tip) + '</div></div>')
+        + _chip(_IC_STAR, what_label, what, "8px")
+        + _chip(_IC_BULB, "Why it matters", why, "8px")
+        + _chip(_IC_ARROW, "Your next step", tip, "0", emphasis=True)
+        + '</div>')
 
 
 def _set_scored_cards(t, scores):
@@ -101,7 +129,7 @@ def _set_scored_cards(t, scores):
         a = re.sub(r'<div class="num band-text">[^<]*</div>', '<div class="num band-text">%s</div>' % label, a, count=1)
         # band-appropriate bullets + "what strong looks like" block (replaces the baked <ul>)
         what, why, tip = dc.strong_block(dim, key)
-        replacement = _bullets_ul(dc.bullets(dim, key)) + _strong_html(what, why, tip)
+        replacement = _bullets_ul(dc.bullets(dim, key)) + _strong_html(what, why, tip, key)
         a = re.sub(r'<ul class="text-\[13\.5px\].*?</ul>', lambda _m: replacement, a, count=1, flags=re.S)
         out = out[:m.start()] + a + out[m.end():]
     return head + out + tail

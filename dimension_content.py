@@ -92,8 +92,8 @@ BULLETS = {
             "pressure rises, not only when things are calm.",
         ],
         "strong": [
-            "When pressure rises you keep the team together — steady yourself, "
-            "and keeping others oriented.",
+            "When pressure rises you keep the team together — you stay steady "
+            "and keep others oriented.",
             "That composure is contagious: the group borrows its steadiness from "
             "you, which is what stops teams fragmenting.",
         ],
@@ -103,58 +103,52 @@ BULLETS = {
 # --- "what strong looks like" + "why" (same for all readers) + band-aware tip ---
 STRONG = {
     "comm": {
-        "what": "Strong communication means being understood, not just heard: "
-                "describing the goal clearly, checking it landed, and adapting "
-                "your words when it doesn't — instead of repeating them louder.",
-        "why": "Most team breakdowns are communication failures, so the person "
-               "who makes things clear becomes the reference point everyone else "
-               "aligns to.",
+        "what": "Being clear, checking that people understood, and rephrasing "
+                "when they didn't — instead of just repeating yourself.",
+        "why": "It prevents the misunderstandings that cause most team problems.",
         "tips": {
-            "foundation": "Before moving on from a point, ask one question that "
-                          "checks the other person actually got it.",
-            "emerging": "Before moving on from a point, ask one question that "
-                        "checks the other person actually got it.",
-            "developing": "When something isn't landing, change your words or "
-                          "your medium instead of restating it.",
-            "strong": "Put your clarity to work earlier — name issues before "
-                      "you're asked, so it reads as leadership.",
+            "foundation": "Before moving on, ask one question to confirm the "
+                          "other person understood.",
+            "emerging": "Before moving on, ask one question to confirm the "
+                        "other person understood.",
+            "developing": "If your message is not getting through, rephrase it "
+                          "or change how you deliver it instead of repeating the "
+                          "same words.",
+            "strong": "Raise issues early and clearly, before you are asked. "
+                      "This is what turns clear communication into visible "
+                      "leadership.",
         },
     },
     "dec": {
-        "what": "Strong decision-making means making the call the moment asks "
-                "for — committing to a direction with the information you have, "
-                "owning it, and adjusting as you learn, rather than waiting for "
-                "certainty.",
-        "why": "Teams stall without someone willing to decide, and decisions "
-               "are what create momentum — a team's scarcest resource under "
-               "pressure.",
+        "what": "Making a clear call with the information you have and adjusting "
+                "as you learn — instead of waiting until you're certain.",
+        "why": "It keeps the team moving instead of waiting for direction.",
         "tips": {
-            "foundation": "Next time a call is unclear, pick a direction you can "
-                          "adjust and commit to it out loud.",
-            "emerging": "Next time a call is unclear, pick a direction you can "
-                        "adjust and commit to it out loud.",
-            "developing": "When you notice a decision going unmade, make it "
-                          "yourself rather than waiting for consensus.",
-            "strong": "Make your decisiveness visible — state the call and the "
-                      "reasoning so others can follow it.",
+            "foundation": "Next time a choice is unclear, pick a direction you "
+                          "can adjust later and commit to it clearly.",
+            "emerging": "Next time a choice is unclear, pick a direction you "
+                        "can adjust later and commit to it clearly.",
+            "developing": "When you notice a decision is not being made, make it "
+                          "yourself instead of waiting for everyone to agree.",
+            "strong": "Explain the reasoning behind your decisions, so others "
+                      "understand them and can act on them.",
         },
     },
     "collab": {
-        "what": "Strong collaboration means holding the team together when "
-                "pressure rises: staying steady, keeping others oriented, and "
-                "protecting the group's shared structure instead of retreating "
-                "into your own task.",
-        "why": "Under pressure most teams fragment, and composure is contagious "
-               "— a team borrows its steadiness from whoever has it.",
+        "what": "Staying calm under pressure and keeping the team working "
+                "together, instead of narrowing to your own task.",
+        "why": "A steady presence keeps the group coordinated when things get "
+               "difficult.",
         "tips": {
-            "foundation": "When pressure hits, take one action that helps someone "
-                          "else before returning to your own task.",
-            "emerging": "When pressure hits, take one action that helps someone "
-                        "else before returning to your own task.",
-            "developing": "Be the person who names what's happening to the group "
-                          "when things wobble, not just after.",
-            "strong": "Use your steadiness deliberately — set the tone early so "
-                      "the team stabilises around it.",
+            "foundation": "When pressure rises, take one action to help someone "
+                          "else before returning to your own work.",
+            "emerging": "When pressure rises, take one action to help someone "
+                        "else before returning to your own work.",
+            "developing": "When things start to go wrong, be the person who says "
+                          "out loud what is happening, so the team can respond "
+                          "together.",
+            "strong": "Set a calm, steady tone early, so the team settles and "
+                      "stays coordinated.",
         },
     },
 }

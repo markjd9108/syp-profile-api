@@ -13,6 +13,7 @@ RUN playwright install chromium
 COPY generate_html_profile.py .
 # Redesigned hosted-HTML profile generator
 COPY inject_v2.py .
+COPY dimension_content.py .
 COPY lead_engine.py .
 # Working Style (V3) layer modules
 COPY working_style.py .

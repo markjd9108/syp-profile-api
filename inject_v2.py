@@ -8,7 +8,9 @@ Used by the hosted-link delivery path (GET /p/<slug>). Unlike the legacy
 generate_html_profile (old templates -> PDF), this works on templates_v2/.
 """
 import os, re, json, datetime
+import html as _html
 import working_style as ws_mod
+import dimension_content as dc
 from working_style_html import render_working_style_section
 
 _DIR = os.path.join(os.path.dirname(__file__), "templates_v2")
@@ -50,21 +52,57 @@ def _initials(name):
     return (p[0][0] + p[-1][0]).upper() if len(p) >= 2 else name[:2].upper()
 
 
+def _esc(s):
+    return _html.escape(s, quote=False)
+
+
+def _bullets_ul(items):
+    lis = "".join(
+        '<li style="position:relative;padding-left:16px;margin-bottom:6px;">'
+        '<span style="position:absolute;left:0;top:8px;width:5px;height:5px;'
+        'border-radius:50%;background:var(--c-soft,#7BBDF4);"></span>'
+        + _esc(x) + '</li>' for x in items)
+    return ('<ul class="text-[13.5px] text-[var(--fg-2)] leading-[1.6] mt-6" '
+            'style="list-style:none;padding:0;margin-top:18px;">' + lis + '</ul>')
+
+
+def _strong_html(what, why, tip):
+    return (
+        '<div style="margin-top:18px;padding-top:16px;'
+        'border-top:1px solid rgba(170,195,240,0.12);">'
+        '<div style="font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;'
+        'color:var(--c-soft,#7BBDF4);font-weight:700;margin-bottom:8px;">'
+        'What strong looks like</div>'
+        '<p style="font-size:12.5px;color:var(--fg-2);line-height:1.55;margin:0 0 10px;">'
+        + _esc(what) + ' ' + _esc(why) + '</p>'
+        '<div style="font-size:12.5px;color:var(--fg-1,#E7EEFB);line-height:1.5;'
+        'background:rgba(123,189,244,0.08);border-left:2px solid var(--c-soft,#7BBDF4);'
+        'padding:8px 12px;border-radius:6px;">'
+        '<strong style="color:var(--c-soft,#7BBDF4);">Your next step:</strong> '
+        + _esc(tip) + '</div></div>')
+
+
 def _set_scored_cards(t, scores):
-    """Update the 3 'How you scored' dimension cards (order Comm/Dec/Collab)."""
+    """Update the 3 'How you scored' dimension cards (order Comm/Dec/Collab):
+    band pill, ring %, band text, band-appropriate bullets, and the
+    'what strong looks like / why / next step' block."""
     s = t.find('id="sec-scored"'); e = t.find('id="sec-stood-out"')
     if s == -1 or e == -1: return t
     head, seg, tail = t[:s], t[s:e], t[e:]
     arts = list(re.finditer(r'<article class="card relative overflow-hidden band-\w+">.*?</article>', seg, re.S))
     if len(arts) != 3: return t
     out = seg
-    for m, sc in zip(reversed(arts), reversed(scores)):  # reverse keeps offsets valid
+    for m, sc, dim in zip(reversed(arts), reversed(scores), reversed(dc.DIM_ORDER)):
         key, label = get_band(sc)
         a = m.group(0)
         a = re.sub(r'(<article class="card relative overflow-hidden )band-\w+(">)', r'\1band-%s\2' % key, a, count=1)
         a = re.sub(r'<span class="band-pill">[^<]*</span>', '<span class="band-pill">%s</span>' % label, a, count=1)
         a = re.sub(r'stroke-dasharray="\d+ 100"', 'stroke-dasharray="%d 100"' % int(round(sc)), a, count=1)
         a = re.sub(r'<div class="num band-text">[^<]*</div>', '<div class="num band-text">%s</div>' % label, a, count=1)
+        # band-appropriate bullets + "what strong looks like" block (replaces the baked <ul>)
+        what, why, tip = dc.strong_block(dim, key)
+        replacement = _bullets_ul(dc.bullets(dim, key)) + _strong_html(what, why, tip)
+        a = re.sub(r'<ul class="text-\[13\.5px\].*?</ul>', lambda _m: replacement, a, count=1, flags=re.S)
         out = out[:m.start()] + a + out[m.end():]
     return head + out + tail
 

@@ -11,6 +11,7 @@ import os, re, json, datetime
 import html as _html
 import working_style as ws_mod
 import dimension_content as dc
+import narrative_v2 as nv
 from working_style_html import render_working_style_section
 
 _DIR = os.path.join(os.path.dirname(__file__), "templates_v2")
@@ -174,6 +175,19 @@ def _set_working_style(t, answers):
     return t[:style_start] + rendered + t[sec_end:]
 
 
+def _replace_section(t, anchor, new_html):
+    """Replace the whole <section ...>...</section> containing `anchor` with new_html.
+    Sections here do not nest, so the first </section> after the anchor closes it."""
+    i = t.find(anchor)
+    if i == -1:
+        return t
+    start = t.rfind('<section', 0, i)
+    end = t.find('</section>', i)
+    if start == -1 or end == -1:
+        return t
+    return t[:start] + new_html + t[end + len('</section>'):]
+
+
 def inject(archetype, data):
     """data: dict with name, company, cohort, assessed_date, profile_id,
     comm_score, dec_score, collab_score, working_style(dict ws_q1..9)."""
@@ -203,6 +217,11 @@ def inject(archetype, data):
               int(round(float(data["collab_score"]))) ]
     t = _set_scored_cards(t, scores)
     t = _set_tldr_donuts(t, scores)
+
+    # dynamic performance narrative (Strength/Growth Edge, next moves + support, momentum)
+    t = _replace_section(t, 'id="sec-stood-out"', nv.render_stood_out(scores))
+    t = _replace_section(t, 'id="sec-moves"', nv.render_moves(scores))
+    t = _replace_section(t, 'Keep the momentum going', nv.render_momentum())
 
     # working style
     t = _set_working_style(t, data.get("working_style"))

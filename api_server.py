@@ -248,7 +248,7 @@ app = FastAPI(title="TEW Profile API", version="2.3.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.4.2",
+    return {"status": "ok", "version": "2.4.3",
             "archetypes": list(ARCHETYPE_FILES),
             "endpoints": ["/generate", "/generate-cohort", "/generate-manager-report",
                           "/generate-leader-report", "/compute-averages"]}
@@ -263,6 +263,14 @@ def asset_resource_pack():
         raise HTTPException(404, "resource pack not found")
     return FileResponse(path, media_type="application/pdf",
                         filename="The Team Effectiveness Workshop Resource Pack.pdf")
+
+@app.get("/assets/tpl-logo")
+def asset_tpl_logo():
+    path = os.path.join(os.path.dirname(__file__), "tpl_logo_email.png")
+    if not os.path.exists(path):
+        raise HTTPException(404, "logo not found")
+    return FileResponse(path, media_type="image/png",
+                        headers={"Cache-Control": "public, max-age=86400"})
 
 @app.get("/assets/field-guide")
 def asset_field_guide():

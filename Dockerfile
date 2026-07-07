@@ -25,6 +25,7 @@ COPY generate_manager_report.py .
 COPY generate_leader_report.py .
 COPY team_lead_engine.py .
 # Leadership Insight Report v2 (wired Claude Design template + pipeline)
+COPY tpl_logo_email.png .
 COPY lir_core.py .
 COPY lir_compose.py .
 COPY lir_render.py .

@@ -1,0 +1,117 @@
+{
+  "team": "Pizzahut",
+  "date": "6 July 2026",
+  "leaderName": "Mark Dickens",
+  "leaderVerdict": "Your team decides well and pulls together when the work gets hard, Mark. The strain is communication: at 50 it sits below the working threshold and splits widely across the three of you. The work ahead is focused, build shared clarity into how information moves before the next stretch of real pressure.",
+  "headline": "The team averages 62. Collaboration leads at 69 and Communication is the priority at 50, a 19 point gap from the team's strongest dimension.",
+  "cards": [
+    {
+      "label": "Communication",
+      "score": 50
+    },
+    {
+      "label": "Decision-Making",
+      "score": 68
+    },
+    {
+      "label": "Collaboration",
+      "score": 69
+    }
+  ],
+  "priorityDim": "Communication",
+  "priorityScore": 50,
+  "priorityRead": "Communication averages 50 and carries the widest spread on the team, from 28 at the low end to 65 at the high. The team number comes from a wide split, and the split is the real finding. Information reaches people unevenly, and that shows most when the brief changes mid exercise.",
+  "firstMove": "Add one shared clarity step to your regular handoffs: whoever receives a task restates the objective and the deadline before starting. Begin with the handoffs that already carry the most risk, where a changed brief has to travel fast between people.",
+  "members": [
+    {
+      "name": "Mark Pizza",
+      "archetype": "Relay",
+      "comm": 58,
+      "dm": 75,
+      "collab": 71,
+      "avg": 68,
+      "flag": "Check-In",
+      "focusTheme": "The data: strong on decisions and collaboration, with communication at 58, just under the threshold. As a Relay he moves information between people, so the gap matters more here than the number suggests. Worth exploring in a 1:1, whether what he passes on lands as clearly as he intends."
+    },
+    {
+      "name": "Mark Pizza 2",
+      "archetype": "Anchor",
+      "comm": 28,
+      "dm": 53,
+      "collab": 92,
+      "avg": 58,
+      "flag": "Check-In",
+      "focusTheme": "The data: collaboration is a clear strength at 92, while communication at 28 is the lowest score on the team and decision clarity sits mid range. Worth exploring in a 1:1, the distance between how much he steadies the group and how little he voices what he is seeing."
+    },
+    {
+      "name": "Jane Pizza",
+      "archetype": "Compass",
+      "comm": 65,
+      "dm": 75,
+      "collab": 43,
+      "avg": 61,
+      "flag": "Check-In",
+      "focusTheme": "The data: decisions and communication are strong, with collaboration at 43 the low point. She reads and names the path well. Worth exploring in a 1:1, how her decisions reach the rest of the team, and where moving early leaves others behind the call."
+    }
+  ],
+  "avgComm": 50,
+  "avgDm": 68,
+  "avgCollab": 69,
+  "avgOverall": 62,
+  "patternLabel": "The pattern that shapes this team",
+  "patternTitle": "Strong hands, thin shared voice",
+  "definingPatternP1": "This is a capable team with a communication seam running through it. Decision-Making and Collaboration both sit near 70, so the raw ability to choose a path and work side by side is already here. Communication, at 50, is the exception, and it is the one dimension where the three members diverge sharply.",
+  "definingPatternP2": "The risk is that strong individual output masks a weak shared channel. When each person is able on their own, teams often route around the communication gap and leave it open, and the gap only surfaces under pressure, when a brief changes and the update fails to reach everyone at once. Treat the seam directly before it widens.",
+  "patternCards": [
+    {
+      "label": "Pattern to watch",
+      "name": "Mark Pizza · Relay",
+      "body": "Mark Pizza is the team's execution line. Scores of 75 on Decision-Making and 71 on Collaboration say he commits once a call is made and delivers with the group. The watch-out is communication at 58: as the member who moves work between the other two, what he passes on carries the team's clarity. One option: build the restate step into his handoffs first, since more information routes through him than through anyone else."
+    },
+    {
+      "label": "Pattern to watch",
+      "name": "Mark Pizza 2 · Anchor",
+      "body": "Mark Pizza 2 is the team's steadying force. A collaboration score of 92 says he holds the group together and keeps people working when a plan wobbles. The watch-out is the distance between that and his communication at 28: he stabilises the room but says little about what he sees. One option, give him a defined moment in each handoff to voice the risk he is already sensing, so his read reaches the team in words."
+    },
+    {
+      "label": "Pattern to watch",
+      "name": "Jane Pizza · Compass",
+      "body": "Jane Pizza sets direction. Decision-Making at 75 and communication at 65 make her the member most able to name the path and hold it under pressure. The watch-out is collaboration at 43: she can move ahead of the team and leave others behind the decision. One option, ask her to pair the call with a short check that others are with her before the team commits, so her clarity carries the whole group."
+    }
+  ],
+  "missingCards": [
+    {
+      "name": "Navigator",
+      "body": "No member fills the Navigator seat. With direction set and the group steady, nobody consistently makes the call when others defer, so pace slows under a tight clock: decisions get made, then take too long to land. One structural option: give pace an owner by rotating a timekeeper role for each piece of work."
+    },
+    {
+      "name": "Summit",
+      "body": "No member fills the Summit seat. A Compass sets the path and an Anchor holds it, so agreement can arrive early and untested, and the team can settle for adequate. One structural option: for any significant call, give one person the explicit job of testing the plan before the team commits, and rotate that job."
+    }
+  ],
+  "risks": [
+    {
+      "num": "01",
+      "title": "Communication is the team's shared structural gap",
+      "statement": "Communication averages 50 and splits widely, from 28 to 65. The team routes around the gap because individuals are capable, so it stays hidden until a brief changes and an update fails to reach everyone at once.",
+      "moves": [
+        "Add a restate step to handoffs. The person receiving a task says back the objective and the deadline before starting, so understanding is verified before work begins.",
+        "Give the quietest reader of the room a defined moment to speak. In each exercise, one member voices the risk they sense before the team moves, so signal reaches words.",
+        "Run a single shared channel for changes. When a brief shifts, one person restates it to the whole team at once, closing the path where updates currently reach people unevenly."
+      ],
+      "observable": "handoffs end with the receiver restating the task, and a changed brief reaches the whole team in one pass."
+    },
+    {
+      "num": "02",
+      "title": "Direction can outrun the wider team",
+      "statement": "Decision clarity is strong while collaboration varies, and the member who sets direction scores lowest on working with others. Decisions can land ahead of the people meant to carry them, so commitment lags the call under pressure.",
+      "moves": [
+        "Pair each significant call with a short alignment check. Before the team commits, the decision maker confirms the others are with the path, so the call lands with everyone before the work moves.",
+        "Rotate who frames the decision. Letting a steadier collaborator restate the chosen path in their words brings the rest of the team into the call and tests that it landed."
+      ],
+      "observable": "decisions are followed by a brief check for alignment, and fewer calls need reopening after the team has moved on."
+    }
+  ],
+  "prescription": "Communication is your priority at 50, the lowest dimension and the widest spread on the team. The matching Focused Session is Communicating with Clarity, a half day built to close the gap between what your people intend and what reaches the room.",
+  "closingVerdict": "Strong for this team looks like its shared voice catching up to its judgement and its trust. You already decide well and hold together under load. Build clarity into how information moves, keep direction tied to the team, and the seam that shows under pressure closes."
+}

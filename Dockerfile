@@ -24,6 +24,12 @@ COPY generate_manager_report.py .
 # Dynamic Leadership Insight Report (team layer)
 COPY generate_leader_report.py .
 COPY team_lead_engine.py .
+# Leadership Insight Report v2 (wired Claude Design template + pipeline)
+COPY lir_core.py .
+COPY lir_compose.py .
+COPY lir_render.py .
+COPY lir_composition_spec.md .
+COPY lir_template_wired.html .
 COPY api_server.py .
 
 # Copy HTML profile templates

@@ -1,0 +1,133 @@
+{
+  "team": "Mekong Digital",
+  "date": "6 July 2026",
+  "leaderName": "Thao Bui",
+  "leaderVerdict": "Your team performs above the line, Thao. Two members are ready to stretch, and three clear the bar on their strongest work while dipping on one dimension each. The work ahead is uneven: hold your strong performers to a higher standard while closing the single soft spot each of the others carries.",
+  "headline": "The team averages 68. Collaboration leads at 72 and Communication is the priority at 65, with the spread inside the team wider than the averages suggest.",
+  "cards": [
+    {
+      "label": "Communication",
+      "score": 65
+    },
+    {
+      "label": "Decision-Making",
+      "score": 66
+    },
+    {
+      "label": "Collaboration",
+      "score": 72
+    }
+  ],
+  "priorityDim": "Communication",
+  "priorityScore": 65,
+  "priorityRead": "Communication averages 65 and hides a wide split, from 48 to 82. Two members sit well above the line and one sits well below it. The team number comes from a wide split, and the split is the real finding. Clarity is uneven across the group.",
+  "firstMove": "Set the standard with your two strongest members first: ask them to name what good looks like on a live piece of work, then hold the team to it. Pair that with one shared clarity step in handoffs so the softer dimensions surface early.",
+  "members": [
+    {
+      "name": "Linh Tran",
+      "archetype": "Navigator",
+      "comm": 72,
+      "dm": 81,
+      "collab": 68,
+      "avg": 74,
+      "flag": "Stretch",
+      "stretchTheme": "The data: strong on every dimension, leading Decision-Making at 81. She makes the call when others defer. One stretch: hand her a decision outside her own lane and ask her to bring the whole team with her."
+    },
+    {
+      "name": "Duc Pham",
+      "archetype": "Summit",
+      "comm": 70,
+      "dm": 76,
+      "collab": 74,
+      "avg": 73,
+      "flag": "Stretch",
+      "stretchTheme": "The data: even strength across all three dimensions, with no score under 70. He raises the standard through his own work. One stretch: give him a piece of the team's work to raise, and have him name what good looks like."
+    },
+    {
+      "name": "An Le",
+      "archetype": "Relay",
+      "comm": 55,
+      "dm": 62,
+      "collab": 70,
+      "avg": 62,
+      "flag": "Check-In",
+      "focusTheme": "The data: collaboration is the strength at 70, with communication at 55 under the threshold and decisions just above it. As a Relay he carries work between people. Worth exploring in a 1:1: whether what he passes on reaches others as clearly as he means it."
+    },
+    {
+      "name": "Minh Vo",
+      "archetype": "Anchor",
+      "comm": 48,
+      "dm": 58,
+      "collab": 84,
+      "avg": 63,
+      "flag": "Check-In",
+      "focusTheme": "The data: collaboration is strong at 84 while communication at 48 and Decision-Making at 58 both sit under the threshold. Worth exploring in a 1:1: the gap between how much he steadies the group and how little he shapes or voices the call."
+    },
+    {
+      "name": "Hoa Nguyen",
+      "archetype": "Signal",
+      "comm": 82,
+      "dm": 54,
+      "collab": 66,
+      "avg": 67,
+      "flag": "Check-In",
+      "focusTheme": "The data: communication is a clear strength at 82, with Decision-Making at 54 the low point. She reads and names what is happening well. Worth exploring in a 1:1: what makes committing to a call harder for her than describing the situation."
+    }
+  ],
+  "avgComm": 65,
+  "avgDm": 66,
+  "avgCollab": 72,
+  "avgOverall": 68,
+  "patternLabel": "The pattern that shapes this team",
+  "patternTitle": "Strong core, uneven soft spots",
+  "definingPatternP1": "This is a team performing above the line with real range inside it. The averages sit in the high sixties and low seventies, and two members clear every dimension. What stands out is the individual soft spots: each of the other three dips on a different single dimension.",
+  "definingPatternP2": "The risk is that steady averages hide these gaps. When a team looks fine on paper, leaders often manage to the mean and leave the individual dips unaddressed, and the dips only surface under pressure, when the one soft dimension is the one the moment demands. Read the rows, then act on each dip directly.",
+  "patternCards": [
+    {
+      "label": "Pattern to watch",
+      "name": "Minh Vo · Anchor",
+      "body": "Minh Vo steadies the team. Collaboration at 84 is the highest single score in the group and holds people together under load. The watch-out is the distance to communication at 48 and Decision-Making at 58: he supports the call but rarely shapes or voices it. One option: give him a defined moment to state the risk he senses before the team moves."
+    },
+    {
+      "label": "Pattern to watch",
+      "name": "Hoa Nguyen · Signal",
+      "body": "Hoa Nguyen names what is happening. Communication at 82 makes her the clearest voice in the room. The watch-out is Decision-Making at 54: she describes the situation well but commits slowly once a choice is needed. One option: ask her to follow each read of the room with the call she would make, so clarity turns into a decision."
+    },
+    {
+      "label": "Pattern to watch",
+      "name": "Linh Tran · Navigator",
+      "body": "Linh Tran drives direction. Decision-Making at 81 and strength across the board make her the member most able to make the call when others defer. The watch-out is her range: she can decide ahead of the group. One option: hand her a decision outside her own lane and ask her to bring the whole team with her."
+    }
+  ],
+  "missingCards": [
+    {
+      "name": "Compass",
+      "body": "No member fills the Compass seat. With strong voices and a clear decider, the team can move without a shared read of the terrain, so a confident call can still point the wrong way. One structural option: before a significant call, have one person map the options and constraints out loud, and rotate who does it."
+    }
+  ],
+  "risks": [
+    {
+      "num": "01",
+      "title": "Steady averages hide individual soft spots",
+      "statement": "The team averages in the high sixties, but three members each dip below the line on one dimension: communication for two, Decision-Making for one. Managed to the mean, these gaps stay hidden until the moment demands the exact dimension that is soft.",
+      "moves": [
+        "Work the rows, not the average. In your next one-to-ones, name the single soft dimension for each of the three and agree one concrete focus, so each gap gets owned by the person who carries it.",
+        "Add a restate step to handoffs. The person receiving a task says back the objective and the deadline before starting, so understanding is verified before work begins.",
+        "Pair a strong voice with a slower decider on live work, so a clear read of the room meets a faster call and both improve."
+      ],
+      "observable": "each member can name their one focus dimension, and the soft spot that used to surface late comes up early in the work."
+    },
+    {
+      "num": "02",
+      "title": "Strong performers can drift without stretch",
+      "statement": "Two members clear every dimension and sit ahead of the group. Left on familiar work, strong performers coast, and the standard for the whole team quietly settles at their comfortable level.",
+      "moves": [
+        "Give your two strongest members work outside their lane, so the challenge is real and the rest of the team sees the bar move.",
+        "Ask them to name what good looks like on a shared piece of work, so the standard becomes explicit and portable to the others."
+      ],
+      "observable": "your strongest members are working on something unfamiliar, and the standard they set is stated out loud."
+    }
+  ],
+  "prescription": "Communication is your priority at 65, the lowest dimension and the widest spread on the team. The matching Focused Session is Communicating with Clarity, a half day built to close the gap between what your people intend and what reaches the room.",
+  "closingVerdict": "Strong for this team looks like its range narrowing without losing its top. You already perform above the line and hold together well. Stretch your two strongest, close the one soft dimension each of the others carries, and the team rises as a group."
+}

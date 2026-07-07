@@ -248,7 +248,7 @@ app = FastAPI(title="TEW Profile API", version="2.3.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.3.4",
+    return {"status": "ok", "version": "2.4.0",
             "archetypes": list(ARCHETYPE_FILES),
             "endpoints": ["/generate", "/generate-cohort", "/generate-manager-report",
                           "/generate-leader-report", "/compute-averages"]}
@@ -519,6 +519,71 @@ def generate_leader_report_endpoint(req: LeaderReportRequest):
                 "data": base64.b64encode(pdf_bytes).decode()}
     return Response(content=pdf_bytes, media_type="application/pdf",
                     headers={"Content-Disposition": f'attachment; filename="{fname}"'})
+
+
+
+# ── Leadership Insight Report v2 — approved Claude Design template ───────────
+# Pipeline per LIR_Data_Contract: validate input -> derive in code -> one
+# composition call (lir_compose, validated + retried) -> inject into the wired
+# template -> A4 print-path PDF. Payload data is never logged in plain text.
+import lir_core
+import lir_compose
+import lir_render
+
+class LIRMember(BaseModel):
+    name: str
+    archetype: str
+    comm: int = Field(..., ge=0, le=100)
+    dm: int = Field(..., ge=0, le=100)
+    collab: int = Field(..., ge=0, le=100)
+
+class LIRRequest(BaseModel):
+    team: str
+    date: str  # 'D Month YYYY' (or 'YYYY-MM-DD', normalised here)
+    leaderName: str
+    members: List[LIRMember]
+    response_format: Optional[str] = Field("binary")
+
+def _lir_normalise_date(d: str) -> str:
+    d = (d or "").strip()
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})$", d)
+    if m:
+        dt = datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        return f"{dt.day} {dt.strftime('%B %Y')}"
+    return d
+
+@app.post("/generate-lir")
+def generate_lir(req: LIRRequest):
+    date_str = _lir_normalise_date(req.date)
+    members = [m.dict() for m in req.members]
+    errors, warnings = lir_core.validate_input(req.team, date_str, req.leaderName, members)
+    if errors:
+        raise HTTPException(422, {"stage": "input", "errors": errors})
+    derived = lir_core.derive(members)
+    try:
+        composed = lir_compose.compose(derived, req.team, date_str, req.leaderName)
+    except lir_compose.CompositionHalt as e:
+        # Halt-and-flag: never ship a degraded report (Composition Spec §4)
+        raise HTTPException(422, {"stage": "composition",
+                                  "failures": e.failures[-1] if e.failures else [],
+                                  "attempts": len(e.failures)})
+    try:
+        payload = lir_core.build_payload(req.team, date_str, req.leaderName, derived, composed)
+        html = lir_core.inject(payload)
+        pdf_bytes = asyncio.run(lir_render.render_lir_pdf_async(html))
+    except Exception as e:
+        raise HTTPException(500, f"render: {e}")
+
+    fname = lir_core.report_filename(req.team, date_str)
+    headers = {"Content-Disposition": f'attachment; filename="{fname}"',
+               "X-LIR-Filename": fname}
+    if warnings:
+        headers["X-LIR-Warnings"] = "; ".join(warnings)
+    if req.response_format == "base64":
+        return {"filename": fname, "content_type": "application/pdf",
+                "warnings": warnings,
+                "data": base64.b64encode(pdf_bytes).decode()}
+    return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
 
 if __name__ == "__main__":
     import uvicorn

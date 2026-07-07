@@ -1,0 +1,64 @@
+{
+  "leaderVerdict": "This team brings real strength on every dimension, Alex, with all three averages at or near 70. Decision-Making is the priority: at 69 it hides a spread from 58 to 85, so alignment depends on who is in the room. The work ahead is building one shared way of deciding.",
+  "headline": "The team averages 70. Collaboration leads at 71 and Decision-Making is the priority at 69, a two point gap hiding the widest spread.",
+  "priorityRead": "Decision-Making averages 69, with member scores from 58 to 85. B Tran at 85 and E Vo at 72 sit clear of the threshold, while D Pham at 64 and G Dang at 58 shape the low end. The room decides at different speeds.",
+  "firstMove": "Run this week's key decision on a written one-page frame: the question, three options, the owner, and the deadline. Ask each member to add a position before the meeting. The frame makes the deciding process visible and gives quieter reads equal weight.",
+  "patternLabel": "The pattern that shapes this team",
+  "patternTitle": "Strong rows, uneven judgement",
+  "definingPatternP1": "Eight members clear the 60 threshold on almost every dimension, and the three team averages sit within two points of each other. The strength is broad and real. Decision-Making carries the widest spread, from 58 to 85, so the team's judgement depends heavily on which members hold the decision.",
+  "definingPatternP2": "The risk is quiet drift: with no single weak dimension to rally around, the team can treat 69 as good enough and leave the spread unmanaged. Direction: make the decision process explicit, so the strongest judgement shapes the room before pace does.",
+  "patternCards": [
+    {
+      "label": "The ceiling",
+      "name": "A Nguyen · Summit",
+      "body": "A Nguyen scores 82, 80 and 78, the only member at or above 78 on every dimension, and sets the ceiling for the room. The watch-out is gravity: when A Nguyen speaks first, other reads arrive smaller. One option: hold A Nguyen's view to last in contested calls, so the room shows its judgement before the strongest hand plays."
+    },
+    {
+      "label": "The sharpest read",
+      "name": "B Tran · Navigator",
+      "body": "B Tran carries the team's best single judgement, Decision-Making at 85, with Communication at 70 to carry it. The watch-out is pace: a decision that lands right can still land alone. One option: pair B Tran with D Pham on the next big call, so the sharpest judgement and the steadiest hands shape it together."
+    },
+    {
+      "label": "The quiet anchor",
+      "name": "D Pham · Anchor",
+      "body": "D Pham anchors the team with Collaboration at 86, the highest single score in the group. Communication at 58 sits under the threshold, so the steadying work happens quietly. The watch-out: the room may read silence as agreement. One option: give D Pham the closing word on each decision review, a set moment to surface what the group missed."
+    },
+    {
+      "label": "The connector",
+      "name": "G Dang · Relay",
+      "body": "G Dang reads the room and moves work between people, with Collaboration at 72. Decision-Making at 58 is the soft spot: quick to pass the ball, slower to call the play. One option: assign G Dang one owned decision each sprint, small in scope, fully theirs, reviewed in the open."
+    }
+  ],
+  "missingCards": [],
+  "risks": [
+    {
+      "title": "Judgement rests on too few",
+      "statement": "Decision-Making averages 69 but spans 58 to 85. Three members sit at or under 64, so most calls route to the strongest deciders and the team's judgement narrows to two or three hands.",
+      "moves": [
+        "Put every recurring decision in a named-owner list, one owner per call, and rotate the small ones to the members who decide least.",
+        "Before each contested call, collect written positions first, then discuss. The room sees every read at full size before the loudest judgement shapes it."
+      ],
+      "observable": "quieter members close calls on their own and the owner of each decision is named before discussion starts."
+    },
+    {
+      "title": "Strength hides the seams",
+      "statement": "With averages of 70, 69 and 71, nothing looks urgent. Teams at this level often stop examining how they work, and the spread inside each dimension stays invisible until pressure finds it.",
+      "moves": [
+        "Hold a short monthly review of one real decision and one real handoff, chosen by rotation, with the scores on the table.",
+        "Ask each member to name one dimension to stretch this quarter and one place to support another member."
+      ],
+      "observable": "the team reviews its own working process without a prompt and names specific gaps before they surface as friction."
+    }
+  ],
+  "focusThemes": {
+    "D Pham": "The data: Collaboration at 86 and steady scores elsewhere, with Communication at 58 under the threshold. Worth exploring in a 1:1, the gap between how much D Pham holds the group steady and how little of that reading reaches the room in words.",
+    "E Vo": "The data: Decision-Making at 72 and Communication at 68, with Collaboration at 55 the one score under the threshold. Worth exploring in a 1:1, what makes shared work cost more than solo work under pressure.",
+    "G Dang": "The data: Collaboration at 72 against Decision-Making at 58, a wide inner gap. Worth exploring in a 1:1, the moment where G Dang hands a call to someone else and what would make holding it feel safe."
+  },
+  "stretchThemes": {
+    "A Nguyen": "The data: 82, 80 and 78, the most even strong line in the team. One stretch: chair the next contested decision without voting in it, and make the room's judgement land as well as A Nguyen's own.",
+    "B Tran": "The data: Decision-Making at 85, the team's sharpest single read. One stretch: narrate the reasoning behind one live call each week so the method spreads beyond the person."
+  },
+  "prescription": "The priority is Decision-Making at 69, a strong average with the team's widest spread underneath it. The matching next step is Deciding with Conviction, the Focused Session built to turn individual judgement into a shared decision process.",
+  "closingVerdict": "Strong for this team looks like eight capable members deciding as one room. The pattern is already close: hold the spread in view, give judgement a shared frame, and let quieter hands close real calls. The next assessment should show the low end rising toward the room's level."
+}

@@ -195,7 +195,7 @@ def validate_composed(composed, derived, team, leader_name):
     # prescription
     p = composed["prescription"]
     if derived["priorityDim"] not in p:
-        fails.append("prescription does not name the priority dimension")
+        fails.append(f"prescription must contain '{derived['priorityDim']}' verbatim (exact spelling, hyphen included)")
     if str(derived["priorityScore"]) not in p:
         fails.append("prescription does not cite the priority score")
     if SESSION_MAP[derived["priorityDim"]] not in p:
@@ -291,6 +291,22 @@ def _build_prompt(derived, team, date_str, leader_name):
         + json.dumps(input_payload, indent=2)
         + "\n\nOUTPUT: respond with ONE strict JSON object and nothing else, "
         "with exactly these fields:\n" + json.dumps(schema, indent=2)
+        + "\n\nHARD RULES — any single violation rejects the whole output:\n"
+        "1. NEVER write the words he, she, him, her, his or hers anywhere. Refer to "
+        "members by name, or with they, them, their. The spec's register examples "
+        "predate this rule; copy their tone but NEVER their pronouns.\n"
+        "2. Word limits are hard maximums. Target roughly 80 percent of each limit. "
+        "Count the words of every field before you finish it, including the fixed "
+        "openings like 'The data:' and 'One stretch:'.\n"
+        "3. No em dashes. NEVER write the two-word sequence ', not' anywhere: no "
+        "'X, not Y' constructions of any kind. British English.\n"
+        "4. Every number you cite must be a payload number or a difference between "
+        "two payload numbers. Never invent or re-round a number.\n"
+        "5. missingCards bodies must stay under 55 words INCLUDING the required "
+        "opening sentence and 'One structural option:'.\n"
+        "6. The prescription must contain the priority dimension EXACTLY as spelled "
+        f"in the payload ('{derived['priorityDim']}', hyphen included), the score "
+        f"{derived['priorityScore']}, and the session name verbatim."
     )
 
 def _call_api(system, user, model=None, api_key=None):
@@ -344,7 +360,16 @@ def compose(derived, team, date_str, leader_name, model=None, api_key=None):
                 r["num"] = f"{i + 1:02d}"
             return composed
         all_failures.append(fails)
+        # Repair mode: hand back the previous output and fix ONLY what failed.
+        # Regenerating from scratch tends to reproduce similar violations.
         user = (_build_prompt(derived, team, date_str, leader_name)
-                + "\n\nYour previous output FAILED validation. Fix every failure and "
-                "regenerate the full JSON:\n- " + "\n- ".join(fails[:25]))
+                + "\n\nYOUR PREVIOUS OUTPUT (failed validation):\n"
+                + json.dumps(composed, ensure_ascii=False)
+                + "\n\nIt failed ONLY these checks:\n- " + "\n- ".join(fails[:25])
+                + "\n\nReturn the FULL corrected JSON. Keep every passing field "
+                "unchanged and rewrite only the failing fields. If a failure says "
+                "'gendered pronoun', use the member's name or they/them/their. If it "
+                "says 'over N words', cut that field to well under the limit. If it "
+                "says a phrase must appear verbatim, include that exact phrase. If it "
+                "says 'X, not Y', remove the ', not' construction entirely.")
     raise CompositionHalt(all_failures)

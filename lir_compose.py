@@ -295,9 +295,11 @@ def _build_prompt(derived, team, date_str, leader_name):
         "1. NEVER write the words he, she, him, her, his or hers anywhere. Refer to "
         "members by name, or with they, them, their. The spec's register examples "
         "predate this rule; copy their tone but NEVER their pronouns.\n"
-        "2. Word limits are hard maximums. Target roughly 80 percent of each limit. "
-        "Count the words of every field before you finish it, including the fixed "
-        "openings like 'The data:' and 'One stretch:'.\n"
+        "2. Word limits are hard maximums, and the printed page only fits "
+        "comfortably when fields sit near 70 percent of each limit. Target 70 "
+        "percent. Count the words of every field before you finish it, including "
+        "the fixed openings like 'The data:' and 'One stretch:'. Prefer 2 moves "
+        "per risk unless a third is essential.\n"
         "3. No em dashes. NEVER write the two-word sequence ', not' anywhere: no "
         "'X, not Y' constructions of any kind. British English.\n"
         "4. Every number you cite must be a payload number or a difference between "
@@ -335,12 +337,18 @@ def _extract_json(text):
     i, j = text.find("{"), text.rfind("}")
     return json.loads(text[i:j + 1])
 
-def compose(derived, team, date_str, leader_name, model=None, api_key=None):
-    """Returns validated composed dict. Raises CompositionHalt after 3 failures."""
+def compose(derived, team, date_str, leader_name, model=None, api_key=None,
+            extra_rules=None):
+    """Returns validated composed dict. Raises CompositionHalt after 3 failures.
+    extra_rules: additional hard constraints (e.g. page-overflow feedback from
+    a previous render round)."""
     system = ("You are the composition engine for The Performance Lens "
               "Leadership Insight Report. The following specification governs "
               "every field you produce. Violations are rejected.\n\n" + _spec_text())
-    user = _build_prompt(derived, team, date_str, leader_name)
+    base_user = _build_prompt(derived, team, date_str, leader_name)
+    if extra_rules:
+        base_user += "\n\nADDITIONAL HARD CONSTRAINT FOR THIS GENERATION:\n" + extra_rules
+    user = base_user
     all_failures = []
     for attempt in range(3):
         try:
@@ -362,7 +370,7 @@ def compose(derived, team, date_str, leader_name, model=None, api_key=None):
         all_failures.append(fails)
         # Repair mode: hand back the previous output and fix ONLY what failed.
         # Regenerating from scratch tends to reproduce similar violations.
-        user = (_build_prompt(derived, team, date_str, leader_name)
+        user = (base_user
                 + "\n\nYOUR PREVIOUS OUTPUT (failed validation):\n"
                 + json.dumps(composed, ensure_ascii=False)
                 + "\n\nIt failed ONLY these checks:\n- " + "\n- ".join(fails[:25])

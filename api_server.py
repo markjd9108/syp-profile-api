@@ -248,7 +248,7 @@ app = FastAPI(title="TEW Profile API", version="2.3.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.4.1",
+    return {"status": "ok", "version": "2.4.2",
             "archetypes": list(ARCHETYPE_FILES),
             "endpoints": ["/generate", "/generate-cohort", "/generate-manager-report",
                           "/generate-leader-report", "/compute-averages"]}
@@ -560,19 +560,50 @@ def generate_lir(req: LIRRequest):
     if errors:
         raise HTTPException(422, {"stage": "input", "errors": errors})
     derived = lir_core.derive(members)
-    try:
-        composed = lir_compose.compose(derived, req.team, date_str, req.leaderName)
-    except lir_compose.CompositionHalt as e:
-        # Halt-and-flag: never ship a degraded report (Composition Spec §4)
-        raise HTTPException(422, {"stage": "composition",
-                                  "failures": e.failures[-1] if e.failures else [],
-                                  "attempts": len(e.failures)})
-    try:
-        payload = lir_core.build_payload(req.team, date_str, req.leaderName, derived, composed)
-        html = lir_core.inject(payload)
-        pdf_bytes = asyncio.run(lir_render.render_lir_pdf_async(html))
-    except Exception as e:
-        raise HTTPException(500, f"render: {e}")
+
+    # Compose -> render -> fit check. Composed copy near the word limits can
+    # push a page past one A4 sheet, spilling a near-blank extra page and
+    # breaking the contract's exact page counts. On overflow, recompose with
+    # a shorten constraint; after two rounds, halt and flag (no degraded ship).
+    _PAGE_FIELDS = ("page 2 = leaderVerdict/headline/priorityRead/firstMove; "
+                    "page 4 = pattern title/paragraphs/patternCards/missingCards; "
+                    "page 5 = focusThemes/stretchThemes; page 6 = risks "
+                    "(titles, statements, moves, observables); "
+                    "page 7 = prescription; page 8 = closingVerdict")
+    extra_rules = None
+    pdf_bytes = None
+    for fit_round in range(2):
+        try:
+            composed = lir_compose.compose(derived, req.team, date_str,
+                                           req.leaderName, extra_rules=extra_rules)
+        except lir_compose.CompositionHalt as e:
+            # Halt-and-flag: never ship a degraded report (Composition Spec §4)
+            raise HTTPException(422, {"stage": "composition",
+                                      "failures": e.failures[-1] if e.failures else [],
+                                      "attempts": len(e.failures)})
+        try:
+            payload = lir_core.build_payload(req.team, date_str, req.leaderName,
+                                             derived, composed)
+            html = lir_core.inject(payload)
+            pdf_bytes, heights = asyncio.run(lir_render.render_lir_pdf_async(html))
+        except Exception as e:
+            raise HTTPException(500, f"render: {e}")
+        over = lir_render.overflowing_pages(heights)
+        if not over:
+            break
+        print(f"[generate-lir] fit round {fit_round + 1}: pages {over} overflow "
+              f"A4 (heights {heights}); recomposing shorter", flush=True)
+        extra_rules = (
+            f"A previous generation overflowed the printed A4 page on report "
+            f"page(s) {over}. Compose the fields that appear on those pages at "
+            f"roughly 55 to 65 percent of their word limits, and use 2 moves per "
+            f"risk and 2 risks unless a third is essential. Field-to-page map: "
+            + _PAGE_FIELDS)
+    else:
+        raise HTTPException(422, {"stage": "fit",
+                                  "failures": [f"pages {over} overflow A4 after 2 "
+                                               "composition rounds"],
+                                  "attempts": 2})
 
     fname = lir_core.report_filename(req.team, date_str)
     headers = {"Content-Disposition": f'attachment; filename="{fname}"',

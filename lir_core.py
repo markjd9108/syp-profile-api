@@ -100,17 +100,12 @@ def derive(members):
     checkIn = [m for m in out_members if m["flag"] == "Check-In"]
     stretch = [m for m in out_members if m["flag"] == "Stretch"]
 
-    # Focus selection (Mark, 7 Jul 2026): page 5 highlights at most 5 themed
-    # members. All Check-In first (worst scores first), then strongest Stretch.
-    # Group headers keep the true flag counts.
-    MAX_THEMED = 5
-    ci_ranked = sorted(checkIn, key=lambda m: (min(m["comm"], m["dm"], m["collab"]), m["avg"]))
-    st_ranked = sorted(stretch, key=lambda m: (-Fraction(m["comm"] + m["dm"] + m["collab"], 3),
-                                               -min(m["comm"], m["dm"], m["collab"])))
-    themed_ci = ci_ranked[:MAX_THEMED]
-    themed_st = st_ranked[:max(0, MAX_THEMED - len(themed_ci))]
-    themed_ci_names = [m["name"] for m in out_members if m in themed_ci]
-    themed_st_names = [m["name"] for m in out_members if m in themed_st]
+    # Change Order 1: every flagged member gets a theme; page 5 tables
+    # paginate. Theme length per group (35 words at <=8 members, 25 at 9+).
+    themed_ci_names = [m["name"] for m in checkIn]
+    themed_st_names = [m["name"] for m in stretch]
+    theme_words_ci = 25 if len(checkIn) >= 9 else 35
+    theme_words_st = 25 if len(stretch) >= 9 else 35
 
     present = {m["archetype"] for m in out_members}
     absent = [a for a in ARCHETYPES if a not in present]
@@ -129,6 +124,8 @@ def derive(members):
         "stretchNames": [m["name"] for m in stretch],
         "themedCheckIn": themed_ci_names,
         "themedStretch": themed_st_names,
+        "themeWordsCi": theme_words_ci,
+        "themeWordsSt": theme_words_st,
         "absentArchetypes": absent,
         "patternCardCount": patternCardCount,
         "missingCardCount": min(2, len(absent)),
@@ -157,8 +154,11 @@ def build_payload(team, date_str, leader_name, derived, composed):
         "avgCollab": derived["avgCollab"], "avgOverall": derived["avgOverall"],
         "priorityDim": derived["priorityDim"], "priorityScore": derived["priorityScore"],
         "leaderVerdict": composed["leaderVerdict"],
-        "headline": composed["headline"],
-        "priorityRead": composed["priorityRead"],
+        "workingWell": composed["workingWell"],
+        "needsSupport": composed["needsSupport"],
+        "teamRisk": composed["teamRisk"],
+        "teamOpportunity": composed["teamOpportunity"],
+        "themeShort": derived["themeWordsCi"] == 25 and (derived["stretchCount"] == 0 or derived["themeWordsSt"] == 25),
         "firstMove": composed["firstMove"],
         "patternLabel": composed["patternLabel"],
         "patternTitle": composed["patternTitle"],

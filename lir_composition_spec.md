@@ -1,86 +1,110 @@
-# COMPOSITION SPEC — Leadership Insight Report
+# COMPOSITION SPEC v2 — Leadership Insight Report
 **The Performance Lens · Team Effectiveness Workshop**
-**For: Cowork wiring build. This document governs every COMPOSED field in the Data Contract. The composition API generates these fields fresh for each report from the team's actual data. Nothing here is optional; a composed output that violates any rule in Section 1 or 2 is rejected and regenerated.**
+**For: Cowork wiring build. This document REPLACES Composition Spec v1 in full. Where the two differ, v2 is correct. It governs every COMPOSED field in the Data Contract (as amended by Change Order 1). A composed output that violates any rule in Sections 1 or 2 is rejected and regenerated.**
 
 ---
 
 ## 1. Global rules (apply to every composed field)
 
-**Traceability.** Every name, count, score, and archetype in composed copy must exist in the payload. No invented people, no rounded-differently numbers, no interpolated scores. If a sentence cites "92", a 92 exists in the member data.
+**Insight first, number last.** This is the governing rule of v2. Composed copy tells the leader what is working, what needs support, what the risk is, and what to do, in plain words. Numbers support claims; they never lead them. Concretely:
+- Never open a sentence with a score or a statistic.
+- Maximum ONE score reference per composed block, placed in trailing or parenthetical position. Page 2 blocks carry ZERO scores (the locked number-to-watch line is the page's only number).
+- Never enumerate a member's dimension scores in prose. The Who Is Who table is the single home for score listings.
+- Theme cells on the Focus page never repeat the scores already shown in that row's columns.
+- Spread and range claims ("splits widely") are made in words; the underlying numbers may appear once, trailing, or not at all.
 
-**The six archetypes only.** Summit, Navigator, Signal, Anchor, Compass, Relay. No other archetype-style label may ever be introduced (no "the Driver", "the Challenger", or similar coinages).
+**Traceability still binds.** Every claim must be supported by the payload. The rule change is about placement and frequency, never accuracy. If composed copy says someone is the quietest voice, the data must show it.
+
+**Canonical archetype definitions.** Composed copy may only characterise archetypes per this table. No invented meanings, no drift.
+- Relay: aligns to clear briefs and delivers consistently. The execution baseline.
+- Navigator: makes the call when others defer. Sets direction in ambiguity.
+- Signal: reads the room before acting. High interpersonal awareness; the informal connector.
+- Summit: raises the standard. Does not accept the first adequate answer.
+- Anchor: the steadying force. Holds function when plans break; absorbs pressure quietly.
+- Compass: builds structure out of ambiguity. Maps complexity and creates process.
+The six names (Summit, Navigator, Signal, Anchor, Compass, Relay) are the only archetype labels permitted anywhere.
+
+**No workplace-ritual jargon.** Never assume the team runs agile or any named methodology. Banned: sprint, retrospective, retro, stand-up, backlog, scrum, kanban, OKR. Use neutral forms: weekly team meeting, project review, end-of-project debrief, regular check-in.
+
+**Product accuracy.** A Focused Session is a 90-minute development session. Never call it a workshop, never describe it as a half-day. Only the Team Effectiveness Workshop is a workshop.
+
+**No program language.** Moves are direct recommendations grounded in established practice, not a curriculum. Never prescribe cadences beyond a single recurring practice, never sequence moves into a schedule, never imply a step-by-step roadmap. The report tells the leader what the team needs and names proven ways to answer it; the leader decides how and when.
 
 **Banned outright:** "actually" · "rather than" · "instead of" · the "X, not Y" contrast construction · em dashes (use commas, full stops, or colons) · "manager" (always "leader") · "diagnostic" · "challenges" as a noun (use "problems") · "transform / unlock / empower / synergy / game-changing" · idioms and figures of speech (ESL-accessible plain English only) · scripted dialogue in quotation marks in any action or theme.
 
-**Register.** Plain, spoken, warm, precise. Short sentences. British English spelling to match the locked template copy (behaviour, normalised, recognise). Describe what the data shows; never speculate about motives, personality, or life outside the exercises. No outcome promises anywhere: observables describe visible behaviour change, never score movement.
+**No gendered pronouns.** Composed copy never uses he, she, him, her, his, or hers. Refer to members by name, or by they, them, their. Never infer gender from a name.
 
-**No gendered pronouns.** Composed copy never uses he, she, him, her, his, or hers. Refer to members by name, or by they, them, their. Never infer gender from a name. Note that the approved sample copy in the template predates this rule and uses gendered pronouns; do not imitate it on this one dimension. Everything else about its register remains the reference.
+**Register.** Executive plain. This report is read by business leaders; the tone is direct, precise, and professional, closer to a top-tier consulting insights page than to coaching. Short sentences. British English spelling (behaviour, normalised, recognise). Describe what the data shows; never speculate about motives, personality, or life outside the exercises. No outcome promises anywhere: observables describe visible behaviour change, never score movement. Two register bans that follow from this:
+- **No colloquial or folksy imagery.** Never "when a plan wobbles", "juggling", "spinning plates", "drops the ball", or similar. Say what is happening in business terms: "when direction is unclear", "when ownership breaks down", "when priorities shift mid-delivery".
+- **No tentative or coaching-casual framing.** Never "worth trying", "maybe give this a go", "you might consider", "could be worth". State what the team needs as a declarative, then name the practice.
 
-**Score framing.** Scores are behaviour under structured pressure, one data point. Composed copy may reference the 60 threshold and the bands' logic but never labels a person with a band name (bands are participant-facing).
+**Recommendations framing.** Every move follows the shape: what the team needs, stated directly, then one established practice that answers it. Practices are described as standard, established, or widely used in high-performing teams; never cite a specific study, author, firm, or statistic (the claim must never invite "which study?"). The leader owns sequencing and adoption; the report owns naming the need clearly.
 
-**Snapshot caveat.** Appears once in the template (page 5, locked). Composed copy never restates it.
+**Score framing.** Scores are behaviour under structured pressure, one data point. Composed copy never labels a person with a band name (bands are participant-facing). The snapshot caveat appears once in the template (page 5, locked); composed copy never restates it.
 
 ## 2. Per-block specification
 
-Word limits are hard maximums. Design containers are tested at 60 to 100 percent of each limit; under-filling is fine, overfilling is rejected.
+Word limits are hard maximums. Containers are tested at 60 to 100 percent of each limit.
 
 ### leaderVerdict · 60 words
-Reads: leaderName, team averages, priority dimension, member spread. Must cover: overall position in one sentence, the leading strength, the priority gap, the shape of the work ahead. Addressed to the leader by first name, once. Register example (approved): "Your team decides well and pulls together when the work gets hard, Mark. The strain is communication: at 50 it sits below the working threshold and splits widely across the three of you."
+Reads: the full payload. Addressed to the leader by first name, once. Must cover in plain words: what this team is good at, what holds it back, and the shape of the work ahead. Maximum one number, trailing, and only if it sharpens the point. Register target: "Mark, this team's judgement and commitment are in place. Decisions get made and the team holds together under pressure. What holds it back is how information moves: too much stays unsaid, and each member is working from a different picture of the same work. The work ahead is building a shared operating picture."
 
-### headline · 25 words
-Reads: avgOverall, leading dimension, priority dimension. One sentence: team average, leader dimension with score, priority dimension with score, and the gap between them when it is the story.
-
-### priorityRead · 50 words
-Reads: priority dimension member scores. Must cover: the average, the spread (low and high), and what the spread means in working terms. If the spread is narrow, say the level is shared instead of inventing a split.
+### The four at-a-glance blocks · 35 words each
+These replace the old headline and priorityRead. Zero scores in all four.
+- **workingWell**: what the team does well, stated as observed behaviour ("Decisions get made and stick. The team commits without drama and holds together under load.")
+- **needsSupport**: where the team underperforms, stated as behaviour and consequence, never as a number.
+- **teamRisk**: the single most important risk, in one plain sentence plus what it costs ("Decisions made without shared context. The work gets done, but each member is working from a different picture, and that breaks first under pressure.")
+- **teamOpportunity**: the growth opening, framed as what becomes possible ("This is a structural fix, one habit away. Give voicing a routine and the team's judgement starts compounding.")
+The four blocks and the verdict must tell the same story.
 
 ### firstMove · 45 words
-Reads: priority dimension, team structure. One concrete structural action the leader can run this week without a facilitator. Specific enough to start, never a script.
+One concrete practice the leader can start this week without a facilitator, in the need-then-practice shape. Neutral-ritual language only. No scores, no tentative framing.
 
 ### patternLabel · 6 words · patternTitle · 5 words
-The label is a small-caps kicker ("The pattern that shapes this team" is the default; vary only with reason). The title names the pattern in plain words. Approved register: "Strong hands, thin shared voice."
+Kicker and plain-words pattern name. Approved register: "Strong hands, thin shared voice."
 
 ### definingPatternP1, definingPatternP2 · 55 words each
-P1: the single most important structural fact of this team's composition, grounded in the numbers. P2: the risk that follows and one sentence of direction. Together they are the report's thesis; everything downstream must be consistent with them.
+P1: the structural fact of this team in plain words, what the team has and what it lacks. P2: the risk that follows and the direction. Maximum two numbers ACROSS BOTH paragraphs combined, trailing positions only. Register target: "This team's judgement and trust are already in place. What is missing is a shared picture: information lives in individuals and moves only when someone asks. Nothing looks broken day to day, which is why this pattern hides."
 
 ### patternCards · body 90 words each
-Count set by the Data Contract card rule (every member at teamSize ≤ 4; the 3 or 4 most consequential at teamSize ≥ 5). Card name format: "{{Name}} · {{Archetype}}". Each body: what this person contributes (with their actual scores), one specific watch-out, one option the leader can act on, introduced as "One option:". Never two watch-outs, never a verdict on the person.
+Count per the Data Contract card rule. Card name format: "{{Name}} · {{Archetype}}". Fixed shape, three beats: what this person GIVES the team, what they NEED, and one way to USE them better ("One option:"). Maximum one score, trailing or parenthetical, only when it sharpens the point; zero is often better. Characterisation must fit the canonical archetype definition. Register target: "Mark Pizza 2 is the member this team relies on when direction is unclear or ownership breaks down: steady, consistent, and carrying more load than they signal. What they need is a defined channel. They identify problems early and raise almost none of them, so the team loses its best early-warning input. One option: give them a standing agenda item to report what they are seeing."
 
 ### missingCards · body 55 words each
-Only archetypes absent from the team. Each body: the sentence pattern "No member fills the {{Archetype}} seat.", what the absence means in practice for THIS team's composition, then "One structural option:" with a rotation-or-structure move. When no archetypes are absent, this array is empty and the block is suppressed (Data Contract, Template guards).
+Only archetypes absent from the team. Shape: "No member fills the {{Archetype}} seat.", what the absence means for THIS team in practice (consistent with the canonical definition), then "One structural option:". No scores. Empty array when no archetypes are absent (block suppresses).
 
-### focusTheme · 45 words per Check-In member
-Fixed shape: "The data:" plus the member's actual score pattern in one or two sentences, then "Worth exploring in a 1:1," plus the theme as a subject. The theme is a topic, never a question in quotation marks and never advice to relay verbatim. Approved register: "Worth exploring in a 1:1, the distance between how much he steadies the group and how little he voices what he is seeing."
+### focusTheme · per Check-In member · 35 words (teams ≤ 8 flagged per group) · 25 words (9+)
+Shape: one sentence of insight about this person's pattern in plain words, then "Worth exploring in a 1:1," plus the theme as a subject. NO scores: the row's columns already show them. Register target: "The quietest voice on a team that needs more voices. Worth exploring in a 1:1, what would make it easier for them to speak first."
 
-### stretchTheme · 40 words per Stretch member
-Fixed shape: "The data:" plus the strength pattern, then "One stretch:" plus a concrete way to extend them. Strength framing throughout; no deficit language for Stretch members.
+### stretchTheme · per Stretch member · same length rule
+Shape: one sentence naming the strength in plain words, then "One stretch:" plus a concrete extension. Strength framing throughout, no deficit language, no scores.
 
-### risks · 2 or 3, ordered by severity in the data
-- title · 6 words. Names the risk plainly.
-- statement · 40 words. What the data shows and why it matters. Numbers must trace.
-- moves · 2 or 3 · 35 words each. Structural options a leader runs without a facilitator. Best practices, never step-by-step programs, never scripted lines.
-- observable · 25 words. Completes the locked lead-in "You will know this is moving when". Visible behaviour only, never a score target.
+### risks · 2 or 3, ordered by severity
+- title · 6 words. Plain words, no numbers.
+- statement · 40 words. What is happening and what it costs, in behavioural terms. Maximum one number, trailing.
+- moves · 2 or 3 · 35 words each. Fixed shape per the Recommendations framing rule: the need stated as a declarative, then one established practice. Register target: "This team needs decision ownership named before work starts. A standard practice: assign a single owner to each recurring decision and review the assignments monthly." Neutral-ritual language, no schedules, no scores.
+- observable · 25 words. Completes the locked lead-in "You will know this is moving when". Visible behaviour only.
 Risk 01 must align with the priority dimension unless the data shows a sharper structural risk, in which case priority appears as risk 02.
 
 ### prescription · 45 words
-Must name the priority dimension with its score and the matching Focused Session from the fixed mapping: Communication → Communicating with Clarity; Decision-Making → Deciding with Conviction; Collaboration → Collaborating Under Pressure. No other session may ever be prescribed. Ends before selling; the locked template copy after it handles format and boundaries.
+Names the priority area in plain words (the score may appear once, trailing) and the matching Focused Session from the fixed mapping: Communication → Communicating with Clarity; Decision-Making → Deciding with Conviction; Collaboration → Collaborating Under Pressure. Describes it as a 90-minute development session. Never "workshop", never "half-day". No other session may ever be prescribed.
 
 ### closingVerdict · 50 words
-The bookend to leaderVerdict: what strong looks like for this team and the two or three moves that get there. Confident, specific, zero promises. Approved register: "Strong for this team looks like its shared voice catching up to its judgement and its trust."
+Bookend to leaderVerdict: what strong looks like for this team and the two or three moves that get there. Confident, specific, zero promises, maximum one number.
 
 ## 3. Internal consistency requirements
 
-- The pattern named on page 4 must be the same pattern the headline, the risks, and both verdicts describe. One thesis per report.
-- The first risk's moves and the firstMove block must not contradict each other; overlap is fine, conflict is not.
-- Person cards, focus themes, and stretch themes for the same member must agree on that member's story.
-- If every member is Check-In, the narrative is team-level (per the locked fallback); composed copy must not single out one member as "the problem".
+- One thesis per report: the verdict, the four blocks, the pattern, the risks, and the closing verdict describe the same story.
+- firstMove and Risk 01's moves must not conflict; overlap is fine.
+- A member's pattern card and their focus or stretch theme must agree on that member's story.
+- When every member is Check-In, the narrative is team-level; composed copy never singles out one member as "the problem".
 
 ## 4. Generation mechanics
 
-- One composition call per report. Input: the derived payload minus composed fields, plus this spec's rules. Output: strict JSON containing only the composed fields.
-- Validate before use: JSON parses; every field present; every word limit respected; banned-language scan passes; traceability scan passes (every number and name in composed copy exists in the payload); archetype names ∈ the six.
-- On any validation failure: regenerate up to twice with the failure named in the retry prompt; after three failures, halt and flag for Mark's review rather than shipping a degraded report.
-- Temperature low (0.3 or under). Consistency beats flair; the register examples carry the voice.
+- One composition call per report. Output: strict JSON containing only the composed fields.
+- Validation before use: JSON parses; every field present; word limits respected; banned-language scan passes (including gendered pronouns, ritual jargon, folksy imagery terms such as "wobbles" and "juggling", and tentative framings such as "worth trying", "you might consider", "maybe"); score-frequency scan passes (count digit-bearing score references per block against the limits in Section 2); archetype names and characterisations conform; traceability scan passes; no study, author, firm, or statistic citations in any move.
+- On failure: regenerate up to twice with the failure named; after three failures, halt and flag for Mark's review.
+- Temperature low (0.3 or under).
 
-## 5. Register sources and one known deviation
+## 5. Register sources
 
-The approved register reference is the composed sample copy in the final Claude Design template (Pizzahut and Mekong Digital datasets), with one known deviation that must NOT be imitated: the Mekong Digital risk move "Work the rows, not the average" uses the banned contrast construction. The compliant form is "Work the rows before the average." Treat the corrected form as canonical.
+The register targets quoted in Section 2 of THIS document are the canonical voice reference. The sample copy in the design template predates v2, leads with scores, and must not be imitated on score placement, archetype characterisation, ritual jargon, or pronouns; its warmth and sentence rhythm remain useful.

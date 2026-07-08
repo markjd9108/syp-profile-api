@@ -248,7 +248,7 @@ app = FastAPI(title="TEW Profile API", version="2.3.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.4.3",
+    return {"status": "ok", "version": "2.5.0",
             "archetypes": list(ARCHETYPE_FILES),
             "endpoints": ["/generate", "/generate-cohort", "/generate-manager-report",
                           "/generate-leader-report", "/compute-averages"]}
@@ -573,11 +573,12 @@ def generate_lir(req: LIRRequest):
     # push a page past one A4 sheet, spilling a near-blank extra page and
     # breaking the contract's exact page counts. On overflow, recompose with
     # a shorten constraint; after two rounds, halt and flag (no degraded ship).
-    _PAGE_FIELDS = ("page 2 = leaderVerdict/headline/priorityRead/firstMove; "
+    _PAGE_FIELDS = ("page 2 = leaderVerdict/workingWell/needsSupport/teamRisk/"
+                    "teamOpportunity/firstMove; "
                     "page 4 = pattern title/paragraphs/patternCards/missingCards; "
-                    "page 5 = focusThemes/stretchThemes; page 6 = risks "
+                    "focus pages = focusThemes/stretchThemes; action plan = risks "
                     "(titles, statements, moves, observables); "
-                    "page 7 = prescription; page 8 = closingVerdict")
+                    "path page = prescription; appendix = closingVerdict")
     extra_rules = None
     pdf_bytes = None
     for fit_round in range(2):

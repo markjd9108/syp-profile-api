@@ -137,6 +137,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     // preserve ordering (React before ReactDOM before Babel before text/babel).
     const doc = new DOMParser().parseFromString(template, 'text/html');
     document.documentElement.replaceWith(doc.documentElement);
+    // Re-assert the viewport: swapping documentElement discards the wrapper's
+    // <meta name="viewport">, and Android Chrome then reverts to the 980px
+    // desktop viewport — a meta arriving inside the swapped subtree is not
+    // re-processed. A freshly created meta inserted into the live head is.
+    (function() {
+      var olds = document.querySelectorAll('meta[name="viewport"]');
+      for (var i = 0; i < olds.length; i++) olds[i].remove();
+      var v = document.createElement('meta');
+      v.setAttribute('name', 'viewport');
+      v.setAttribute('content', 'width=device-width, initial-scale=1');
+      document.head.insertBefore(v, document.head.firstChild);
+    })();
     const dead = Array.from(document.scripts);
     for (const old of dead) {
       const s = document.createElement('script');

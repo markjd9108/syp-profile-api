@@ -136,19 +136,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     // createElement so they execute, awaiting onload for src scripts to
     // preserve ordering (React before ReactDOM before Babel before text/babel).
     const doc = new DOMParser().parseFromString(template, 'text/html');
-    document.documentElement.replaceWith(doc.documentElement);
-    // Re-assert the viewport: swapping documentElement discards the wrapper's
-    // <meta name="viewport">, and Android Chrome then reverts to the 980px
-    // desktop viewport — a meta arriving inside the swapped subtree is not
-    // re-processed. A freshly created meta inserted into the live head is.
-    (function() {
-      var olds = document.querySelectorAll('meta[name="viewport"]');
-      for (var i = 0; i < olds.length; i++) olds[i].remove();
-      var v = document.createElement('meta');
-      v.setAttribute('name', 'viewport');
-      v.setAttribute('content', 'width=device-width, initial-scale=1');
-      document.head.insertBefore(v, document.head.firstChild);
-    })();
+    // Graft the unpacked document into the LIVE <html> instead of replacing
+    // the whole documentElement. Android Chrome reverts to the 980px desktop
+    // viewport the moment the active <meta name="viewport"> leaves the DOM
+    // (even as part of a root swap), and a meta inside a swapped-in subtree
+    // is not re-processed. The parse-time meta must never leave the document.
+    for (const a of doc.documentElement.attributes) {
+      document.documentElement.setAttribute(a.name, a.value);
+    }
+    const liveVp = document.querySelector('meta[name="viewport"]');
+    for (const n of Array.from(document.head.childNodes)) {
+      if (n !== liveVp) n.remove();
+    }
+    for (const n of Array.from(doc.head.childNodes)) {
+      if (n.nodeType === 1 && n.matches && n.matches('meta[name="viewport"]')) continue;
+      document.head.appendChild(document.adoptNode(n));
+    }
+    document.body.replaceWith(document.adoptNode(doc.body));
     const dead = Array.from(document.scripts);
     for (const old of dead) {
       const s = document.createElement('script');

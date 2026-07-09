@@ -248,7 +248,7 @@ app = FastAPI(title="TEW Profile API", version="2.3.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.5.1",
+    return {"status": "ok", "version": "2.5.2",
             "archetypes": list(ARCHETYPE_FILES),
             "endpoints": ["/generate", "/generate-cohort", "/generate-manager-report",
                           "/generate-leader-report", "/compute-averages"]}
@@ -609,10 +609,20 @@ def generate_lir(req: LIRRequest):
             f"risk and 2 risks unless a third is essential. Field-to-page map: "
             + _PAGE_FIELDS)
     else:
+        # Diagnostics: measured page heights + a fingerprint proving which
+        # template file this instance is serving (v2.5.1 split marker).
+        _tpl_path = os.path.join(os.path.dirname(os.path.abspath(lir_core.__file__)),
+                                 "lir_template_wired.html")
+        try:
+            _tpl_split = "n <= 12" in open(_tpl_path).read()
+        except OSError:
+            _tpl_split = None
         raise HTTPException(422, {"stage": "fit",
                                   "failures": [f"pages {over} overflow A4 after 2 "
                                                "composition rounds"],
-                                  "attempts": 2})
+                                  "attempts": 2,
+                                  "heights": heights,
+                                  "tplSplit9to12": _tpl_split})
 
     fname = lir_core.report_filename(req.team, date_str)
     headers = {"Content-Disposition": f'attachment; filename="{fname}"',

@@ -404,7 +404,11 @@ def _build_prompt(derived, team, date_str, leader_name):
         "reads the room, the informal connector; Summit raises the standard; Anchor is "
         "the steadying force under pressure; Compass builds structure out of ambiguity.\n"
         "10. Any number you do use must be a payload number or a difference of two "
-        "payload numbers. Never invent or re-round."
+        "payload numbers. Never invent or re-round.\n"
+        "11. NEVER write these words or phrases anywhere: instead of, rather than, "
+        "actually, manager, diagnostic, challenges, transform, unlock, empower, "
+        "synergy, game-changing. To express a replacement or change of behaviour, "
+        "state the new behaviour directly; do not contrast it against the old one."
     )
 
 def _call_api(system, user, model=None, api_key=None):

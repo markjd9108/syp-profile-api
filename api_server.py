@@ -248,7 +248,7 @@ app = FastAPI(title="TEW Profile API", version="2.3.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.5.2",
+    return {"status": "ok", "version": "2.5.3",
             "archetypes": list(ARCHETYPE_FILES),
             "endpoints": ["/generate", "/generate-cohort", "/generate-manager-report",
                           "/generate-leader-report", "/compute-averages"]}

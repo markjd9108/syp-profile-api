@@ -23,13 +23,18 @@ WORD_LIMITS = {
     "prescription": 45, "closingVerdict": 50,
 }
 
-# Spec v2 §1/§2: maximum score references per block (None = no limit check)
-SCORE_LIMITS = {
-    "leaderVerdict": 1, "firstMove": 0,
-    "workingWell": 0, "needsSupport": 0, "teamRisk": 0, "teamOpportunity": 0,
-    "patternLabel": 0, "patternTitle": 0,
-    "prescription": 1, "closingVerdict": 1,
-}
+# Change Order 2: the report is bands-only. Composed copy carries ZERO digits
+# anywhere (exempt: the fixed phrases '1:1' and '90-minute'). Counts in words.
+BAND_WORDS = ["Foundation", "Emerging", "Developing", "Strong"]
+
+# Change Order 2: never presume an operating cadence the team may not have.
+ASSUMED_CADENCE = ["weekly team meeting", "weekly meeting", "monthly review",
+                   "monthly meeting", "quarterly review", "your weekly",
+                   "your monthly", "each week's meeting", "the weekly"]
+
+# Change Order 2: 1:1 openers must vary (no opener more than twice per report).
+def _openers(themes):
+    return [" ".join(t.strip().split()[:4]).lower() for t in themes if t.strip()]
 
 RITUAL_JARGON = ["sprint", "retrospective", "retro", "stand-up", "standup",
                  "backlog", "scrum", "kanban", "okr"]
@@ -41,7 +46,7 @@ CITATION_MARKERS = ["study", "studies", "research", "survey", "according to", "%
 
 BANNED_WORDS = ["actually", "rather than", "instead of", "manager", "diagnostic",
                 "challenges", "transform", "unlock", "empower", "synergy",
-                "game-changing"]
+                "game-changing", "drama", "better calls", "good calls"]
 PRONOUNS = re.compile(r"\b(he|she|him|her|his|hers)\b", re.I)
 CONTRAST = re.compile(r",\s*not\s+[a-z]", re.I)
 ARCHETYPES = ["Summit", "Navigator", "Signal", "Anchor", "Compass", "Relay"]
@@ -82,18 +87,6 @@ def _walk_texts(composed):
         yield f"stretchThemes[{name}]", t
 
 THEME_OR_ACTION = re.compile(r"^(firstMove|risks\[\d+\]\.moves|focusThemes|stretchThemes)")
-
-def _allowed_numbers(derived):
-    base = set()
-    for m in derived["members"]:
-        base.update([m["comm"], m["dm"], m["collab"], m["avg"]])
-    base.update([derived["avgComm"], derived["avgDm"], derived["avgCollab"],
-                 derived["avgOverall"], derived["priorityScore"]])
-    base.update([derived["teamSize"], derived["checkInCount"], derived["stretchCount"]])
-    base.update([0, 40, 60, 70, 80, 100])
-    base.update(range(0, derived["teamSize"] + 1))
-    diffs = {abs(a - b) for a in base for b in base}
-    return base | diffs
 
 def _allowed_phrases(derived, team, leader_name):
     phrases = set()
@@ -211,8 +204,8 @@ def validate_composed(composed, derived, team, leader_name):
         else:
             if _wc(t) > ci_lim:
                 fails.append(f"focusThemes[{nm}] over {ci_lim} words")
-            if "Worth exploring in a 1:1" not in t:
-                fails.append(f"focusThemes[{nm}] missing 'Worth exploring in a 1:1'")
+            if "1:1" not in t:
+                fails.append(f"focusThemes[{nm}] must frame the theme for a 1:1")
             if _score_refs(t, member_names) > 0:
                 fails.append(f"focusThemes[{nm}] contains a score; themes carry no numbers")
     for nm in derived["themedStretch"]:
@@ -222,12 +215,19 @@ def validate_composed(composed, derived, team, leader_name):
         else:
             if _wc(t) > st_lim:
                 fails.append(f"stretchThemes[{nm}] over {st_lim} words")
-            if "One stretch:" not in t:
-                fails.append(f"stretchThemes[{nm}] missing 'One stretch:'")
+            if "stretch" not in t.lower():
+                fails.append(f"stretchThemes[{nm}] must offer a stretch")
             if _score_refs(t, member_names) > 0:
                 fails.append(f"stretchThemes[{nm}] contains a score; themes carry no numbers")
 
-    # prescription (Spec v2: priority area in plain words; score optional)
+    # opener variety (Change Order 2): no theme opener more than twice
+    ops = _openers(list(composed["focusThemes"].values())
+                   + list(composed["stretchThemes"].values()))
+    for op in set(ops):
+        if ops.count(op) > 2:
+            fails.append(f"theme opener '{op}' used {ops.count(op)} times; vary the openers (max twice)")
+
+    # prescription (CO2: priority area in plain words, bands only)
     p = composed["prescription"]
     dim_plain = derived["priorityDim"].lower().replace("-", " ")
     if dim_plain not in p.lower().replace("-", " "):
@@ -245,7 +245,6 @@ def validate_composed(composed, derived, team, leader_name):
         fails.append("prescription must not contain 'half-day'")
 
     # --- language rules, every field ---
-    allowed_nums = _allowed_numbers(derived)
     allowed_phrases = _allowed_phrases(derived, team, leader_name)
     for path, text in _walk_texts(composed):
         if not isinstance(text, str):
@@ -276,27 +275,14 @@ def validate_composed(composed, derived, team, leader_name):
             for w in CITATION_MARKERS:
                 if (w in low) if w == "%" else re.search(r"\b" + re.escape(w) + r"\b", low):
                     fails.append(f"{path} cites a study/statistic ('{w}'); moves never cite sources")
-        # Spec v2 score-frequency scan (member names exempted; they may carry digits)
+        # CO2: assumed-cadence scan
+        for w in ASSUMED_CADENCE:
+            if w in low:
+                fails.append(f"{path} presumes an operating cadence ('{w}')")
+        # CO2 bands-only: ZERO digits anywhere ('1:1', '90-minute', names exempt)
         mnames = [m["name"] for m in derived["members"]]
-        sr = _score_refs(text, mnames)
-        base_field = path.split("[")[0]
-        if base_field in SCORE_LIMITS and sr > SCORE_LIMITS[base_field]:
-            fails.append(f"{path} has {sr} score references; maximum {SCORE_LIMITS[base_field]}")
-        if path.startswith("patternCards") and path.endswith(".body") and sr > 1:
-            fails.append(f"{path} has more than one score reference")
-        if path.startswith("missingCards") and sr > 0:
-            fails.append(f"{path} contains a score; missing cards carry no numbers")
-        if re.search(r"\.title$|\.observable$", path) and sr > 0:
-            fails.append(f"{path} contains a number; titles and observables carry none")
-        if re.search(r"\.statement$", path) and sr > 1:
-            fails.append(f"{path} has more than one score reference")
-        if re.search(r"\.moves\[\d+\]$", path) and sr > 0:
-            fails.append(f"{path} contains a score; moves carry no numbers")
-        # number traceability (names, '1:1' and '90-minute' exempted)
-        clean = _strip_exempt(text, [m["name"] for m in derived["members"]])
-        for num in re.findall(r"\d+", clean):
-            if int(num) not in allowed_nums:
-                fails.append(f"{path} cites untraceable number {num}")
+        if _score_refs(text, mnames) > 0:
+            fails.append(f"{path} contains a digit; the report is bands-only")
         # name traceability: capitalised multi-word sequences must be known
         for seq in _CAPSEQ.findall(text):
             s = re.sub(r"[’']s\b", "", seq).strip()  # possessives trace to the name
@@ -308,19 +294,30 @@ def validate_composed(composed, derived, team, leader_name):
                 continue
             fails.append(f"{path} contains untraceable name/phrase '{s}'")
 
-    combined = (_score_refs(composed.get("definingPatternP1", ""), member_names)
-                + _score_refs(composed.get("definingPatternP2", ""), member_names))
-    if combined > 2:
-        fails.append(f"definingPatternP1+P2 carry {combined} score references; maximum 2 combined")
     return fails
 
 def _build_prompt(derived, team, date_str, leader_name):
+    # CO2: the model never sees a raw score. Bands only.
+    members_banded = [{
+        "name": m["name"], "archetype": m["archetype"], "flag": m["flag"],
+        "communication": m["bandComm"], "decisionMaking": m["bandDm"],
+        "collaboration": m["bandCollab"],
+    } for m in derived["members"]]
+    spread = {dim: f"{lo} to {hi}" if lo != hi else lo
+              for dim, (lo, hi) in derived["dimBandSpread"].items()}
     input_payload = {
         "team": team, "date": date_str, "leaderName": leader_name,
-        "members": derived["members"],
-        "avgComm": derived["avgComm"], "avgDm": derived["avgDm"],
-        "avgCollab": derived["avgCollab"], "avgOverall": derived["avgOverall"],
-        "priorityDim": derived["priorityDim"], "priorityScore": derived["priorityScore"],
+        "bandScale": "Foundation < Emerging < Developing < Strong "
+                     "(Developing is the working threshold)",
+        "members": members_banded,
+        "teamBands": {"Communication": derived["bandComm"],
+                      "Decision-Making": derived["bandDm"],
+                      "Collaboration": derived["bandCollab"],
+                      "Overall": derived["bandOverall"]},
+        "memberSpreadByDimension": spread,
+        "priorityDim": derived["priorityDim"],
+        "priorityBand": derived["priorityBand"],
+        "priorityBelowThreshold": derived["priorityBelow"],
         "checkInMembers": derived["checkInNames"], "stretchMembers": derived["stretchNames"],
         "themedCheckIn": derived["themedCheckIn"], "themedStretch": derived["themedStretch"],
         "teamSize": derived["teamSize"],
@@ -329,7 +326,7 @@ def _build_prompt(derived, team, date_str, leader_name):
     schema = {
         "leaderVerdict": "string, max 60 words, addressed to the leader by first name once; "
                          "what the team is good at, what holds it back, the shape of the work "
-                         "ahead; maximum ONE number, trailing",
+                         "ahead; bands only, ZERO digits",
         "workingWell": "string, max 35 words, ZERO numbers: what the team does well as observed behaviour",
         "needsSupport": "string, max 35 words, ZERO numbers: where the team underperforms, behaviour and consequence",
         "teamRisk": "string, max 35 words, ZERO numbers: the single most important risk and what it costs",
@@ -339,38 +336,38 @@ def _build_prompt(derived, team, date_str, leader_name):
         "patternLabel": "string, max 6 words",
         "patternTitle": "string, max 5 words",
         "definingPatternP1": "string, max 55 words: the structural fact of this team",
-        "definingPatternP2": "string, max 55 words: the risk that follows and the direction. "
-                             "Maximum TWO numbers across P1+P2 combined, trailing only",
+        "definingPatternP2": "string, max 55 words: the risk that follows and the direction. ZERO digits",
         "patternCards": f"array of EXACTLY {derived['patternCardCount']} objects "
                         "{label: small-caps kicker, name: '{{Member name}} · {{Their archetype}}', "
                         "body: max 90 words, three beats: what this person GIVES, what they NEED, "
-                        "one way to USE them better introduced 'One option:'. Maximum ONE score, "
-                        "trailing or parenthetical; zero is often better}",
+                        "one way to USE them better introduced 'One option:'. Bands only, ZERO digits}",
         "missingCards": (f"array of EXACTLY {derived['missingCardCount']} objects "
                          "{name: an ABSENT archetype from absentArchetypes, body: max 55 words, "
                          "ZERO numbers, opens 'No member fills the {{Archetype}} seat.' and includes "
                          "'One structural option:'}") if derived["missingCardCount"] else "empty array []",
-        "risks": "array of 2 or 3 objects {title: max 6 words, no numbers; statement: max 40 words, "
-                 "behavioural terms, maximum ONE number trailing; moves: 2-3 strings max 35 words each, "
-                 "need-then-practice shape, ZERO numbers, no schedules; observable: max 25 words "
-                 "completing 'You will know this is moving when', visible behaviour, no numbers} "
-                 "ordered by severity; risk 1 aligns with the priority dimension unless a sharper "
-                 "structural risk exists",
+        "risks": "array of 2 or 3 objects {title: max 6 words; statement: max 40 words, "
+                 "behavioural terms; moves: 2-3 strings max 35 words each, "
+                 "need-then-practice shape, no schedules, never presuming an existing meeting; "
+                 "observable: max 25 words completing 'You will know this is moving when', "
+                 "visible behaviour} ALL fields ZERO digits, ordered by severity; risk 1 aligns "
+                 "with the priority dimension unless a sharper structural risk exists",
         "focusThemes": f"object mapping EACH name in themedCheckIn (exactly those, no others) to a "
                        f"string, max {derived['themeWordsCi']} words: one sentence of insight about "
-                       "this person's pattern in plain words, then 'Worth exploring in a 1:1,' plus "
-                       "the theme as a subject. ZERO numbers",
+                       "this person's pattern in plain words, then a 1:1 conversation opener plus "
+                       "the theme as a subject. VARY the opener across members (e.g. 'Worth "
+                       "exploring in a 1:1,', 'A 1:1 could open with', 'One for your next 1:1:'); "
+                       "never the same opener more than twice. ZERO digits (the phrase 1:1 is fine)",
         "stretchThemes": f"object mapping EACH name in themedStretch (exactly those, no others) to a "
                          f"string, max {derived['themeWordsSt']} words: one sentence naming the "
-                         "strength in plain words, then 'One stretch:' plus a concrete extension. "
-                         "ZERO numbers, strength framing",
+                         "strength in plain words, then a concrete extension containing the word "
+                         "'stretch' (e.g. 'One stretch:', 'A stretch to offer:'). Vary the opener; "
+                         "ZERO digits, strength framing",
         "prescription": f"string, max 45 words: names the priority area in plain words "
-                        f"('{derived['priorityDim']}' verbatim; the score {derived['priorityScore']} "
-                        f"may appear once, trailing) and the session "
+                        f"('{derived['priorityDim']}' verbatim; its band may be named) and the session "
                         f"'{SESSION_MAP[derived['priorityDim']]}', described as a 90-minute "
-                        "development session. NEVER the words workshop or half-day",
+                        "development session. NEVER the words workshop or half-day. ZERO other digits",
         "closingVerdict": "string, max 50 words: what strong looks like and the two or three moves "
-                          "that get there; maximum one number",
+                          "that get there; ZERO digits",
     }
     return (
         "Compose the Leadership Insight Report fields for the team below. "
@@ -381,18 +378,19 @@ def _build_prompt(derived, team, date_str, leader_name):
         + "\n\nOUTPUT: respond with ONE strict JSON object and nothing else, "
         "with exactly these fields:\n" + json.dumps(schema, indent=2)
         + "\n\nHARD RULES — any single violation rejects the whole output:\n"
-        "1. INSIGHT FIRST, NUMBER LAST. Never open a sentence with a score. The four "
-        "at-a-glance blocks, firstMove, all themes, all moves, missingCards, titles and "
-        "observables carry ZERO numbers. Verdicts, statements, prescription: at most ONE "
-        "number, trailing. P1+P2: at most two combined. Never list a member's scores in prose.\n"
+        "1. BANDS, NOT NUMBERS. The payload contains no scores, only the four bands "
+        "(Foundation, Emerging, Developing, Strong). NEVER write a digit anywhere; the only "
+        "digit-bearing phrases allowed are '1:1' and '90-minute'. Express counts in words "
+        "(eight members, three of the ten). Use band words exactly as given.\n"
         "2. NEVER write he, she, him, her, his or hers. Use the member's name or "
         "they, them, their.\n"
         "3. Word limits are hard maximums; target roughly 70 percent of each. Count words "
         "including fixed openings like 'One stretch:'.\n"
         "4. No em dashes. NEVER write the two-word sequence ', not'. British English.\n"
         "5. No workplace-ritual jargon: sprint, retrospective, retro, stand-up, backlog, "
-        "scrum, kanban, OKR. Use neutral forms: weekly team meeting, project review, "
-        "regular check-in.\n"
+        "scrum, kanban, OKR. And NEVER presume a meeting cadence the team may not have "
+        "(no 'weekly team meeting', 'monthly review'). Either create the moment ('set "
+        "aside twenty minutes this week') or anchor to 'your next team discussion'.\n"
         "6. No colloquial imagery (wobbles, juggling, spinning plates, drops the ball) and "
         "no tentative framing (worth trying, you might consider, maybe, could be worth). "
         "State the need as a declarative, then name the practice.\n"
@@ -403,12 +401,13 @@ def _build_prompt(derived, team, date_str, leader_name):
         "Relay executes to clear briefs; Navigator makes the call in ambiguity; Signal "
         "reads the room, the informal connector; Summit raises the standard; Anchor is "
         "the steadying force under pressure; Compass builds structure out of ambiguity.\n"
-        "10. Any number you do use must be a payload number or a difference of two "
-        "payload numbers. Never invent or re-round.\n"
+        "10. Never rank or compare bands numerically; describe movement as bringing a "
+        "dimension toward the next band.\n"
         "11. NEVER write these words or phrases anywhere: instead of, rather than, "
         "actually, manager, diagnostic, challenges, transform, unlock, empower, "
-        "synergy, game-changing. To express a replacement or change of behaviour, "
-        "state the new behaviour directly; do not contrast it against the old one."
+        "synergy, game-changing, drama, better calls, good calls. To express a replacement or "
+        "change of behaviour, state the new behaviour directly; do not contrast it "
+        "against the old one. For decision quality write 'more informed decisions'."
     )
 
 def _call_api(system, user, model=None, api_key=None):

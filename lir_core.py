@@ -12,6 +12,13 @@ from datetime import datetime
 ARCHETYPES = ["Summit", "Navigator", "Signal", "Anchor", "Compass", "Relay"]
 DIMS = [("Communication", "comm"), ("Decision-Making", "dm"), ("Collaboration", "collab")]
 
+# Band scheme (single source: Foundation/Emerging/Developing/Strong @40/60/80)
+def band(score) -> str:
+    if score >= 80: return "Strong"
+    if score >= 60: return "Developing"
+    if score >= 40: return "Emerging"
+    return "Foundation"
+
 class LIRInputError(ValueError):
     pass
 
@@ -75,6 +82,7 @@ def derive(members):
         out_members.append({
             "name": m["name"], "archetype": m["archetype"],
             "comm": comm, "dm": dm, "collab": collab,
+            "bandComm": band(comm), "bandDm": band(dm), "bandCollab": band(collab),
             "avg": avg, "flag": flag,
         })
 
@@ -96,6 +104,15 @@ def derive(members):
     priorityDim = sorted(order, key=lambda d: (dim_means[d], -dim_spread[d], order.index(d)))[0]
     priorityScore = {"Communication": avgComm, "Decision-Making": avgDm,
                      "Collaboration": avgCollab}[priorityDim]
+    priorityBand = band(priorityScore)
+    priorityBelow = priorityScore <= 59
+
+    # Banded spread per dimension (lowest member band .. highest member band)
+    _order = ["Foundation", "Emerging", "Developing", "Strong"]
+    dimBandSpread = {}
+    for label, key in DIMS:
+        bs = sorted((band(m[key]) for m in out_members), key=_order.index)
+        dimBandSpread[label] = (bs[0], bs[-1])
 
     checkIn = [m for m in out_members if m["flag"] == "Check-In"]
     stretch = [m for m in out_members if m["flag"] == "Stretch"]
@@ -118,6 +135,10 @@ def derive(members):
         "avgComm": avgComm, "avgDm": avgDm, "avgCollab": avgCollab,
         "avgOverall": avgOverall,
         "priorityDim": priorityDim, "priorityScore": priorityScore,
+        "priorityBand": priorityBand, "priorityBelow": priorityBelow,
+        "bandComm": band(avgComm), "bandDm": band(avgDm),
+        "bandCollab": band(avgCollab), "bandOverall": band(avgOverall),
+        "dimBandSpread": dimBandSpread,
         "priorityMemberScores": {m["name"]: m[dict((l, k) for l, k in DIMS)[priorityDim]] for m in out_members},
         "checkInCount": len(checkIn), "stretchCount": len(stretch), "teamSize": n,
         "checkInNames": [m["name"] for m in checkIn],
@@ -130,9 +151,9 @@ def derive(members):
         "patternCardCount": patternCardCount,
         "missingCardCount": min(2, len(absent)),
         "cards": [
-            {"label": "Communication", "score": avgComm},
-            {"label": "Decision-Making", "score": avgDm},
-            {"label": "Collaboration", "score": avgCollab},
+            {"label": "Communication", "band": band(avgComm)},
+            {"label": "Decision-Making", "band": band(avgDm)},
+            {"label": "Collaboration", "band": band(avgCollab)},
         ],
     }
 
@@ -140,7 +161,9 @@ def build_payload(team, date_str, leader_name, derived, composed):
     """Merge derived + composed into the template payload."""
     members = []
     for m in derived["members"]:
-        mm = dict(m)
+        mm = {"name": m["name"], "archetype": m["archetype"],
+              "comm": m["bandComm"], "dm": m["bandDm"],
+              "collab": m["bandCollab"], "flag": m["flag"]}
         if m["name"] in derived["themedCheckIn"]:
             mm["focusTheme"] = composed["focusThemes"][m["name"]]
         elif m["name"] in derived["themedStretch"]:
@@ -150,9 +173,11 @@ def build_payload(team, date_str, leader_name, derived, composed):
         "team": team, "date": date_str, "leaderName": leader_name,
         "members": members,
         "cards": derived["cards"],
-        "avgComm": derived["avgComm"], "avgDm": derived["avgDm"],
-        "avgCollab": derived["avgCollab"], "avgOverall": derived["avgOverall"],
-        "priorityDim": derived["priorityDim"], "priorityScore": derived["priorityScore"],
+        "avgComm": derived["bandComm"], "avgDm": derived["bandDm"],
+        "avgCollab": derived["bandCollab"],
+        "priorityDim": derived["priorityDim"],
+        "priorityBand": derived["priorityBand"],
+        "priorityBelow": derived["priorityBelow"],
         "leaderVerdict": composed["leaderVerdict"],
         "workingWell": composed["workingWell"],
         "needsSupport": composed["needsSupport"],

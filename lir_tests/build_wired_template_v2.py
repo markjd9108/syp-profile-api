@@ -31,6 +31,13 @@ FALLBACK_CHECKIN_SHORT = "No members sit in the Check-In group this round."
 
 P3_INTRO = ("The full team in one view. The Focus column marks who needs a supporting "
             "conversation (Check-In) and who is ready for more (Stretch).")
+HOW_TO_READ = ("Everything here comes from structured exercises your team completed "
+               "together, each one built on researched patterns of how effective teams "
+               "communicate, decide and work together. Every member answered for their "
+               "own approach and for the teammates they worked alongside, so each "
+               "picture is cross-checked, not self-reported. It is a snapshot of one "
+               "session, not a final judgement of any person. Treat it as an honest "
+               "starting point: the patterns it surfaces are the ones worth exploring first.")
 P3_LEGEND = ("Amber marks an area needing support. Check-In: at least one area needs "
              "support. Stretch: strong across the board, ready for more.")
 P5_INTRO = ("Two groups deserve deliberate attention this quarter. The conversation "
@@ -85,42 +92,55 @@ PAGE2_NEW = f"""<div class="page" data-screen-label="02 The One-Page Read" style
           {glance_card("The opportunity", "teamOpportunity")}
       </div>
 
-      <p style="font-family:var(--font-heading);font-weight:600;font-size:15px;color:var(--navy-900);margin:14px 2px 0">{{{{ numberToWatch }}}}</p>
+      <p style="font-family:var(--font-heading);font-weight:600;font-size:15px;color:var(--navy-900);margin:14px 2px 0">{{{{ oneToWatch }}}}</p>
 
       <!-- Element 4: start-here box -->
       <div style="background:var(--callout);border-left:3px solid var(--blue-500);border-radius:6px;padding:20px 24px;margin-top:16px">
         <div style="font-family:var(--font-body);font-weight:700;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:var(--blue-600)">One move to start with</div>
         <p style="font-family:var(--font-body);font-size:15px;line-height:1.55;color:var(--ink-900);margin:11px 0 0;text-wrap:pretty">{{{{ firstMove }}}}</p>
       </div>
+
+      <!-- Element 5: how to read this report (locked, CO2) -->
+      <div style="margin-top:16px;border-top:1px solid var(--rule-200);padding-top:12px">
+        <p style="font-family:var(--font-body);font-size:12px;line-height:1.55;color:var(--text-muted);margin:0;text-wrap:pretty"><strong style="color:var(--navy-900)">How to read this report.</strong> {HOW_TO_READ}</p>
+      </div>
     </div>
     {FOOTER.replace("%%PAGE%%", "2")}
   </div>
 """
 
-WIW_ROW = """<sc-raw-tr>
-              <sc-raw-td style="padding:11px 12px 11px 0;border-bottom:1px solid var(--rule-200);font-weight:700;font-size:14px;color:var(--navy-900)">{{ m.name }}</sc-raw-td>
-              <sc-raw-td style="padding:11px 12px;border-bottom:1px solid var(--rule-200);font-size:13px;color:var(--text-muted)">{{ m.archetype }}</sc-raw-td>
-              <sc-raw-td style="{{ m.commStyle }}">{{ m.comm }}</sc-raw-td>
-              <sc-raw-td style="{{ m.dmStyle }}">{{ m.dm }}</sc-raw-td>
-              <sc-raw-td style="{{ m.collabStyle }}">{{ m.collab }}</sc-raw-td>
-              <sc-raw-td style="{{ m.avgStyle }}">{{ m.avg }}</sc-raw-td>
-              <sc-raw-td style="padding:11px 0 11px 12px;border-bottom:1px solid var(--rule-200)"><span style="{{ m.flagStyle }}">{{ m.flag }}</span></sc-raw-td>
+CHIP_TD = ('padding:8px 4px;border-bottom:1px solid var(--rule-200);'
+           'text-align:center;vertical-align:middle;white-space:nowrap')
+CHIP_TD_TOP = ('padding:13px 4px;border-bottom:1px solid var(--rule-200);'
+               'text-align:center;vertical-align:top;white-space:nowrap')
+
+def chip(prefix, td_style):
+    return (f'<sc-raw-td style="{td_style}"><span style="display:inline-flex;'
+            f'align-items:center;gap:5px"><span style="{{{{ m.{prefix}Dot }}}}"></span>'
+            f'<span style="{{{{ m.{prefix}Txt }}}}">{{{{ m.{prefix} }}}}</span></span></sc-raw-td>')
+
+WIW_ROW = f"""<sc-raw-tr>
+              <sc-raw-td style="padding:8px 10px 8px 0;border-bottom:1px solid var(--rule-200);font-weight:700;font-size:13px;color:var(--navy-900)">{{{{ m.name }}}}</sc-raw-td>
+              <sc-raw-td style="padding:8px 10px;border-bottom:1px solid var(--rule-200);font-size:12.5px;color:var(--text-muted)">{{{{ m.archetype }}}}</sc-raw-td>
+              {chip("comm", CHIP_TD)}
+              {chip("dm", CHIP_TD)}
+              {chip("collab", CHIP_TD)}
+              <sc-raw-td style="padding:8px 0 8px 10px;border-bottom:1px solid var(--rule-200)"><span style="{{{{ m.flagStyle }}}}">{{{{ m.flag }}}}</span></sc-raw-td>
             </sc-raw-tr>"""
 
 WIW_THEAD = f"""<sc-raw-thead>
           <sc-raw-tr>
-            <sc-raw-th style="{TH.format(al='left', pad='0 12px 9px 0')}">Name</sc-raw-th>
-            <sc-raw-th style="{TH.format(al='left', pad='0 12px 9px')}">Archetype</sc-raw-th>
-            <sc-raw-th style="{TH.format(al='center', pad='0 8px 9px')}">Comm.</sc-raw-th>
-            <sc-raw-th style="{TH.format(al='center', pad='0 8px 9px')}">Decision-Making</sc-raw-th>
-            <sc-raw-th style="{TH.format(al='center', pad='0 8px 9px')}">Collab.</sc-raw-th>
-            <sc-raw-th style="{TH.format(al='center', pad='0 8px 9px')}">Avg</sc-raw-th>
-            <sc-raw-th style="{TH.format(al='left', pad='0 0 9px 12px')}">Focus</sc-raw-th>
+            <sc-raw-th style="{TH.format(al='left', pad='0 10px 8px 0')}">Name</sc-raw-th>
+            <sc-raw-th style="{TH.format(al='left', pad='0 10px 8px')}">Archetype</sc-raw-th>
+            <sc-raw-th style="{TH.format(al='center', pad='0 4px 8px')}">Comm.</sc-raw-th>
+            <sc-raw-th style="{TH.format(al='center', pad='0 4px 8px')}">Decision-Making</sc-raw-th>
+            <sc-raw-th style="{TH.format(al='center', pad='0 4px 8px')}">Collab.</sc-raw-th>
+            <sc-raw-th style="{TH.format(al='left', pad='0 0 8px 10px')}">Focus</sc-raw-th>
           </sc-raw-tr>
         </sc-raw-thead>"""
 
-AVG_TD = ('padding:12px 8px;border-top:2px solid var(--navy-900);text-align:center;'
-          'font-weight:800;font-size:14px;color:var(--navy-900);font-variant-numeric:tabular-nums')
+AVG_TD = ('padding:10px 4px;border-top:2px solid var(--navy-900);text-align:center;'
+          'white-space:nowrap')
 
 PAGE3_NEW = f"""<sc-for list="{{{{ wiwPages }}}}" as="wp" hint-placeholder-count="1">
   <div class="page" data-screen-label="03 Who Is Who" style="width:794px;min-height:1123px;background:#fff;box-sizing:border-box;box-shadow:0 3px 26px rgba(10,22,69,0.12);display:flex;flex-direction:column">
@@ -132,12 +152,12 @@ PAGE3_NEW = f"""<sc-for list="{{{{ wiwPages }}}}" as="wp" hint-placeholder-count
 
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 16px">
         <sc-for list="{{{{ cards }}}}" as="card" hint-placeholder-count="3">
-          <div style="border:1px solid var(--rule-200);border-radius:6px;padding:12px 16px;display:flex;align-items:center;gap:12px">
-            <div style="flex:1;min-width:0">
-              <div style="font-family:var(--font-body);font-weight:700;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{{{ card.label }}}}</div>
-              <div style="height:5px;border-radius:3px;background:var(--rule-200);margin-top:9px;overflow:hidden"><div style="{{{{ card.barStyle }}}}"></div></div>
+          <div style="border:1px solid var(--rule-200);border-radius:6px;padding:12px 16px">
+            <div style="font-family:var(--font-body);font-weight:700;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{{{ card.label }}}}</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:9px">
+              <div style="flex:1;min-width:0;height:5px;border-radius:3px;background:var(--rule-200);overflow:hidden"><div style="{{{{ card.barStyle }}}}"></div></div>
+              <div style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex:none"><span style="{{{{ card.dotStyle }}}}"></span><span style="font-family:var(--font-heading);font-weight:800;font-size:13.5px;letter-spacing:0.02em;color:var(--navy-900)">{{{{ card.band }}}}</span></div>
             </div>
-            <div style="font-family:var(--font-display);font-weight:900;font-size:32px;line-height:1;color:var(--navy-900);font-variant-numeric:tabular-nums">{{{{ card.score }}}}</div>
           </div>
         </sc-for>
       </div>
@@ -160,13 +180,12 @@ PAGE3_NEW = f"""<sc-for list="{{{{ wiwPages }}}}" as="wp" hint-placeholder-count
           <sc-for list="{{{{ wp.rows }}}}" as="m" hint-placeholder-count="3">{WIW_ROW}</sc-for>
           <sc-if value="{{{{ wp.last }}}}" hint-placeholder-val="{{{{ true }}}}">
           <sc-raw-tr>
-            <sc-raw-td style="padding:12px 12px 12px 0;border-top:2px solid var(--navy-900);font-family:var(--font-heading);font-weight:700;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--navy-900)">Team average</sc-raw-td>
-            <sc-raw-td style="padding:12px 12px;border-top:2px solid var(--navy-900)"></sc-raw-td>
-            <sc-raw-td style="{AVG_TD}">{{{{ avgComm }}}}</sc-raw-td>
-            <sc-raw-td style="{AVG_TD}">{{{{ avgDm }}}}</sc-raw-td>
-            <sc-raw-td style="{AVG_TD}">{{{{ avgCollab }}}}</sc-raw-td>
-            <sc-raw-td style="{AVG_TD}">{{{{ avgOverall }}}}</sc-raw-td>
-            <sc-raw-td style="padding:12px 0;border-top:2px solid var(--navy-900)"></sc-raw-td>
+            <sc-raw-td style="padding:10px 10px 10px 0;border-top:2px solid var(--navy-900);font-family:var(--font-heading);font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--navy-900)">Team level</sc-raw-td>
+            <sc-raw-td style="padding:10px 10px;border-top:2px solid var(--navy-900)"></sc-raw-td>
+            <sc-raw-td style="{AVG_TD}"><span style="display:inline-flex;align-items:center;gap:5px"><span style="{{{{ avgCommDot }}}}"></span><span style="{{{{ avgCommTxt }}}}">{{{{ avgComm }}}}</span></span></sc-raw-td>
+            <sc-raw-td style="{AVG_TD}"><span style="display:inline-flex;align-items:center;gap:5px"><span style="{{{{ avgDmDot }}}}"></span><span style="{{{{ avgDmTxt }}}}">{{{{ avgDm }}}}</span></span></sc-raw-td>
+            <sc-raw-td style="{AVG_TD}"><span style="display:inline-flex;align-items:center;gap:5px"><span style="{{{{ avgCollabDot }}}}"></span><span style="{{{{ avgCollabTxt }}}}">{{{{ avgCollab }}}}</span></span></sc-raw-td>
+            <sc-raw-td style="padding:10px 0;border-top:2px solid var(--navy-900)"></sc-raw-td>
           </sc-raw-tr>
           </sc-if>
         </sc-raw-tbody>
@@ -175,6 +194,7 @@ PAGE3_NEW = f"""<sc-for list="{{{{ wiwPages }}}}" as="wp" hint-placeholder-count
       <sc-if value="{{{{ wp.last }}}}" hint-placeholder-val="{{{{ true }}}}">
       <div style="font-size:12px;color:var(--slate-400);margin-top:10px">{P3_LEGEND}</div>
 
+      <sc-if value="{{{{ compOnP3 }}}}" hint-placeholder-val="{{{{ true }}}}">
       <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:26px;margin-top:28px;align-items:start">
         <div>
           <div style="font-family:var(--font-body);font-weight:700;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--slate-600);margin-bottom:12px">Team composition</div>
@@ -201,6 +221,7 @@ PAGE3_NEW = f"""<sc-for list="{{{{ wiwPages }}}}" as="wp" hint-placeholder-count
           <p style="font-family:var(--font-body);font-size:13px;line-height:1.55;color:var(--text-muted);margin:0;text-wrap:pretty">Each team member has received their own private profile. This report is the team layer: it shows what the collective data says.</p>
         </div>
       </div>
+      </sc-if>
       </sc-if>
     </div>
     {FOOTER.replace("%%PAGE%%", "{{ wp.num }}")}
@@ -229,9 +250,9 @@ def group_table(kind, theme_header):
                   <div style="font-weight:700;font-size:14px;color:var(--navy-900)">{{{{ m.name }}}}</div>
                   <div style="font-size:12px;color:var(--text-muted);margin-top:2px">{{{{ m.archetype }}}}</div>
                 </sc-raw-td>
-                <sc-raw-td style="{{{{ m.commStyleTop }}}}">{{{{ m.comm }}}}</sc-raw-td>
-                <sc-raw-td style="{{{{ m.dmStyleTop }}}}">{{{{ m.dm }}}}</sc-raw-td>
-                <sc-raw-td style="{{{{ m.collabStyleTop }}}}">{{{{ m.collab }}}}</sc-raw-td>
+                {chip("comm", CHIP_TD_TOP)}
+                {chip("dm", CHIP_TD_TOP)}
+                {chip("collab", CHIP_TD_TOP)}
                 <sc-raw-td style="padding:13px 0 13px 14px;border-bottom:1px solid var(--rule-200);font-size:13px;line-height:1.5;color:var(--text-body);vertical-align:top;text-wrap:pretty">{{{{ m.theme }}}}</sc-raw-td>
               </sc-raw-tr>
             </sc-for>
@@ -291,7 +312,7 @@ PAGE5_NEW = f"""<sc-for list="{{{{ p5Pages }}}}" as="pg" hint-placeholder-count=
 
         <sc-if value="{{{{ b.caveat }}}}" hint-placeholder-val="{{{{ true }}}}">
         <div style="border-left:3px solid var(--rule-300);padding:4px 0 4px 18px;margin-top:24px">
-          <p style="font-family:var(--font-body);font-size:13px;line-height:1.55;color:var(--text-muted);margin:0;text-wrap:pretty">These scores are a snapshot of behaviour under structured pressure, one data point. Use them to open conversations.</p>
+          <p style="font-family:var(--font-body);font-size:13px;line-height:1.55;color:var(--text-muted);margin:0;text-wrap:pretty">This picture is a snapshot of behaviour under structured pressure, one data point. Use it to open conversations.</p>
         </div>
         </sc-if>
 
@@ -302,7 +323,33 @@ PAGE5_NEW = f"""<sc-for list="{{{{ p5Pages }}}}" as="pg" hint-placeholder-count=
   </sc-for>
 """
 
-APPENDIX_BLOCK = f"""<div style="margin-top:30px">
+APPENDIX_COMPOSITION = """<sc-if value="{{ compInAppendix }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:20px">
+        <h3 style="font-family:var(--font-heading);font-weight:700;font-size:16px;color:var(--navy-900);margin:0 0 10px">Team composition</h3>
+        <sc-raw-table style="width:100%;border-collapse:collapse;font-family:var(--font-body)">
+          <sc-raw-thead>
+            <sc-raw-tr>
+              <sc-raw-th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate-600);font-weight:700;padding:0 10px 7px 0;border-bottom:1px solid var(--rule-300)">Archetype</sc-raw-th>
+              <sc-raw-th style="text-align:center;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate-600);font-weight:700;padding:0 10px 7px;border-bottom:1px solid var(--rule-300)">Count</sc-raw-th>
+              <sc-raw-th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate-600);font-weight:700;padding:0 0 7px 10px;border-bottom:1px solid var(--rule-300)">Members</sc-raw-th>
+            </sc-raw-tr>
+          </sc-raw-thead>
+          <sc-raw-tbody>
+            <sc-for list="{{ archetypes }}" as="a" hint-placeholder-count="3">
+            <sc-raw-tr>
+                <sc-raw-td style="padding:5px 10px 5px 0;border-bottom:1px solid var(--rule-200);font-weight:700;font-size:12px;color:var(--navy-900)">{{ a.arch }}</sc-raw-td>
+                <sc-raw-td style="padding:5px 10px;border-bottom:1px solid var(--rule-200);text-align:center;font-weight:700;font-size:12px;color:var(--navy-900);font-variant-numeric:tabular-nums">{{ a.count }}</sc-raw-td>
+                <sc-raw-td style="padding:5px 0 5px 10px;border-bottom:1px solid var(--rule-200);font-size:11.5px;color:var(--text-muted)">{{ a.members }}</sc-raw-td>
+              </sc-raw-tr>
+            </sc-for>
+          </sc-raw-tbody>
+        </sc-raw-table>
+      </div>
+      </sc-if>
+
+      """
+
+APPENDIX_BLOCK = f"""<div style="margin-top:20px">
         <h3 style="font-family:var(--font-heading);font-weight:700;font-size:16px;color:var(--navy-900);margin:0 0 14px">Focus groups</h3>
         <p style="font-family:var(--font-body);font-size:13.5px;line-height:1.55;color:var(--text-body);margin:0;text-wrap:pretty">{APPENDIX_FOCUS}</p>
       </div>
@@ -314,12 +361,18 @@ APPENDIX_BLOCK = f"""<div style="margin-top:30px">
 # through the end of the return object). Written against the payload contract
 # as amended by Change Order 1.
 RENDERVALS_V2 = r"""
-    const avgStyleStr = 'padding:11px 8px;text-align:center;font-variant-numeric:tabular-nums;font-size:14px;font-weight:800;color:var(--navy-900);border-bottom:1px solid var(--rule-200);';
+    // CO2: bands-only. Payload dim values are band words, rendered as
+    // colour-dot chips; below-threshold bands carry amber text (legend intact).
+    const BCOLOR = { 'Strong': 'var(--scale-strong)', 'Developing': 'var(--scale-developing)',
+                     'Emerging': 'var(--scale-emerging)', 'Foundation': 'var(--scale-foundation)' };
+    const BLOW = { 'Strong': false, 'Developing': false, 'Emerging': true, 'Foundation': true };
+    const bdot = (b, sz) => 'width:' + sz + 'px;height:' + sz + 'px;border-radius:50%;flex:none;background:' + (BCOLOR[b] || 'var(--rule-300)') + ';';
+    const btxt = b => 'font-size:10.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;' + (BLOW[b] ? 'color:#8A5200;' : 'color:var(--navy-900);');
     const members = cfg.members.map(m => ({
       ...m,
-      commStyle: this.cell(m.comm, false), dmStyle: this.cell(m.dm, false), collabStyle: this.cell(m.collab, false),
-      commStyleTop: this.cell(m.comm, true), dmStyleTop: this.cell(m.dm, true), collabStyleTop: this.cell(m.collab, true),
-      avgStyle: avgStyleStr,
+      commDot: bdot(m.comm, 9), commTxt: btxt(m.comm),
+      dmDot: bdot(m.dm, 9), dmTxt: btxt(m.dm),
+      collabDot: bdot(m.collab, 9), collabTxt: btxt(m.collab),
       flagStyle: m.flag === 'Steady' ? 'display:none' : this.flagStyle(m.flag),
     }));
     const checkInMembers = members.filter(m => m.flag === 'Check-In').map(m => ({ ...m, theme: m.focusTheme }));
@@ -329,35 +382,32 @@ RENDERVALS_V2 = r"""
     cfg.members.forEach(m => { if (!amap[m.archetype]) { amap[m.archetype] = []; order.push(m.archetype); } amap[m.archetype].push(m.name); });
     const archetypes = order.map(a => ({ arch: a, count: amap[a].length, members: amap[a].join(', ') }));
 
-    const cards = cfg.cards.map(c => ({ ...c, barStyle: this.bar(c.score) }));
+    const BPCT = { 'Foundation': 18, 'Emerging': 45, 'Developing': 72, 'Strong': 95 };
+    const cards = cfg.cards.map(c => ({ ...c, barStyle: this.bar(BPCT[c.band] || 0), dotStyle: bdot(c.band, 12) }));
     const hasMissing = Array.isArray(cfg.missingCards) && cfg.missingCards.length > 0;
     const splitPage4 = cfg.patternCards.length >= 4 && hasMissing;
     const inlineMissingFlag = cfg.patternCards.length < 4 && hasMissing;
     const patternGridCols = cfg.patternCards.length <= 3 ? ('repeat(' + cfg.patternCards.length + ',1fr)') : '1fr 1fr';
 
     const bands = [
-      { band: 'Strong', range: '80–100', desc: 'Demonstrable strength under pressure.', dotStyle: 'width:11px;height:11px;border-radius:50%;background:var(--scale-strong);flex:none' },
-      { band: 'Developing', range: '60–79', desc: 'Working capability, above threshold, with room to grow.', dotStyle: 'width:11px;height:11px;border-radius:50%;background:var(--scale-developing);flex:none' },
-      { band: 'Emerging', range: '40–59', desc: 'A development priority. Targeted focus here moves the needle quickly.', dotStyle: 'width:11px;height:11px;border-radius:50%;background:var(--scale-emerging);flex:none' },
-      { band: 'Foundation', range: '0–39', desc: 'Foundational stage. Structured attention recommended.', dotStyle: 'width:11px;height:11px;border-radius:50%;background:var(--scale-foundation);flex:none' },
+      { band: 'Strong', desc: 'Demonstrable strength under pressure.', dotStyle: 'width:11px;height:11px;border-radius:50%;background:var(--scale-strong);flex:none' },
+      { band: 'Developing', desc: 'Working capability, above the working threshold, with room to grow.', dotStyle: 'width:11px;height:11px;border-radius:50%;background:var(--scale-developing);flex:none' },
+      { band: 'Emerging', desc: 'A development priority. Targeted focus here moves the needle quickly.', dotStyle: 'width:11px;height:11px;border-radius:50%;background:var(--scale-emerging);flex:none' },
+      { band: 'Foundation', desc: 'Foundational stage. Structured attention recommended.', dotStyle: 'width:11px;height:11px;border-radius:50%;background:var(--scale-foundation);flex:none' },
     ];
 
     // ---- Who Is Who pagination (Change Order 1 §6.2) --------------------
     const n = members.length;
+    // CO2: "the team in one view" means ONE page. Compact rows hold up to 14
+    // members with the legend; at 9+ the composition grid moves to the appendix.
+    const compOnP3 = n <= 8;
+    const compInAppendix = n > 8;
     const wiwChunks = [];
-    if (n <= 8) { wiwChunks.push(members.slice()); }
-    else if (n <= 12) {
-      // 9-12 members: one page would also carry the legend and overflow A4
-      // (first live 10-member cohort, BritCham Jul 2026). Split balanced so
-      // the legend page holds at most 6 rows.
-      const first = Math.ceil(n / 2);
-      wiwChunks.push(members.slice(0, first));
-      wiwChunks.push(members.slice(first));
-    }
+    if (n <= 14) { wiwChunks.push(members.slice()); }
     else {
       const rest = members.slice();
-      wiwChunks.push(rest.splice(0, 12));
-      while (rest.length > 10) { wiwChunks.push(rest.splice(0, Math.min(20, rest.length - 8))); }
+      wiwChunks.push(rest.splice(0, 14));
+      while (rest.length > 12) { wiwChunks.push(rest.splice(0, Math.min(16, rest.length - 6))); }
       if (rest.length) wiwChunks.push(rest);
     }
 
@@ -416,10 +466,13 @@ RENDERVALS_V2 = r"""
       leaderVerdict: cfg.leaderVerdict,
       workingWell: cfg.workingWell, needsSupport: cfg.needsSupport,
       teamRisk: cfg.teamRisk, teamOpportunity: cfg.teamOpportunity,
-      cards, priorityDim: cfg.priorityDim, priorityScore: cfg.priorityScore, firstMove: cfg.firstMove,
-      members, avgComm: cfg.avgComm, avgDm: cfg.avgDm, avgCollab: cfg.avgCollab, avgOverall: cfg.avgOverall,
+      cards, priorityDim: cfg.priorityDim, firstMove: cfg.firstMove,
+      members, avgComm: cfg.avgComm, avgDm: cfg.avgDm, avgCollab: cfg.avgCollab,
+      avgCommDot: bdot(cfg.avgComm, 9), avgCommTxt: btxt(cfg.avgComm),
+      avgDmDot: bdot(cfg.avgDm, 9), avgDmTxt: btxt(cfg.avgDm),
+      avgCollabDot: bdot(cfg.avgCollab, 9), avgCollabTxt: btxt(cfg.avgCollab),
       isSmallTeam: cfg.members.length <= 5,
-      archetypes,
+      archetypes, compOnP3, compInAppendix,
       patternLabel: cfg.patternLabel, patternTitle: cfg.patternTitle, definingPatternP1: cfg.definingPatternP1, definingPatternP2: cfg.definingPatternP2,
       patternCards: cfg.patternCards, missingCards: cfg.missingCards,
       splitPage4, inlineMissing: inlineMissingFlag, patternGridCols,
@@ -429,9 +482,9 @@ RENDERVALS_V2 = r"""
       hasStretch: stretchMembers.length > 0, noStretch: stretchMembers.length === 0,
       stretchFallback: checkInMembers.length === members.length ? __FB_ST_ALL__ : __FB_ST_SHORT__,
       checkInFallback: stretchMembers.length === members.length ? __FB_CI_ALL__ : __FB_CI_SHORT__,
-      numberToWatch: cfg.priorityScore <= 59
-        ? 'The number to watch: ' + cfg.priorityDim + ', ' + cfg.priorityScore + ' now, above 60 at re-assessment.'
-        : 'The number to watch: ' + cfg.priorityDim + ', ' + cfg.priorityScore + ' now, the dimension with the most room at re-assessment.',
+      oneToWatch: cfg.priorityBelow
+        ? 'The one to watch: ' + cfg.priorityDim + ' \u2014 at ' + cfg.priorityBand + ' today; the work is bringing it to Developing by re-assessment.'
+        : 'The one to watch: ' + cfg.priorityDim + ' \u2014 the dimension with the most room at re-assessment.',
       risks: cfg.risks, prescription: cfg.prescription, closingVerdict: cfg.closingVerdict,
       bands,
       wiwPages, p5Pages, totalPages, pg4Num, pg4bNum, pg6Num, pg7Num, pg8Num,
@@ -489,10 +542,42 @@ def main():
     assert tpl.count("Targeted · Half-Day") == 1
     tpl = tpl.replace("Targeted · Half-Day", "Targeted · 90 Minutes")
 
-    # ---- appendix Focus groups block ---------------------------------------
+    # ---- appendix Focus groups block + conditional composition grid --------
     anchor = '<div style="margin-top:34px;border-top:1px solid var(--rule-200);padding-top:16px">'
     assert tpl.count(anchor) == 1
-    tpl = tpl.replace(anchor, APPENDIX_BLOCK + anchor)
+    tpl = tpl.replace(anchor, APPENDIX_COMPOSITION + APPENDIX_BLOCK + anchor)
+
+    # ---- CO2 bands-only: strip the numeric range column from the band legend
+    range_td = ('<td style="padding:13px 20px 13px 0;border-bottom:1px solid var(--rule-200);'
+                'vertical-align:top;font-weight:700;font-size:14px;color:var(--navy-900);'
+                'font-variant-numeric:tabular-nums;white-space:nowrap">{{ b.range }}</td>')
+    assert tpl.count(range_td) == 1
+    tpl = tpl.replace(range_td, "")
+    assert "{{ b.range }}" not in tpl
+
+    # ---- CO2: appendix methodology speaks in bands, not scales -------------
+    old_meth = ("Scores are normalised to a 0 to 100 scale based on each person's "
+                "role-specific question set, which allows comparison across participants "
+                "who played different roles.")
+    new_meth = ("Results are normalised for each person's role-specific question set, "
+                "which allows comparison across participants who played different roles, "
+                "and reported in four bands.")
+    assert tpl.count(old_meth) == 1
+    tpl = tpl.replace(old_meth, new_meth)
+    assert tpl.count("How scores are generated") == 1
+    tpl = tpl.replace("How scores are generated", "How results are generated")
+    tpl = tpl.replace("Archetypes are not assigned by a simple highest-score rule. "
+                      "The method evaluates the pattern of scores across all three dimensions.",
+                      "Archetypes are not assigned by a single highest result. "
+                      "The method evaluates the pattern of results across all three dimensions.")
+
+    # ---- CO2: p2 now carries "How to read this report"; retitle appendix ---
+    assert tpl.count(">How to read this report</h2>") == 1
+    tpl = tpl.replace(">How to read this report</h2>", ">Method and reference</h2>")
+
+    # ---- CO2: no hardcoded page references (report length is dynamic) ------
+    tpl = tpl.replace("The debrief will walk through pages 3 through 6 of this report.",
+                      "The debrief walks through the core pages of this report.")
 
     # ---- dynamic page numbers on remaining static pages ---------------------
     for old, new in [("Page 4 of 8", "Page {{ pg4Num }} of {{ totalPages }}"),
@@ -547,11 +632,16 @@ def main():
     tpl = tpl[:k] + pre + tpl[k:]
 
     # ---- sanity: no v1 leftovers -------------------------------------------
-    for gone in ["{{ headline }}", "{{ priorityRead }}", "Priority — "]:
+    for gone in ["{{ headline }}", "{{ priorityRead }}", "Priority — ",
+                 "{{ numberToWatch }}", "{{ avgOverall }}", "{{ m.avg }}",
+                 "{{ priorityScore }}", "{{ card.score }}", "{{ b.range }}",
+                 "0 to 100"]:
         assert gone not in tpl, gone
     for there in ["{{ workingWell }}", "{{ needsSupport }}", "{{ teamRisk }}",
                   "{{ teamOpportunity }}", "wiwPages", "p5Pages", "{{ totalPages }}",
-                  "Targeted · 90 Minutes", "Focus groups"]:
+                  "Targeted · 90 Minutes", "Focus groups", "{{ oneToWatch }}",
+                  "How to read this report.", "compInAppendix", "compOnP3",
+                  "{{ card.band }}", "{{ m.commDot }}"]:
         assert there in tpl, there
 
     encoded = json.dumps(tpl).replace("</", "<\\u002F")

@@ -61,19 +61,33 @@ TEST_COHORTS = {
             {"name": "Uyen Xa", "archetype": "Navigator", "comm": 61, "dm": 67, "collab": 65},
             {"name": "Vy Yen", "archetype": "Relay", "comm": 60, "dm": 70, "collab": 68}],
     },
+    "test5": {
+        "team": "BritCham", "date": "9 July 2026", "leader": "Matt Ryland",
+        "members": [
+            {"name": "Thao Uyen Nguyen", "archetype": "Anchor", "comm": 56, "dm": 48, "collab": 86},
+            {"name": "Anh Hong Nguyen", "archetype": "Relay", "comm": 43, "dm": 77, "collab": 75},
+            {"name": "Khanh Dinh", "archetype": "Relay", "comm": 72, "dm": 83, "collab": 60},
+            {"name": "Nhu Truong", "archetype": "Relay", "comm": 68, "dm": 63, "collab": 77},
+            {"name": "Linh Cao", "archetype": "Anchor", "comm": 73, "dm": 65, "collab": 93},
+            {"name": "Van Ha", "archetype": "Summit", "comm": 81, "dm": 79, "collab": 86},
+            {"name": "Trinh Trần", "archetype": "Relay", "comm": 78, "dm": 70, "collab": 75},
+            {"name": "Khue", "archetype": "Relay", "comm": 37, "dm": 72, "collab": 69},
+            {"name": "Uyen Nguyen", "archetype": "Relay", "comm": 82, "dm": 55, "collab": 92},
+            {"name": "Giang Ngo", "archetype": "Signal", "comm": 63, "dm": 42, "collab": 38}],
+    },
 }
 
 _CI_THEMES = [
     "{n} steadies the group and raises little of what they see. Worth exploring in a 1:1, what would make raising problems early feel routine.",
-    "{n} delivers reliably and goes quiet when direction is unclear. Worth exploring in a 1:1, what a clearer brief would change for them.",
-    "{n} reads the room well and holds back their own view. Worth exploring in a 1:1, what would make speaking first feel safe.",
+    "{n} delivers reliably and goes quiet when direction is unclear. A 1:1 could open with what a clearer brief would change for them.",
+    "{n} reads the room well and holds back their own view. One for your next 1:1: what would make speaking first feel safe.",
     "{n} commits fast and checks alignment late. Worth exploring in a 1:1, the moment where a shared check would help them most.",
-    "{n} carries load without signalling it. Worth exploring in a 1:1, how the team would know when they need support.",
+    "{n} carries load without signalling it. A 1:1 could open with how the team would know when they need support.",
 ]
 _ST_THEMES = [
     "{n} sets a standard the room can see and follow. One stretch: chair the next contested decision without voting in it, so the room shows its own judgement.",
-    "{n} makes the call when others defer, and the calls hold. One stretch: narrate the reasoning behind one live decision each week so the method spreads.",
-    "{n} connects people and reads the room before acting. One stretch: run the weekly team meeting and turn that awareness into the team's shared channel.",
+    "{n} decides when others defer, and the decisions hold. A stretch to offer: narrate the reasoning behind one live decision so the method spreads.",
+    "{n} connects people and reads the room before acting. A stretch to offer: convene the team's next shared conversation and turn that awareness into a channel.",
     "{n} absorbs pressure and keeps the work moving. One stretch: mentor one developing member through a full piece of work, start to close.",
     "{n} executes cleanly against any clear brief. One stretch: own the framing of the next brief, so the standard they deliver to becomes the standard they set.",
 ]
@@ -90,16 +104,16 @@ def _themes(names, pool, short=False):
                 # deterministic short variants
                 shorts = [
                     "{n} steadies others and raises little. Worth exploring in a 1:1, what would make raising problems early feel routine.",
-                    "{n} delivers well and goes quiet without direction. Worth exploring in a 1:1, what a clearer brief would change.",
-                    "{n} reads the room and holds back. Worth exploring in a 1:1, what would make speaking first feel safe.",
+                    "{n} delivers well and goes quiet without direction. A 1:1 could open with what a clearer brief would change.",
+                    "{n} reads the room and holds back. One for your next 1:1: what would make speaking first feel safe.",
                     "{n} commits fast and checks alignment late. Worth exploring in a 1:1, where a shared check would help most.",
-                    "{n} carries load without signalling it. Worth exploring in a 1:1, how the team would know they need support.",
+                    "{n} carries load without signalling it. A 1:1 could open with how the team would know they need support.",
                 ]
                 t = shorts[i % len(shorts)].format(n=n)
         out[n] = t
     return out
 
-def _base(leader_first, prio_dim, prio_score, session):
+def _base(leader_first, prio_dim, prio_band, session):
     return {
         "leaderVerdict": (f"{leader_first}, this team's commitment is not in question. Work gets "
                           "picked up, held, and finished. What holds the team back is how "
@@ -117,8 +131,8 @@ def _base(leader_first, prio_dim, prio_score, session):
         "teamOpportunity": ("This is a structural fix, one habit away. Give the team a shared "
                             "operating picture and its existing judgement starts compounding."),
         "firstMove": ("This team needs its working picture made visible. A standard practice: "
-                      "open the weekly team meeting with each member naming their top priority "
-                      "and the one thing blocking it, before any other business."),
+                      "set aside twenty minutes this week for each member to name their top "
+                      "priority and the one thing blocking it, before any other business."),
         "patternLabel": "The pattern that shapes this team",
         "patternTitle": "Strong hands, thin shared voice",
         "definingPatternP1": ("The individual capability is in place: members deliver, steady one "
@@ -135,8 +149,8 @@ def _base(leader_first, prio_dim, prio_score, session):
                            "where it is hardest to absorb."),
              "moves": [
                  ("This team needs a single visible source of priorities. A standard practice: "
-                  "one shared list of current commitments, reviewed together in the weekly "
-                  "team meeting."),
+                  "one shared list of current commitments, reviewed together at the start of "
+                  "your next team discussion."),
                  ("This team needs decisions to travel. An established practice: every decision "
                   "of consequence is written where the whole team reads it, with an owner named."),
              ],
@@ -156,7 +170,7 @@ def _base(leader_first, prio_dim, prio_score, session):
                             "members' positions shape final calls.")},
         ],
         "prescription": (f"The priority is {prio_dim.lower().replace('-', ' ')}, the area with the "
-                         f"most room to grow (now {prio_score}). The matching next step is "
+                         f"most room to grow, at {prio_band} today. The matching next step is "
                          f"{session}, a 90-minute development session built to turn individual "
                          "capability into a shared team habit."),
         "closingVerdict": ("Strong for this team looks like the same hands working from one "
@@ -168,7 +182,7 @@ def _base(leader_first, prio_dim, prio_score, session):
 def _pattern_card(name, arch):
     beats = {
         "Relay": (f"{name} is the execution baseline of this team: give them a clear brief and "
-                  "the work arrives done, on time, without drama. What they need is exactly that "
+                  "the work arrives done, on time, without noise. What they need is exactly that "
                   "clarity, because ambiguity stalls them quietly and without warning. One option: "
                   "make them the first reader of every new brief, and fix what they cannot restate."),
         "Navigator": (f"{name} makes the call when others defer and sets direction when the path "
@@ -206,15 +220,15 @@ MISSING = {
                "standards drift without anyone noticing. One structural option: give one member "
                "per piece of work the explicit job of testing the plan before the team commits."),
     "Signal": ("No member fills the Signal seat. The team reads the work but never the room, "
-               "so friction between people surfaces late. One structural option: close the "
-               "weekly team meeting with each member naming how the work felt, in one line."),
+               "so friction between people surfaces late. One structural option: close each "
+               "team discussion with every member naming how the work felt, in one line."),
 }
 
 def composed_for(name, derived):
     ds = TEST_COHORTS[name]
     leader_first = ds["leader"].split()[0]
     from lir_compose import SESSION_MAP
-    base = _base(leader_first, derived["priorityDim"], derived["priorityScore"],
+    base = _base(leader_first, derived["priorityDim"], derived["priorityBand"],
                  SESSION_MAP[derived["priorityDim"]])
     by_name = {m["name"]: m["archetype"] for m in ds["members"]}
     # pattern cards: choose the first patternCardCount members deterministically

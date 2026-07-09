@@ -248,7 +248,7 @@ app = FastAPI(title="TEW Profile API", version="2.3.0")
 
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.5.3",
+    return {"status": "ok", "version": "2.5.4",
             "archetypes": list(ARCHETYPE_FILES),
             "endpoints": ["/generate", "/generate-cohort", "/generate-manager-report",
                           "/generate-leader-report", "/compute-averages"]}
@@ -564,6 +564,11 @@ def _lir_normalise_date(d: str) -> str:
 def generate_lir(req: LIRRequest):
     date_str = _lir_normalise_date(req.date)
     members = [m.dict() for m in req.members]
+    # Normalise name whitespace at the door: sheets deliver "First Last" via
+    # concatenation, so an empty last name yields a trailing space ("Khue ")
+    # and the exact-match card/theme validators can then never pass.
+    for m in members:
+        m["name"] = re.sub(r"\s+", " ", str(m.get("name", ""))).strip()
     errors, warnings = lir_core.validate_input(req.team, date_str, req.leaderName, members)
     if errors:
         raise HTTPException(422, {"stage": "input", "errors": errors})

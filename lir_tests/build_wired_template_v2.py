@@ -346,6 +346,14 @@ RENDERVALS_V2 = r"""
     const n = members.length;
     const wiwChunks = [];
     if (n <= 8) { wiwChunks.push(members.slice()); }
+    else if (n <= 12) {
+      // 9-12 members: one page would also carry the legend and overflow A4
+      // (first live 10-member cohort, BritCham Jul 2026). Split balanced so
+      // the legend page holds at most 6 rows.
+      const first = Math.ceil(n / 2);
+      wiwChunks.push(members.slice(0, first));
+      wiwChunks.push(members.slice(first));
+    }
     else {
       const rest = members.slice();
       wiwChunks.push(rest.splice(0, 12));

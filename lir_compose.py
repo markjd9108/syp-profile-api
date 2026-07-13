@@ -428,8 +428,19 @@ def _call_api(system, user, model=None, api_key=None):
         "https://api.anthropic.com/v1/messages", data=body,
         headers={"x-api-key": key, "anthropic-version": "2023-06-01",
                  "content-type": "application/json"})
-    with urllib.request.urlopen(req, timeout=180) as r:
-        resp = json.load(r)
+    try:
+        with urllib.request.urlopen(req, timeout=180) as r:
+            resp = json.load(r)
+    except urllib.error.HTTPError as e:
+        # Surface the upstream status + error body: instant HTTPError here is
+        # almost always key/credits/rate-limit, and the caller's generic
+        # "output not valid JSON" hid that for hours on 13 Jul 2026.
+        detail = ""
+        try:
+            detail = e.read().decode()[:300]
+        except Exception:
+            pass
+        raise CompositionHalt([[f"Anthropic API HTTP {e.code}: {detail}"]])
     return "".join(b.get("text", "") for b in resp.get("content", []))
 
 def _extract_json(text):

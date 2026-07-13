@@ -128,9 +128,12 @@ _CAPSEQ = re.compile(r"(?<![.!?:]\s)(?<!^)\b([A-Z][a-zA-Z'-]*(?:[ ·]+[A-Z][a-zA
 
 def validate_composed(composed, derived, team, leader_name):
     fails = []
+    # Stretch retired (CO3): stretchThemes always empty; keep the key for the
+    # template contract but never require the model to produce it.
+    composed.setdefault("stretchThemes", {})
     # --- structure ---
     for k in list(WORD_LIMITS) + ["patternCards", "missingCards", "risks",
-                                  "focusThemes", "stretchThemes"]:
+                                  "focusThemes"]:
         if k not in composed:
             fails.append(f"missing field {k}")
     if fails:
@@ -318,8 +321,8 @@ def _build_prompt(derived, team, date_str, leader_name):
         "priorityDim": derived["priorityDim"],
         "priorityBand": derived["priorityBand"],
         "priorityBelowThreshold": derived["priorityBelow"],
-        "checkInMembers": derived["checkInNames"], "stretchMembers": derived["stretchNames"],
-        "themedCheckIn": derived["themedCheckIn"], "themedStretch": derived["themedStretch"],
+        "checkInMembers": derived["checkInNames"],
+        "themedCheckIn": derived["themedCheckIn"],
         "teamSize": derived["teamSize"],
         "absentArchetypes": derived["absentArchetypes"],
     }
@@ -357,11 +360,6 @@ def _build_prompt(derived, team, date_str, leader_name):
                        "the theme as a subject. VARY the opener across members (e.g. 'Worth "
                        "exploring in a 1:1,', 'A 1:1 could open with', 'One for your next 1:1:'); "
                        "never the same opener more than twice. ZERO digits (the phrase 1:1 is fine)",
-        "stretchThemes": f"object mapping EACH name in themedStretch (exactly those, no others) to a "
-                         f"string, max {derived['themeWordsSt']} words: one sentence naming the "
-                         "strength in plain words, then a concrete extension containing the word "
-                         "'stretch' (e.g. 'One stretch:', 'A stretch to offer:'). Vary the opener; "
-                         "ZERO digits, strength framing",
         "prescription": f"string, max 45 words: names the priority area in plain words "
                         f"('{derived['priorityDim']}' verbatim; its band may be named) and the session "
                         f"'{SESSION_MAP[derived['priorityDim']]}', described as a 90-minute "

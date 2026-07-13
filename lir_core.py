@@ -75,10 +75,8 @@ def derive(members):
         avg = rnd(Fraction(comm + dm + collab, 3))
         if min(comm, dm, collab) <= 59:
             flag = "Check-In"
-        elif min(comm, dm, collab) >= 61 and avg >= 70:
-            flag = "Stretch"
         else:
-            flag = "Steady"
+            flag = "Steady"  # Stretch retired (CO3, Mark 10 Jul 2026)
         out_members.append({
             "name": m["name"], "archetype": m["archetype"],
             "comm": comm, "dm": dm, "collab": collab,

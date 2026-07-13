@@ -286,7 +286,12 @@ def validate_composed(composed, derived, team, leader_name):
         mnames = [m["name"] for m in derived["members"]]
         if _score_refs(text, mnames) > 0:
             fails.append(f"{path} contains a digit; the report is bands-only")
-        # name traceability: capitalised multi-word sequences must be known
+        # name traceability: capitalised multi-word sequences must be known.
+        # Kicker labels (patternCards[].label) are free descriptive small-caps
+        # text, not names, so they are exempt (a Title/UPPER two-word kicker like
+        # "Steadying Force" is legitimate and must not trip the name check).
+        if path.endswith(".label"):
+            continue
         for seq in _CAPSEQ.findall(text):
             s = re.sub(r"[’']s\b", "", seq).strip()  # possessives trace to the name
             if s in allowed_phrases:

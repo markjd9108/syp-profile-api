@@ -32,6 +32,8 @@ COPY lir_render.py .
 COPY lir_composition_spec.md .
 COPY lir_template_wired.html .
 COPY api_server.py .
+# Between-sessions curriculum capture page route
+COPY capture_route.py .
 
 # Copy HTML profile templates
 COPY templates/ ./templates/

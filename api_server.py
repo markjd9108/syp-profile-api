@@ -359,9 +359,6 @@ def generate(req: ProfileRequest):
 def _new_slug():
     return secrets.token_hex(11)  # 22 hex chars, unguessable
 
-from capture_route import capture_router
-app.include_router(capture_router)
-
 @app.post("/generate-hosted")
 def generate_hosted(req: ProfileRequest):
     """Generate the REDESIGNED self-contained HTML profile, store it under an

@@ -235,76 +235,107 @@ async def submit_capture(token: str, request: Request):
 # ------------------------------------------------------------------ page
 PAGE = r"""<!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Between-Sessions - Week %%WEEK%%</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>The Performance Lens Studio &middot; Week %%WEEK%%</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#1F3A5F;--navy-2:#2c507e;--navy-ink:#16304d;--gold:#b0842f;--gold-line:#ecdcb6;
---line:#e7ebf2;--ink:#22344a;--grey:#5f6f84;--grey-2:#8a97a8;--good:#1a7f55;--good-soft:#e7f4ee;--good-line:#bfe3d1;
---bad:#c0392b;--bad-soft:#fdecea;--shadow-sm:0 1px 2px rgba(31,58,95,.07);--shadow:0 1px 2px rgba(31,58,95,.05),0 12px 30px rgba(31,58,95,.08);--radius:18px}
+:root{--navy:#040A1C;--blue:#1E88E5;--blue-2:#4AA1ED;--blue-3:#7BBDF4;
+--ink:#EDF2FB;--body:#C2CCDA;--grey:#8b98b4;--grey-2:#5f6d88;--line:rgba(123,189,244,.14);--paper:#0c1930;
+--good:#34D399;--bad:#F87171;--amber:#FBBF24;--radius:16px;
+--shadow:0 1px 2px rgba(0,0,0,.45),0 18px 42px rgba(0,0,0,.5);--shadow-sm:0 1px 2px rgba(0,0,0,.45)}
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(180deg,#f3f6fb,#e9edf4);background-attachment:fixed;color:var(--ink);
-line-height:1.65;-webkit-font-smoothing:antialiased;font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{margin:0;background:radial-gradient(120% 90% at 50% -8%,#0b1a3c 0%,#040A1C 55%);background-attachment:fixed;
+color:var(--body);line-height:1.62;-webkit-font-smoothing:antialiased;font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+h1,h2{font-family:'Barlow','Inter',sans-serif}
 button,textarea{font-family:inherit}
 .btn,.opt,.tap,.send{transition:all .16s ease}
-.wrap{max-width:680px;margin:0 auto;padding:26px 18px 90px}
-.head{margin:4px 2px 18px}.head .wk{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
-.head h1{font-size:23px;font-weight:800;letter-spacing:-.02em;color:var(--navy-ink);margin:4px 0 0}
-.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;margin:14px 0;box-shadow:var(--shadow)}
-.card h2{display:flex;align-items:center;gap:11px;margin:0 0 12px;font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--navy-ink)}
-.card h2::before{content:"";width:4px;height:19px;border-radius:3px;background:var(--gold);flex:none}
-.hint{font-size:13px;color:var(--grey-2);margin:2px 0 14px}
-label.fld{display:block;font-weight:700;color:var(--navy-ink);margin:14px 0 8px;font-size:15px}
+.topbar{background:var(--navy);border-bottom:1px solid rgba(123,189,244,.14)}
+.topbar-in{max-width:760px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;flex:none}
+.wordmark{display:flex;flex-direction:column;line-height:1}
+.wordmark .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.32em;color:var(--blue-3)}
+.wordmark .n{font-family:'Barlow',sans-serif;font-weight:800;font-size:15px;letter-spacing:.12em;color:#fff;margin-top:3px}
+.studio-tag{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.18em;color:var(--blue-2);border:1px solid rgba(74,161,237,.4);border-radius:999px;padding:5px 11px;text-transform:uppercase}
+.hero{background:radial-gradient(120% 150% at 82% 0%,#13294f 0%,#040A1C 62%);border-bottom:1px solid rgba(123,189,244,.12);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-70px;top:-70px;width:280px;height:280px;border-radius:50%;border:1.5px solid rgba(74,161,237,.16);box-shadow:0 0 0 40px rgba(74,161,237,.05)}
+.hero-in{max-width:760px;margin:0 auto;padding:30px 20px 34px;position:relative;z-index:1}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.22em;color:var(--blue-3);text-transform:uppercase;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.hero h1{font-weight:800;font-size:33px;letter-spacing:-.01em;line-height:1.08;margin:12px 0 8px;color:#fff}
+.hero h1 .pd{color:var(--blue)}
+.hero p{color:#b9c6de;font-size:15px;max-width:52ch;margin:0}
+.wrap{max-width:760px;margin:0 auto;padding:22px 20px 96px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;margin:16px 0;box-shadow:var(--shadow)}
+.seclabel{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-2);margin-bottom:6px}
+.card h2{font-weight:700;font-size:20px;letter-spacing:-.01em;color:var(--ink);margin:0 0 4px}
+.hint{font-size:13px;color:var(--grey);margin:4px 0 14px}
+label.fld{display:block;font-weight:600;color:#dbe4f4;margin:16px 0 8px;font-size:15px}
 label.fld:first-of-type{margin-top:0}
-textarea{width:100%;min-height:74px;border:1.5px solid var(--line);border-radius:12px;padding:13px;font-size:15px;resize:vertical;color:var(--ink);background:#fff}
-textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(31,58,95,.1)}
-textarea::placeholder{color:var(--grey-2)}
+textarea{width:100%;min-height:74px;border:1.5px solid var(--line);border-radius:12px;padding:13px;font-size:15px;resize:vertical;color:var(--ink);background:#0a1730}
+textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,136,229,.22);background:#0b1a3a}
+textarea::placeholder{color:#5f6d88}
 .taprow{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-.tap{flex:1;min-width:120px;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:13px;font-weight:600;cursor:pointer;text-align:center;font-size:15px;color:var(--navy)}
-.tap:hover{border-color:var(--navy-2);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
-.tap.sel{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:var(--shadow-sm)}
-.scene{background:#f5f8fc;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;box-shadow:var(--shadow-sm)}
-.stitle{display:flex;align-items:center;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--grey);margin:0 -18px 12px;padding:0 18px 11px;border-bottom:1px solid var(--line);font-weight:700}
-.stitle::before{content:"";width:9px;height:9px;border-radius:50%;background:#e0655a;box-shadow:15px 0 0 #e6b95c,30px 0 0 #63b563;margin-right:40px}
-.scene.good{background:var(--good-soft);border-color:var(--good-line)}
-.scene.good .stitle{border-bottom-color:var(--good-line)}
-.bubble{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:8px 0;font-size:15px;box-shadow:var(--shadow-sm)}
-.bubble b{color:var(--navy-ink)}.bubble.lead{border-left:3px solid var(--navy)}.bubble.col{border-left:3px solid var(--grey-2)}
+.tap{flex:1;min-width:120px;border:1.5px solid var(--line);background:#0d1c3f;border-radius:12px;padding:13px;font-weight:600;cursor:pointer;text-align:center;font-size:15px;color:#dbe4f4}
+.tap:hover{border-color:var(--blue-2);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.tap.sel{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 6px 16px rgba(30,136,229,.28)}
+.scene{background:#0a1836;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0}
+.stitle{display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--grey);margin:0 -18px 12px;padding:0 18px 11px;border-bottom:1px solid var(--line);font-weight:600}
+.stitle::before{content:"";width:9px;height:9px;border-radius:50%;background:#e0655a;box-shadow:15px 0 0 var(--amber),30px 0 0 #46c07f;margin-right:40px}
+.scene.good{background:rgba(52,211,153,.09);border-color:rgba(52,211,153,.38)}
+.scene.good .stitle{border-bottom-color:rgba(52,211,153,.38)}
+.bubble{background:#0f2246;border:1px solid rgba(123,189,244,.16);border-radius:14px;padding:10px 14px;margin:8px 0;font-size:15px;color:var(--body)}
+.bubble b{color:#eaf0fb}.bubble.lead{border-left:3px solid var(--blue)}.bubble.col{border-left:3px solid var(--grey)}
 .scenenote{font-size:14px;color:var(--grey);font-style:italic;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
 .simblock{margin:0 0 18px}
-.q{margin:0 0 10px;font-weight:600;color:var(--navy-ink);font-size:15.5px}.q .qnum{font-weight:800;color:var(--navy)}
-.opt{display:block;border:1.5px solid var(--line);border-radius:12px;padding:12px 15px;margin:8px 0;cursor:pointer;font-size:15px;background:#fff}
-.opt:hover{border-color:var(--navy-2);background:#fafbfd}
-.opt.sel{border-color:var(--navy);background:#eef2f8;box-shadow:inset 0 0 0 1px var(--navy)}
-.opt.good{border-color:var(--good);background:var(--good-soft)}.opt.bad{border-color:var(--bad);background:var(--bad-soft)}
-.opt .lbl{font-weight:800;color:var(--navy);margin-right:8px}
-.simwhy{display:none;font-size:13.5px;color:var(--grey);background:#f4f7fb;border-left:3px solid var(--navy-2);border-radius:8px;padding:11px 14px;margin-top:8px}
-.simwhy.show{display:block}.verdict{font-weight:800}.verdict.v-good{color:var(--good)}.verdict.v-bad{color:var(--bad)}
-.revealwrap{margin:16px 0 4px}
-.btn{border:1px solid var(--line);background:#fff;color:var(--navy);font-weight:600;padding:9px 16px;border-radius:999px;cursor:pointer;font-size:13.5px}
-.btn:hover{border-color:var(--navy-2)}.btn.small{font-size:13px;padding:8px 14px}
-.reveal{display:none;margin-top:12px}.reveal.show{display:block}
+.q{margin:0 0 10px;font-weight:600;color:#e4ebf7;font-size:15.5px}.q .qnum{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--blue);margin-right:2px}
+.opt{display:block;border:1.5px solid var(--line);border-radius:12px;padding:12px 15px;margin:8px 0;cursor:pointer;font-size:15px;background:#0b1a3c;color:var(--body)}
+.opt:hover{border-color:var(--blue-2);background:#0e2247}
+.opt.sel{border-color:var(--blue);background:rgba(30,136,229,.18);box-shadow:inset 0 0 0 1px var(--blue)}
+.opt.good{border-color:var(--good);background:rgba(52,211,153,.15)}.opt.bad{border-color:var(--bad);background:rgba(248,113,113,.15)}
+.opt .lbl{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--blue);margin-right:9px}
+.simwhy{display:none;font-size:13.5px;color:var(--body);background:rgba(30,136,229,.13);border-left:3px solid var(--blue);border-radius:8px;padding:11px 14px;margin-top:8px}
+.simwhy.show{display:block}.verdict{font-weight:700}.verdict.v-good{color:var(--good)}.verdict.v-bad{color:var(--bad)}
+.btn{border:1.5px solid rgba(123,189,244,.32);background:transparent;color:var(--blue-2);font-weight:600;padding:9px 16px;border-radius:999px;cursor:pointer;font-size:13.5px}
+.btn:hover{border-color:var(--blue);color:var(--blue-3)}.btn.small{font-size:12.5px;padding:8px 14px}
+.revealwrap{margin:16px 0 4px}.reveal{display:none;margin-top:12px}.reveal.show{display:block}
 .goodcap{font-size:14px;color:var(--grey);margin:12px 2px 0}
 .yourturn{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
-.yourturn label{display:block;font-weight:700;color:var(--navy-ink);margin-bottom:8px}
-.send{background:linear-gradient(180deg,var(--navy-2),var(--navy));color:#fff;border:none;border-radius:999px;padding:15px 36px;font-weight:700;font-size:16px;cursor:pointer;display:block;margin:26px auto 0;box-shadow:0 8px 20px rgba(31,58,95,.24)}
-.send:hover{transform:translateY(-1px)}.send:disabled{opacity:.55}
-.err{color:var(--bad);font-size:13.5px;text-align:center;margin-top:12px;display:none}
-.note{font-size:12px;color:var(--grey-2);text-align:center;margin-top:16px}
-.scoreline{font-size:15px;color:var(--navy-ink);font-weight:600;margin:2px 0 4px}
+.yourturn label{display:block;font-weight:600;color:#dbe4f4;margin-bottom:8px}
+.send{background:linear-gradient(180deg,var(--blue-2),var(--blue));color:#fff;border:none;border-radius:999px;padding:15px 40px;font-weight:700;font-size:16px;letter-spacing:.01em;cursor:pointer;display:block;margin:26px auto 0;box-shadow:0 10px 24px rgba(30,136,229,.32);font-family:'Barlow',sans-serif}
+.send:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(30,136,229,.4)}.send:disabled{opacity:.55}
+.err{color:#fca5a0;font-size:13.5px;text-align:center;margin-top:12px;display:none}
+.foot{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--grey-2);text-align:center;margin-top:18px;letter-spacing:.04em}
+.scorewrap{display:flex;align-items:center;gap:20px;margin:6px 0 14px}
+.ring{width:96px;height:96px;flex:none;position:relative}
+.ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .val b{font-family:'Barlow',sans-serif;font-weight:800;font-size:26px;color:var(--ink);line-height:1}
+.ring .val span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--grey);text-transform:uppercase;margin-top:3px}
+.scoremsg{font-size:15px;color:var(--body)}.scoremsg b{color:var(--ink)}
 .resitem{border:1px solid var(--line);border-left-width:4px;border-radius:12px;padding:14px 16px;margin:10px 0}
-.resitem.ok{border-left-color:var(--good);background:#f4faf7}.resitem.no{border-left-color:var(--bad);background:#fdf5f4}
-.resline{font-weight:800;font-size:13.5px;margin:6px 0 2px}.resitem.ok .resline{color:var(--good)}.resitem.no .resline{color:var(--bad)}
-.rescorrect{font-size:14px;color:var(--navy-ink);font-weight:600;margin:2px 0 6px}
-.reswhy{font-size:13.5px;color:var(--grey);background:#f4f7fb;border-left:3px solid var(--navy-2);border-radius:8px;padding:11px 14px;margin-top:4px}
-.thanks{text-align:center;padding:36px 22px}
-.thanks::before{content:"\2713";display:flex;width:58px;height:58px;margin:0 auto 16px;border-radius:50%;background:var(--good-soft);color:var(--good);align-items:center;justify-content:center;font-size:28px;font-weight:800}
-.thanks h2{font-size:21px;justify-content:center}.thanks h2::before{display:none}
-</style></head><body><div class="wrap">
-<div class="head"><div class="wk">Week %%WEEK%% &middot; Communication</div><h1>Your check-in</h1></div>
+.resitem.ok{border-left-color:var(--good);background:rgba(52,211,153,.08)}
+.resitem.no{border-left-color:var(--bad);background:rgba(248,113,113,.08)}
+.resline{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12px;letter-spacing:.06em;margin:6px 0 2px;text-transform:uppercase}
+.resitem.ok .resline{color:var(--good)}.resitem.no .resline{color:var(--bad)}
+.rescorrect{font-size:14px;color:#eaf0fb;font-weight:600;margin:2px 0 6px}
+.reswhy{font-size:13.5px;color:var(--body);background:rgba(30,136,229,.13);border-left:3px solid var(--blue);border-radius:8px;padding:11px 14px;margin-top:4px}
+.thanks{text-align:center;padding:30px 22px 12px}
+.thanks .tick{width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:rgba(52,211,153,.16);color:var(--good);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800}
+.thanks h2{font-size:21px}.thanks p{color:var(--body)}
+</style></head><body>
+<div class="topbar"><div class="topbar-in">
+  <svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16.5" fill="none" stroke="#1E88E5" stroke-width="2.4"></circle><circle cx="20" cy="20" r="9.7" fill="none" stroke="#4AA1ED" stroke-width="2" opacity="0.75"></circle><circle cx="20" cy="20" r="4" fill="#1E88E5"></circle></svg>
+  <div class="wordmark"><span class="t">THE</span><span class="n">PERFORMANCE&nbsp;LENS</span></div>
+  <span class="studio-tag">Studio</span>
+</div></div>
+<div class="hero"><div class="hero-in">
+  <div class="eyebrow"><span class="dot"></span>Week %%WEEK%% &nbsp;&middot;&nbsp; Communication &nbsp;&middot;&nbsp; The Clarity Loop</div>
+  <h1>Your check-in<span class="pd">.</span></h1>
+  <p>About six minutes: a short simulation, a few quick checks, and one reflection on how the week went.</p>
+</div></div>
+<div class="wrap">
 
 <form id="form">
-  <div class="card">
-    <h2>Your week</h2>
+  <div class="card"><div class="seclabel">Your week</div><h2>How did the practice go?</h2>
     <label class="fld">Were you able to try it this week?</label>
     <div class="taprow">
       <div class="tap" data-v="Y" onclick="tap(this)">Yes, a few times</div>
@@ -315,8 +346,7 @@ textarea::placeholder{color:var(--grey-2)}
     <textarea id="story" placeholder="Share as much or as little as you like (optional)"></textarea>
   </div>
 
-  <div class="card">
-    <h2>Simulation &middot; spot the gap</h2>
+  <div class="card"><div class="seclabel">Simulation</div><h2>Spot the gap</h2>
     <p class="hint" id="sim_intro"></p>
     <div class="scene" id="sim_scene"></div>
     <div id="sim"></div>
@@ -328,21 +358,22 @@ textarea::placeholder{color:var(--grey-2)}
       <div class="reveal" id="model"></div></div>
   </div>
 
-  <div class="card"><h2>Quick knowledge checks</h2>
-    <p class="hint">A few short questions, one answer each.</p><div id="checks"></div></div>
+  <div class="card"><div class="seclabel">Knowledge checks</div><h2>Six quick checks</h2>
+    <p class="hint">One answer each. You will see how you did the moment you send.</p><div id="checks"></div></div>
 
-  <div class="card"><h2>Reflection</h2><div id="reflection"></div></div>
+  <div class="card"><div class="seclabel">Reflection</div><h2>Looking back</h2><div id="reflection"></div></div>
 
   <button type="submit" class="send" id="send">Send my response</button>
-  <p class="err" id="err">Please answer the knowledge-check questions before sending.</p>
-  <p class="note">The Performance Lens &middot; This link is private to you, please do not share it.</p>
+  <p class="err" id="err">Please answer the six checks before sending.</p>
+  <p class="foot">THE PERFORMANCE LENS STUDIO &middot; PRIVATE TO YOU, PLEASE DO NOT SHARE</p>
 </form>
 
 <div id="postsubmit" style="display:none">
-  <div class="card"><h2>How you did</h2><p class="scoreline" id="scoreline"></p>
-    <p class="hint">Your answers are saved. Here is how each one landed, and the why behind it.</p>
+  <div class="card"><div class="seclabel">Results</div><h2>How you did</h2>
+    <div class="scorewrap"><div class="ring" id="ring"></div><div class="scoremsg" id="scoremsg"></div></div>
     <div id="resultlist"></div></div>
-  <div class="card thanks"><h2>Thank you</h2><p>Your response for this week has been recorded. See you Monday.</p></div>
+  <div class="card thanks"><div class="tick">&#10003;</div><h2>Thank you</h2><p>Your response for this week has been recorded. See you Monday.</p></div>
+</div>
 </div>
 
 <script>
@@ -352,14 +383,12 @@ var L=['A','B','C'];
 function el(id){return document.getElementById(id)}
 function tap(t){state.completion=t.getAttribute('data-v');t.parentNode.querySelectorAll('.tap').forEach(function(x){x.classList.remove('sel')});t.classList.add('sel')}
 
-// story + reflection
 el('story_label').textContent=C.story_prompt;
 var refWrap=el('reflection');
 C.reflection.forEach(function(r,i){var lab=document.createElement('label');lab.className='fld';lab.textContent=r;
   var ta=document.createElement('textarea');ta.id='ref'+i;ta.placeholder='Write a line or two (optional)';
   refWrap.appendChild(lab);refWrap.appendChild(ta)});
 
-// simulation
 var S=C.simulation;el('sim_intro').textContent=S.intro;
 var sc=el('sim_scene');sc.innerHTML='<div class="stitle">'+S.scene_title+'</div>';
 S.scene.forEach(function(b){sc.innerHTML+='<div class="bubble '+b.cls+'"><b>'+b.who+':</b> '+b.text+'</div>'});
@@ -380,7 +409,6 @@ el('yt_label').textContent=S.yourturn_label;el('model').innerHTML='<b>'+S.yourtu
 el('goodbtn').onclick=function(){var s=gx.classList.toggle('show');this.textContent=s?'Hide what good looks like':'See what good looks like'};
 el('modelbtn').onclick=function(){var s=el('model').classList.toggle('show');this.textContent=s?'Hide example':'Reveal a strong example'};
 
-// knowledge checks (no answer key present)
 var cw=el('checks');
 C.checks.forEach(function(item,qi){var blk=document.createElement('div');blk.style.margin='0 0 18px';
   var h='<div class="q"><span class="qnum">'+(qi+1)+'.</span> '+item.q+'</div>';
@@ -407,6 +435,8 @@ function showResults(res){var out='';
     (r.correct?'':'<div class="rescorrect">Correct answer ('+r.correctKey+'): '+r.correctText+'</div>')+
     '<div class="reswhy"><b>Why:</b> '+r.why+'</div></div>'});
   el('resultlist').innerHTML=out;
-  el('scoreline').textContent='You got '+res.correct+' of '+res.total+' right.';
+  var pct=Math.round(res.correct/res.total*100);
+  el('ring').innerHTML='<svg viewBox="0 0 42 42" style="transform:rotate(-90deg)"><circle cx="21" cy="21" r="15.5" fill="none" stroke="rgba(123,189,244,0.16)" stroke-width="5"></circle><circle cx="21" cy="21" r="15.5" fill="none" stroke="#1E88E5" stroke-width="5" stroke-linecap="round" pathLength="100" stroke-dasharray="'+pct+' 100"></circle></svg><div class="val"><b>'+res.correct+'/'+res.total+'</b><span>Theory</span></div>';
+  el('scoremsg').innerHTML='You got <b>'+res.correct+' of '+res.total+'</b> right. Your answers are saved. Here is how each one landed, and the why behind it.';
   el('form').style.display='none';el('postsubmit').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
 </script></body></html>"""

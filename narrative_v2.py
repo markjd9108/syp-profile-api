@@ -317,8 +317,6 @@ def render_momentum():
         '<div class="eyebrow mb-2">Section 05 · What happens next</div>'
         '<h2 class="display text-[26px] tracking-tight mb-4">Keep the momentum going.</h2>'
         '<p class="text-[14px] text-[var(--fg-2)] leading-[1.7] max-w-[68ch] mb-7">'
-        'Your leader has already received your profile. The real progress happens in '
-        'the meetings that follow this workshop, so pick one move from Section 04 and '
-        'use it this week.</p>'
+        'This profile is yours. Your leader has received a team insights report so they can back you and your team in the work ahead. The real progress happens in the meetings that follow.</p>'
         '<div class="grid gap-3 max-w-[70ch]">' + rows + '</div>'
         '</div></article></section>')

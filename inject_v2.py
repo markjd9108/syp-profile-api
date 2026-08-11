@@ -19,7 +19,19 @@ _DIR = os.path.join(os.path.dirname(__file__), "templates_v2")
 ARCH_FILES = {
     "anchor": "Anchor.html", "compass": "Compass.html", "navigator": "Navigator.html",
     "relay": "Relay.html", "signal": "Signal.html", "summit": "Summit.html",
+    # Leadership Workshop (TLW) archetypes
+    "keystone": "Keystone.html", "lighthouse": "Lighthouse.html",
+    "pathfinder": "Pathfinder.html", "diplomat": "Diplomat.html",
+    "vanguard": "Vanguard.html", "cornerstone": "Cornerstone.html",
 }
+
+# Archetypes whose profiles use the Leadership dimension copy (Leadership /
+# Change Management / Conflict Management) rather than the TEW dimensions.
+LEAD_ARCH = {"keystone", "lighthouse", "pathfinder", "diplomat", "vanguard", "cornerstone"}
+
+
+def _family(archetype):
+    return "lead" if archetype in LEAD_ARCH else "tew"
 
 # TLDR donut / scale colours (the bright band set used in the summary)
 BAND_HEX = {"foundation": "#F87171", "emerging": "#FBBF24",
@@ -111,7 +123,7 @@ def _strong_html(what, why, tip, band):
         + '</div>')
 
 
-def _set_scored_cards(t, scores):
+def _set_scored_cards(t, scores, family="tew"):
     """Update the 3 'How you scored' dimension cards (order Comm/Dec/Collab):
     band pill, ring %, band text, band-appropriate bullets, and the
     'what strong looks like / why / next step' block."""
@@ -129,8 +141,8 @@ def _set_scored_cards(t, scores):
         a = re.sub(r'stroke-dasharray="\d+ 100"', 'stroke-dasharray="%d 100"' % int(round(sc)), a, count=1)
         a = re.sub(r'<div class="num band-text">[^<]*</div>', '<div class="num band-text">%s</div>' % label, a, count=1)
         # band-appropriate bullets + "what strong looks like" block (replaces the baked <ul>)
-        what, why, tip = dc.strong_block(dim, key)
-        replacement = _bullets_ul(dc.bullets(dim, key)) + _strong_html(what, why, tip, key)
+        what, why, tip = dc.strong_block(dim, key, family)
+        replacement = _bullets_ul(dc.bullets(dim, key, family)) + _strong_html(what, why, tip, key)
         a = re.sub(r'<ul class="text-\[13\.5px\].*?</ul>', lambda _m: replacement, a, count=1, flags=re.S)
         out = out[:m.start()] + a + out[m.end():]
     return head + out + tail
@@ -175,15 +187,15 @@ def _set_working_style(t, answers):
     return t[:style_start] + rendered + t[sec_end:]
 
 
-def _set_tldr_lead(t, scores):
+def _set_tldr_lead(t, scores, family="tew"):
     """Replace the baked 'Snapshot of the day' summary paragraph."""
-    lead = '<p class="tldr-lead">' + _esc(nv.render_tldr_lead(scores)) + '</p>'
+    lead = '<p class="tldr-lead">' + _esc(nv.render_tldr_lead(scores, family)) + '</p>'
     return re.sub(r'<p class="tldr-lead">.*?</p>', lambda _m: lead, t, count=1, flags=re.S)
 
 
-def _set_tldr_heads(t, scores):
+def _set_tldr_heads(t, scores, family="tew"):
     """Replace the two TL;DR strength/growth headlines with dynamic ones."""
-    hs = list(nv.heads(scores))
+    hs = list(nv.heads(scores, family))
     box = {"i": 0}
     def repl(_m):
         v = _esc(hs[box["i"]]) if box["i"] < len(hs) else _m.group(1)
@@ -231,6 +243,7 @@ def inject(archetype, data):
     """data: dict with name, company, cohort, assessed_date, profile_id,
     comm_score, dec_score, collab_score, working_style(dict ws_q1..9)."""
     raw, t = _load(archetype)
+    family = _family(archetype)
     name = data.get("name") or "Participant"
     company = data.get("company") or "Company"
     cohort = data.get("cohort") or "TEW"
@@ -254,17 +267,17 @@ def inject(archetype, data):
     scores = [int(round(float(data["comm_score"]))),
               int(round(float(data["dec_score"]))),
               int(round(float(data["collab_score"]))) ]
-    t = _set_scored_cards(t, scores)
+    t = _set_scored_cards(t, scores, family)
     t = _set_tldr_donuts(t, scores)
 
     # TL;DR "Snapshot of the day" panel — paragraph, mini working styles, strength/growth
-    t = _set_tldr_lead(t, scores)
-    t = _set_tldr_heads(t, scores)
+    t = _set_tldr_lead(t, scores, family)
+    t = _set_tldr_heads(t, scores, family)
     t = _set_tldr_ws(t, data.get("working_style"))
 
     # dynamic performance narrative (Strength/Growth Edge, next moves + support, momentum)
-    t = _replace_section(t, 'id="sec-stood-out"', nv.render_stood_out(scores))
-    t = _replace_section(t, 'id="sec-moves"', nv.render_moves(scores))
+    t = _replace_section(t, 'id="sec-stood-out"', nv.render_stood_out(scores, family))
+    t = _replace_section(t, 'id="sec-moves"', nv.render_moves(scores, family))
     t = _replace_section(t, 'Keep the momentum going', nv.render_momentum())
 
     # working style

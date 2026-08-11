@@ -131,6 +131,9 @@ ARCHETYPE_ALIASES = {
     "ember": "compass", "developing": "compass",
     "anchor": "anchor", "compass": "compass", "navigator": "navigator",
     "relay": "relay", "signal": "signal", "summit": "summit",
+    # Leadership Workshop (TLW) archetypes — served via /generate-hosted (inject_v2)
+    "keystone": "keystone", "lighthouse": "lighthouse", "pathfinder": "pathfinder",
+    "diplomat": "diplomat", "vanguard": "vanguard", "cornerstone": "cornerstone",
 }
 
 def resolve_archetype(raw: str) -> str:

@@ -143,21 +143,150 @@ TLDR_GROWTH = {
 }
 
 
-def heads(scores):
+# ===========================================================================
+# LEADERSHIP WORKSHOP (TLW) variant: same three score slots, reused by
+# position: comm -> Leadership, dec -> Change Management, collab -> Conflict
+# Management. Copy grounded in the TLW frameworks (Flywheel / Crossing / Forge).
+# Same voice, no em dashes.
+# ===========================================================================
+DIM_NAME_LEAD = {"comm": "Leadership", "dec": "Change Management",
+                 "collab": "Conflict Management"}
+DIM_ACTION_LEAD = {
+    "comm": "say the why before the what, then check the team is pointed at it",
+    "dec": "understand the whole before you change a part, and build the path with the people affected",
+    "collab": "name the problem while it is still small, and keep it about the work",
+}
+DIM_SKILL_LEAD = {"comm": "leading with intention", "dec": "leading people through change",
+                  "collab": "handling conflict well"}
+DIM_TOPIC_LEAD = {"comm": "intentional leadership", "dec": "leading change",
+                  "collab": "managing conflict and building trust"}
+
+STRENGTH_LEAD = {
+    "comm": {
+        "established": ("You set the direction and keep people on it.",
+            "You lead from a clear why and keep the team aimed at it, so people know "
+            "what they are working toward and can move without waiting on you. That "
+            "clarity is what keeps a team pulling the same way."),
+        "emerging": ("Leading with intention is your strongest starting point.",
+            "Of your three areas, leading from a clear why is where you are furthest "
+            "along. It is the best place to build from, because a team that knows the "
+            "intent can move without being told every step."),
+    },
+    "dec": {
+        "established": ("You lead people through change.",
+            "You understand the whole before you change a part, and you carry people "
+            "through the messy middle instead of leaving them behind. That is what "
+            "makes change stick instead of stalling."),
+        "emerging": ("Navigating change is where you are furthest along.",
+            "Of your three areas, working through change is your strongest starting "
+            "point. It is worth building on, because a team holds together through "
+            "change when someone can see the whole and steady the path."),
+    },
+    "collab": {
+        "established": ("You make it safe to disagree well.",
+            "You name problems early and keep them about the work, so tension gets "
+            "resolved instead of buried. That is what stops small issues from "
+            "becoming the thing nobody will say."),
+        "emerging": ("Handling conflict is your strongest starting point.",
+            "Of your three areas, dealing with tension head-on is where you are "
+            "furthest along. It is a solid base to build from, because a team that "
+            "can disagree well catches problems while they are still small."),
+    },
+}
+GROWTH_HEAD_LEAD = {
+    "comm": "Lead from the why, every time.",
+    "dec": "Bring people through the change.",
+    "collab": "Say it while it is still small.",
+}
+GROWTH_BODY_LEAD = {
+    "comm": {
+        "low": "This is your biggest opportunity. Focus on one habit: before a "
+               "task, say the goal and the why, then check the team is pointed at "
+               "it before you move.",
+        "developing": "You are close to strong here. The next step is to read the "
+               "field as you go and adjust your direction to what the team is "
+               "actually doing, rather than holding the plan.",
+        "strong": "Even your growth area is a strength. Keep it sharp by setting "
+               "the intent early and out loud, so people can act on it when you are "
+               "not there.",
+    },
+    "dec": {
+        "low": "This is your biggest opportunity. Focus on one habit: when "
+               "something shifts, map how the whole works before you change any "
+               "single part.",
+        "developing": "You are close to strong here. The next step is to expect "
+               "the resistance and move people through it, rather than assuming a "
+               "good plan sells itself.",
+        "strong": "Even your growth area is a strength. Keep it sharp by "
+               "re-anchoring change once it lands, so the new way becomes the "
+               "default.",
+    },
+    "collab": {
+        "low": "This is your biggest opportunity. Focus on one habit: when you "
+               "spot a problem in the work, name it early and about the work, not "
+               "the person.",
+        "developing": "You are close to strong here. The next step is to get past "
+               "positions to what each person is trying to do, and solve for that.",
+        "strong": "Even your growth area is a strength. Keep it sharp by setting "
+               "the ground early, so people know challenging the work is welcome.",
+    },
+}
+TLDR_STRONG_LEAD = {
+    "comm": "You led from a clear why and kept the team aimed at it, so people knew "
+            "what they were working toward",
+    "dec": "You saw the whole before changing a part and carried people through the "
+           "change instead of leaving them behind",
+    "collab": "You named problems early and kept them about the work, so tension got "
+              "resolved instead of buried",
+}
+TLDR_GROWTH_LEAD = {
+    "comm": "keeping the why in front of the team when the pressure is on, not just "
+            "the task",
+    "dec": "expecting the pushback and moving people through the change, not around it",
+    "collab": "raising problems while they are still small, not after they have grown",
+}
+
+
+class _Pack:
+    __slots__ = ("DIM_NAME", "DIM_ACTION", "DIM_SKILL", "DIM_TOPIC", "STRENGTH",
+                 "GROWTH_HEAD", "GROWTH_BODY", "TLDR_STRONG", "TLDR_GROWTH")
+
+    def __init__(self, d):
+        for k in self.__slots__:
+            setattr(self, k, d[k])
+
+
+_TEW_PACK = _Pack(dict(
+    DIM_NAME=DIM_NAME, DIM_ACTION=DIM_ACTION, DIM_SKILL=DIM_SKILL, DIM_TOPIC=DIM_TOPIC,
+    STRENGTH=STRENGTH, GROWTH_HEAD=GROWTH_HEAD, GROWTH_BODY=GROWTH_BODY,
+    TLDR_STRONG=TLDR_STRONG, TLDR_GROWTH=TLDR_GROWTH))
+_LEAD_PACK = _Pack(dict(
+    DIM_NAME=DIM_NAME_LEAD, DIM_ACTION=DIM_ACTION_LEAD, DIM_SKILL=DIM_SKILL_LEAD,
+    DIM_TOPIC=DIM_TOPIC_LEAD, STRENGTH=STRENGTH_LEAD, GROWTH_HEAD=GROWTH_HEAD_LEAD,
+    GROWTH_BODY=GROWTH_BODY_LEAD, TLDR_STRONG=TLDR_STRONG_LEAD, TLDR_GROWTH=TLDR_GROWTH_LEAD))
+
+
+def _pack(family):
+    return _LEAD_PACK if family == "lead" else _TEW_PACK
+
+
+def heads(scores, family="tew"):
     """(strength_headline, growth_headline) — same as the What-stood-out cards."""
+    P = _pack(family)
     s_dim, g_dim = select(scores)
     s_band = band_of(scores[DIM_ORDER.index(s_dim)])
     tier = "established" if s_band in ("developing", "strong") else "emerging"
-    return STRENGTH[s_dim][tier][0], GROWTH_HEAD[g_dim]
+    return P.STRENGTH[s_dim][tier][0], P.GROWTH_HEAD[g_dim]
 
 
-def render_tldr_lead(scores):
+def render_tldr_lead(scores, family="tew"):
     """Two-sentence summary paragraph for the 'Snapshot of the day' panel."""
+    P = _pack(family)
     s_dim, g_dim = select(scores)
     return ("Your strongest area today was %s. %s. The area with the most room to "
             "grow is %s, where the focus is %s."
-            % (DIM_NAME[s_dim].lower(), TLDR_STRONG[s_dim],
-               DIM_NAME[g_dim].lower(), TLDR_GROWTH[g_dim]))
+            % (P.DIM_NAME[s_dim].lower(), P.TLDR_STRONG[s_dim],
+               P.DIM_NAME[g_dim].lower(), P.TLDR_GROWTH[g_dim]))
 
 
 def _esc(s):
@@ -178,17 +307,18 @@ def _card_open(band):
         '<div class="relative">')
 
 
-def render_stood_out(scores):
+def render_stood_out(scores, family="tew"):
+    P = _pack(family)
     s_dim, g_dim = select(scores)
     s_score = scores[DIM_ORDER.index(s_dim)]
     g_score = scores[DIM_ORDER.index(g_dim)]
     s_band = band_of(s_score)
     g_band = band_of(g_score)
     tier = "established" if s_band in ("developing", "strong") else "emerging"
-    s_head, s_body = STRENGTH[s_dim][tier]
+    s_head, s_body = P.STRENGTH[s_dim][tier]
     g_key = {"foundation": "low", "emerging": "low"}.get(g_band, g_band)
-    g_head = GROWTH_HEAD[g_dim]
-    g_body = GROWTH_BODY[g_dim][g_key]
+    g_head = P.GROWTH_HEAD[g_dim]
+    g_body = P.GROWTH_BODY[g_dim][g_key]
     g_target = NEXT_BAND[g_band]
 
     strength = (
@@ -199,7 +329,7 @@ def render_stood_out(scores):
         '<p class="text-[15px] text-[var(--fg-2)] leading-[1.7]">' + _esc(s_body) + '</p>'
         '<div class="mt-7 pt-5 border-t hairline grid grid-cols-2 gap-6">'
         '<div><div class="eyebrow mb-1.5">Dimension</div>'
-        '<div class="text-[13.5px] font-medium">' + DIM_NAME[s_dim] + '</div></div>'
+        '<div class="text-[13.5px] font-medium">' + P.DIM_NAME[s_dim] + '</div></div>'
         '<div><div class="eyebrow mb-1.5">Band</div>'
         '<div class="text-[13.5px] font-medium tabular" style="color: var(--c-soft)">'
         + _band_span(s_band) + '</div></div></div></div></article>')
@@ -212,7 +342,7 @@ def render_stood_out(scores):
         '<p class="text-[15px] text-[var(--fg-2)] leading-[1.7]">' + _esc(g_body) + '</p>'
         '<div class="mt-7 pt-5 border-t hairline grid grid-cols-2 md:grid-cols-3 gap-6">'
         '<div><div class="eyebrow mb-1.5">Focus area</div>'
-        '<div class="text-[13.5px] font-medium">' + DIM_NAME[g_dim] + '</div></div>'
+        '<div class="text-[13.5px] font-medium">' + P.DIM_NAME[g_dim] + '</div></div>'
         '<div><div class="eyebrow mb-1.5">Current</div>'
         '<div class="text-[13.5px] font-medium tabular" style="color: var(--c-soft)">'
         + _band_span(g_band) + '</div></div>'
@@ -253,10 +383,11 @@ def _support(label, meta, head, body):
         '</p></div>')
 
 
-def render_moves(scores):
+def render_moves(scores, family="tew"):
+    P = _pack(family)
     s_dim, g_dim = select(scores)
-    sN, gN = DIM_NAME[s_dim], DIM_NAME[g_dim]
-    sAct, gAct = DIM_ACTION[s_dim], DIM_ACTION[g_dim]
+    sN, gN = P.DIM_NAME[s_dim], P.DIM_NAME[g_dim]
+    sAct, gAct = P.DIM_ACTION[s_dim], P.DIM_ACTION[g_dim]
 
     m1 = _move("01", "1", "Lead with your strength.",
         "In your next few meetings, lean on your %s: %s. It is your most reliable "
@@ -274,11 +405,11 @@ def render_moves(scores):
         "feels easier not to." % gAct)
     sup2 = _support("Mentor pairing", "2 chats", "Learn from someone strong at %s." % gN,
         "Pick someone on your team who is genuinely good at %s, watch how they do it, "
-        "and ask them one specific question about their approach." % DIM_SKILL[g_dim])
+        "and ask them one specific question about their approach." % P.DIM_SKILL[g_dim])
     sup3 = _support("Self-directed learning", "20 min / week",
         "Spend 20 minutes a week on %s." % gN,
         "Find a book, podcast, or short online course on %s and give it 20 focused "
-        "minutes a week. Small, regular input adds up." % DIM_TOPIC[g_dim])
+        "minutes a week. Small, regular input adds up." % P.DIM_TOPIC[g_dim])
 
     return (
         '<section id="sec-moves" class="mt-20 rise rise-4 section-next-steps">'

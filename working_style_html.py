@@ -35,7 +35,9 @@ _IC_PAIR = ('<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8.6" cy="7
             '<path d="M2.2 19.6a6.4 6.4 0 0 1 12.8 0v.4H2.2z"/>'
             '<circle cx="16.7" cy="8.4" r="2.7" opacity=".6"/>'
             '<path d="M16.6 20c0-2.1-.6-4-1.7-5.5a5.6 5.6 0 0 1 6.9 5.1v.4z" opacity=".6"/></svg>')
-_DIM_ICON = {"Communication": _IC_COMM, "Decision-Making": _IC_DEC, "Collaboration": _IC_COLL}
+_DIM_ICON = {"Communication": _IC_COMM, "Decision-Making": _IC_DEC, "Collaboration": _IC_COLL,
+             # Leadership Workshop (TLW) dimensions — reuse the same filled icon set.
+             "Leadership": _IC_DEC, "Change Management": _IC_COLL, "Conflict Management": _IC_COMM}
 
 # ── Style-specific icons (one per working style) ────────────────────────────────
 # Solid filled style (flat, two-tone): main silhouette in currentColor, interior
@@ -106,6 +108,31 @@ STYLE_ICONS = {
         '<circle cx="12" cy="12" r="3.4" fill="#fff" opacity=".92"/>'
         '<circle cx="12" cy="12" r="1.6"/>'),
 }
+
+# ── Leadership Workshop (TLW) style icons ────────────────────────────────────
+# The 12 lead styles are new names with no direct match in STYLE_ICONS above.
+# Reasonable fallback: render_working_style_section() and _set_tldr_ws() both
+# use STYLE_ICONS.get(name, "") so an unmatched name never crashes (it just
+# renders without an icon). Beyond that safety net, reuse the existing solid
+# filled two-tone icon set 1:1 by concept so every lead style still gets an
+# icon rather than falling back to blank.
+STYLE_ICONS.update({
+    # Leadership (Leading with Intention)
+    "Vision-Led & Big-Picture":  STYLE_ICONS["Candid & Open"],          # sees the whole picture
+    "Structured & Step-by-Step": STYLE_ICONS["Measured & Analytical"],  # stepped/sequenced bars
+    "People-First & Relational": STYLE_ICONS["Close & Collaborative"],  # relationship pair
+    "Adaptive & Field-Reading":  STYLE_ICONS["Adaptive & Iterative"],   # adjust-as-you-go cycle
+    # Change Management (Navigating Change)
+    "Systems-Minded & Deliberate":   STYLE_ICONS["Considered & Thorough"],   # deliberate, plan-first
+    "Collaborative & Co-Created":    STYLE_ICONS["Consultative & Inclusive"],# group/network
+    "Steady & Reassuring":           STYLE_ICONS["Warm & Attuned"],          # warmth/reassurance
+    "Fast-Moving & Momentum-Driven": STYLE_ICONS["Decisive & Committed"],    # momentum/bolt
+    # Conflict Management (Managing Conflict)
+    "Early & Direct":               STYLE_ICONS["Direct & To-the-Point"],     # direct arrow
+    "Calm & De-escalating":         STYLE_ICONS["Flexible & Versatile"],      # steady, multi-directional
+    "Interest-Seeking & Diagnostic": STYLE_ICONS["Curious & Questioning"],    # question-led
+    "Steady & Task-Focused":        STYLE_ICONS["Self-Directed & Focused"],   # focused target
+})
 
 _CSS = """
 <style>

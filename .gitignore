@@ -6,4 +6,6 @@ syp_logo_white_wm.png
 # but DO ship the static take-home assets served by the API
 !assets/resource_pack.pdf
 !assets/field_guide.pdf
+!assets/tlw_resource_pack.pdf
+!assets/tlw_field_guide.pdf
 .DS_Store

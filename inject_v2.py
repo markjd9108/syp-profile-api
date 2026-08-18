@@ -165,12 +165,12 @@ def _set_tldr_donuts(t, scores):
     return out
 
 
-def _set_working_style(t, answers):
+def _set_working_style(t, answers, family="tew"):
     """Replace the baked Working Style style+section with freshly rendered output."""
     if not answers:
         return t
     try:
-        blocks = ws_mod.build_blocks(answers)
+        blocks = ws_mod.build_blocks(answers, family)
         rendered = render_working_style_section(blocks)
         # keep the anchor id so TLDR "How you naturally work" links still resolve
         rendered = rendered.replace('<section class="ws-zone rise"',
@@ -204,17 +204,17 @@ def _set_tldr_heads(t, scores, family="tew"):
     return re.sub(r'<div class="tldr-headline">(.*?)</div>', repl, t, count=2, flags=re.S)
 
 
-def _set_tldr_ws(t, answers):
+def _set_tldr_ws(t, answers, family="tew"):
     """Replace the 3 mini working-style chips in the TL;DR with the real styles."""
     if not answers:
         return t
     try:
-        blocks = ws_mod.build_blocks(answers)
+        blocks = ws_mod.build_blocks(answers, family)
     except Exception:
         return t
     bydim = {b["dimension"]: b["style_name"] for b in blocks}
     cells = []
-    for dim in ("Communication", "Decision-Making", "Collaboration"):
+    for dim in ws_mod.DIMENSIONS_BY_FAMILY.get(family, ws_mod.DIMENSIONS_BY_FAMILY["tew"]):
         style = bydim.get(dim, "")
         icon = STYLE_ICONS.get(style, "")
         cells.append(
@@ -273,7 +273,7 @@ def inject(archetype, data):
     # TL;DR "Snapshot of the day" panel — paragraph, mini working styles, strength/growth
     t = _set_tldr_lead(t, scores, family)
     t = _set_tldr_heads(t, scores, family)
-    t = _set_tldr_ws(t, data.get("working_style"))
+    t = _set_tldr_ws(t, data.get("working_style"), family)
 
     # dynamic performance narrative (Strength/Growth Edge, next moves + support, momentum)
     t = _replace_section(t, 'id="sec-stood-out"', nv.render_stood_out(scores, family))
@@ -281,6 +281,6 @@ def inject(archetype, data):
     t = _replace_section(t, 'Keep the momentum going', nv.render_momentum())
 
     # working style
-    t = _set_working_style(t, data.get("working_style"))
+    t = _set_working_style(t, data.get("working_style"), family)
 
     return _save(raw, t)

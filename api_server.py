@@ -284,6 +284,24 @@ def asset_field_guide():
     return FileResponse(path, media_type="application/pdf",
                         filename="The Leadership Field Guide.pdf")
 
+@app.get("/assets/tlw-resource-pack")
+def asset_tlw_resource_pack():
+    """Static take-home Leadership Workshop Resource Pack PDF (same file for every participant)."""
+    path = os.path.join(_ASSETS_DIR, "tlw_resource_pack.pdf")
+    if not os.path.exists(path):
+        raise HTTPException(404, "TLW resource pack not found")
+    return FileResponse(path, media_type="application/pdf",
+                        filename="The Leadership Workshop Resource Pack.pdf")
+
+@app.get("/assets/tlw-field-guide")
+def asset_tlw_field_guide():
+    """Static Leadership Workshop Leaders' Field Guide PDF (same file for every leader)."""
+    path = os.path.join(_ASSETS_DIR, "tlw_field_guide.pdf")
+    if not os.path.exists(path):
+        raise HTTPException(404, "TLW field guide not found")
+    return FileResponse(path, media_type="application/pdf",
+                        filename="The Leadership Workshop Field Guide.pdf")
+
 @app.get("/sample/leadership-dashboard")
 def sample_leadership_dashboard():
     """Illustrative sample Leadership Dashboard (static HTML) for prospect demos."""

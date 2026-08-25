@@ -19,6 +19,7 @@ COPY lead_engine.py .
 # Working Style (V3) layer modules
 COPY working_style.py .
 COPY working_style_content.py .
+COPY working_style_content_lead.py .
 COPY working_style_html.py .
 COPY generate_manager_report.py .
 # Dynamic Leadership Insight Report (team layer)

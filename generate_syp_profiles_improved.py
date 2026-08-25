@@ -873,9 +873,9 @@ def draw_footer(c):
     c.rect(0, 0, PW, FOOTER_H, fill=1, stroke=0)
     c.setFont("Helvetica-Bold", 7)
     c.setFillColor(SYP_WHITE)
-    c.drawString(ML, FOOTER_H / 2 - 3, "SAIGON YOUNG PROFESSIONALS")
+    c.drawString(ML, FOOTER_H / 2 - 3, "THE PERFORMANCE LENS")
     c.setFont("Helvetica", 7)
-    c.drawRightString(PW - MR, FOOTER_H / 2 - 3, "www.saigonyoungprofessionals.com")
+    c.drawRightString(PW - MR, FOOTER_H / 2 - 3, "www.theperformancelens.com")
     c.restoreState()
 
 # ─── Score section ─────────────────────────────────────────────────────────────

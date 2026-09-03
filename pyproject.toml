@@ -13,3 +13,13 @@ dependencies = [
     "reportlab>=5.0.1",
     "uvicorn>=0.52.4",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+tpl-api-server = "api_server:main"
+
+[tool.hatch.build.targets.wheel      ]
+packages = ["api_server"]

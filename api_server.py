@@ -21,7 +21,9 @@ import inject_v2
 # ── Hosted-profile store ──────────────────────────────────────────────────────
 # Self-contained redesigned HTML profiles served at /p/<slug>. Mount a Railway
 # Volume at PROFILE_STORE_DIR so links survive restarts/redeploys.
-PROFILE_STORE_DIR = os.environ.get("PROFILE_STORE_DIR", "/data/profiles")
+# PROFILE_STORE_DIR = os.environ.get("PROFILE_STORE_DIR", os.path.join(os.getcwd(), "data", "profiles"))
+PROFILE_STORE_DIR = os.environ.get("PROFILE_STORE_DIR", os.path.join("/tmp", "data", "profiles"))
+print("PROFILE_STORE_DIR", PROFILE_STORE_DIR)
 PUBLIC_BASE_URL = os.environ.get(
     "PUBLIC_BASE_URL", "https://syp-profile-api-production.up.railway.app").rstrip("/")
 try:

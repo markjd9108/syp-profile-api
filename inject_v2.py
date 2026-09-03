@@ -243,6 +243,37 @@ def _replace_section(t, anchor, new_html):
     return t[:start] + new_html + t[end + len('</section>'):]
 
 
+_ASSESSED_FORMATS = ("%Y-%m-%d", "%Y/%m/%d", "%d/%m/%Y", "%d-%m-%Y",
+                     "%d %B %Y", "%d %b %Y", "%B %d, %Y", "%b %d, %Y")
+
+
+def _parse_assessed(raw):
+    """Best-effort parse of whatever the pipeline puts in assessed_date.
+
+    Slash and dash forms are read day-first, matching the house convention
+    (Make writes its own timestamps as DD/MM/YYYY). Returns None when the
+    value is absent or in a shape we do not recognise, so the caller can fall
+    back rather than print a confidently wrong date."""
+    if not raw:
+        return None
+    # Drop a trailing clock time, keeping the date: the sheet's Timestamp
+    # column arrives as "09/07/2026 11:08" or "2026-09-05 11:53:00". Written
+    # forms like "9 July 2026" must survive intact, so only a real time is cut.
+    s = re.sub(r"[T ]\d{1,2}:\d{2}(:\d{2})?(\s*[APap]\.?[Mm]\.?)?$", "",
+               str(raw).strip())
+    for fmt in _ASSESSED_FORMATS:
+        try:
+            return datetime.datetime.strptime(s, fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def _fmt_assessed(d):
+    """9 July 2026 — day first, no leading zero."""
+    return "{} {}".format(d.day, d.strftime("%B %Y"))
+
+
 def inject(archetype, data):
     """data: dict with name, company, cohort, assessed_date, profile_id,
     comm_score, dec_score, collab_score, working_style(dict ws_q1..9)."""
@@ -252,9 +283,20 @@ def inject(archetype, data):
     company = data.get("company") or "Company"
     cohort = data.get("cohort") or "TEW"
     now = datetime.datetime.now()
-    assessed = data.get("assessed_date") or now.strftime("%B %d, %Y").replace(" 0", " ")
+    # The header month and the ASSESSED line must both describe the day the
+    # participant was assessed, not the day the profile happens to be built —
+    # profiles get regenerated long after the workshop.
+    assessed_date = _parse_assessed(data.get("assessed_date"))
+    if assessed_date:
+        assessed = _fmt_assessed(assessed_date)
+        month_year = assessed_date.strftime("%B %Y")
+    elif data.get("assessed_date"):
+        assessed = str(data["assessed_date"])          # unrecognised shape: print it as given
+        month_year = now.strftime("%B %Y")
+    else:
+        assessed = _fmt_assessed(now.date())
+        month_year = now.strftime("%B %Y")
     pid = data.get("profile_id") or ""
-    month_year = now.strftime("%B %Y")
 
     # identity tokens (sample values baked into the template)
     t = t.replace("Alex Nguyen", name)

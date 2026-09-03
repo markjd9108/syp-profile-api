@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Twelve sample participant profiles from The Performance Lens, one per archetype, with scores and direct links.">
+<title>Archetype Sample Library</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* The Performance Lens sample index. Single dark identity on purpose:
+     the page mirrors the profiles it links to, so every colour is painted
+     explicitly and nothing is inherited from the host theme. */
+  :root {
+    --ink:        #080f1c;
+    --ground:     #0b1424;
+    --surface:    #111d33;
+    --surface-2:  #16243d;
+    --line:       #1e2f4b;
+    --line-soft:  #17253c;
+    --text:       #eef3fa;
+    --text-dim:   #9db0cc;
+    --text-faint: #6d829f;
+    --sky:        #1e88e5;
+    --sky-bright: #61b0f5;
+
+    --band-foundation: #e8577a;
+    --band-emerging:   #e2b33c;
+    --band-developing: #4d8fe0;
+    --band-strong:     #3fcf8e;
+
+    --step--1: 0.75rem;
+    --step-0:  0.95rem;
+    --step-1:  1.15rem;
+    --step-2:  1.65rem;
+    --step-3:  2.6rem;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+    font-size: var(--step-0);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 40px 24px 72px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .lockup { display: flex; align-items: center; gap: 14px; }
+
+  .lockup svg { width: 46px; height: 46px; flex: none; }
+
+  .lockup-words { display: flex; flex-direction: column; line-height: 1; }
+
+  .lockup-the {
+    font-family: Barlow, Inter, sans-serif;
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.36em;
+    color: var(--sky-bright);
+  }
+
+  .lockup-name {
+    font-family: Barlow, Inter, sans-serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    margin-top: 4px;
+  }
+
+  .masthead-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: right;
+    max-width: 42ch;
+  }
+
+  .masthead-meta h1 {
+    font-family: Barlow, Inter, sans-serif;
+    font-weight: 700;
+    font-size: var(--step-2);
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .masthead-meta p { margin: 0; color: var(--text-dim); font-size: var(--step--1); }
+
+  /* ---------- intro + scale ---------- */
+
+  .intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.9fr);
+    gap: 40px;
+    align-items: start;
+    padding: 28px 0 20px;
+  }
+
+  .intro p { margin: 0 0 12px; max-width: 62ch; color: var(--text-dim); }
+  .intro p:last-child { margin-bottom: 0; }
+  .intro strong { color: var(--text); font-weight: 600; }
+
+  .scale {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 20px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+
+  .scale-title {
+    font-family: Barlow, Inter, sans-serif;
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .scale-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+
+  .scale-seg { height: 4px; border-radius: 2px; }
+
+  .scale-keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+  }
+
+  .scale-keys span { display: flex; flex-direction: column; gap: 2px; }
+  .scale-keys b { color: var(--text-dim); font-weight: 500; }
+
+  /* ---------- workshop sections ---------- */
+
+  .workshop { margin-top: 44px; }
+
+  .workshop-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 10px;
+  }
+
+  .workshop-head h2 {
+    font-family: Barlow, Inter, sans-serif;
+    font-weight: 900;
+    font-size: var(--step-1);
+    letter-spacing: 0.01em;
+    margin: 0;
+  }
+
+  .dims {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  .rows { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto;
+    gap: 20px 28px;
+    align-items: center;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    text-decoration: none;
+    color: inherit;
+    transition: background 140ms ease, border-color 140ms ease;
+  }
+
+  .row:hover, .row:focus-visible {
+    background: var(--surface);
+    border-bottom-color: var(--line);
+    outline: none;
+  }
+
+  .row:focus-visible { box-shadow: inset 0 0 0 2px var(--sky); }
+
+  .who { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+  .archetype {
+    font-family: Barlow, Inter, sans-serif;
+    font-weight: 900;
+    font-size: 1.32rem;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+
+  .archetype span { color: var(--text-faint); font-weight: 600; margin-right: 6px; }
+
+  .tagline { color: var(--text-dim); font-size: var(--step--1); text-wrap: balance; }
+
+  .person {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    color: var(--text-faint);
+    letter-spacing: 0.02em;
+  }
+
+  .scores { display: flex; gap: 8px; }
+
+  .score {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 8px 10px;
+    background: var(--surface);
+    border-left: 2px solid var(--band);
+    border-radius: 0 3px 3px 0;
+    min-width: 0;
+  }
+
+  .score-dim {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    color: var(--text-faint);
+  }
+
+  .score-val {
+    font-family: Barlow, Inter, sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--band);
+    line-height: 1;
+  }
+
+  .open {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: Barlow, Inter, sans-serif;
+    font-weight: 600;
+    font-size: var(--step--1);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sky-bright);
+    white-space: nowrap;
+  }
+
+  .open svg { width: 14px; height: 14px; }
+  .row:hover .open svg { transform: translateX(3px); }
+  .open svg { transition: transform 140ms ease; }
+
+  /* ---------- footnote ---------- */
+
+  .foot {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px 40px;
+    color: var(--text-faint);
+    font-size: var(--step--1);
+  }
+
+  .foot h3 {
+    font-family: Barlow, Inter, sans-serif;
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0 0 6px;
+  }
+
+  .foot p { margin: 0; max-width: 46ch; }
+  .foot code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 28px 16px 56px; }
+    .masthead { align-items: flex-start; }
+    .masthead-meta { text-align: left; }
+    .intro { grid-template-columns: 1fr; gap: 28px; padding-bottom: 8px; }
+    .row { grid-template-columns: 1fr; gap: 14px; padding: 18px 12px; }
+    .open { justify-content: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="lockup">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="86" fill="none" stroke="#eef3fa" stroke-width="6"></circle>
+        <circle cx="100" cy="100" r="58" fill="none" stroke="#eef3fa" stroke-width="10"></circle>
+        <circle cx="100" cy="100" r="30" fill="none" stroke="#1e88e5" stroke-width="14"></circle>
+        <circle cx="100" cy="100" r="8" fill="#eef3fa"></circle>
+        <g stroke="#eef3fa" stroke-width="6" stroke-linecap="round">
+          <line x1="100" y1="6" x2="100" y2="22"></line>
+          <line x1="100" y1="178" x2="100" y2="194"></line>
+          <line x1="6" y1="100" x2="22" y2="100"></line>
+          <line x1="178" y1="100" x2="194" y2="100"></line>
+        </g>
+      </svg>
+      <div class="lockup-words">
+        <div class="lockup-the">THE</div>
+        <div class="lockup-name">PERFORMANCE LENS</div>
+      </div>
+    </div>
+    <div class="masthead-meta">
+      <h1>Archetype sample library</h1>
+      <p>Twelve reference profiles, one per archetype, live on app.theperformancelens.com</p>
+    </div>
+  </header>
+
+  <section class="intro">
+    <div>
+      <p>Every link below opens a real hosted participant profile, generated by the live pipeline rather than mocked up. Show one on a phone or tablet and it behaves exactly as a participant's own profile does, because it is the same page.</p>
+      <p>The participants are invented and the employer is <strong>Sample Company Ltd.</strong> The scores are chosen so each profile genuinely reads as its archetype: the Vanguard really is strong on direction and thin on conflict, the Compass really is early in its development.</p>
+      <p>The links are stable. Regenerating a sample reuses its profile ID and therefore its URL, so anything you print, bookmark or put behind a QR code keeps working.</p>
+    </div>
+    <div class="scale">
+      <div class="scale-title">The development scale</div>
+      <div class="scale-bar">
+        <div class="scale-seg" style="background: var(--band-foundation)"></div>
+        <div class="scale-seg" style="background: var(--band-emerging)"></div>
+        <div class="scale-seg" style="background: var(--band-developing)"></div>
+        <div class="scale-seg" style="background: var(--band-strong)"></div>
+      </div>
+      <div class="scale-keys">
+        <span><b>Foundation</b>0&ndash;39</span>
+        <span><b>Emerging</b>40&ndash;59</span>
+        <span><b>Developing</b>60&ndash;79</span>
+        <span><b>Strong</b>80&ndash;100</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="workshop">
+    <div class="workshop-head">
+      <h2>Team Effectiveness Workshop</h2>
+      <div class="dims">Communication &middot; Decision-Making &middot; Collaboration</div>
+    </div>
+    <div class="rows">
+
+      <a class="row" href="https://app.theperformancelens.com/p/ffbd8a5b280824ecdb90f4" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Summit</div>
+          <div class="tagline">Strong across the board. Leads from any dimension.</div>
+          <div class="person">Chi Vo &middot; TPL-SAMPLE-DEMO-02</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">COMM</div><div class="score-val">84</div></div>
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">DEC</div><div class="score-val">82</div></div>
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">COLLAB</div><div class="score-val">87</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/62c275d4dd3fe4f1efcd7c" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Signal</div>
+          <div class="tagline">You have a clear voice. Now step into the lead.</div>
+          <div class="person">Bao Le &middot; TPL-SAMPLE-DEMO-04</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">COMM</div><div class="score-val">86</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">DEC</div><div class="score-val">62</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">COLLAB</div><div class="score-val">72</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/6a061423d205362a9bf002" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Anchor</div>
+          <div class="tagline">The team holds together because of you.</div>
+          <div class="person">Hoa Nguyen &middot; TPL-SAMPLE-DEMO-03</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">COMM</div><div class="score-val">68</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">DEC</div><div class="score-val">64</div></div>
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">COLLAB</div><div class="score-val">89</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/6d0cf3a049b4cc375d8603" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Navigator</div>
+          <div class="tagline">You can read the room. Now learn to steer.</div>
+          <div class="person">Thu Pham &middot; TPL-SAMPLE-DEMO-05</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">COMM</div><div class="score-val">78</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">DEC</div><div class="score-val">61</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">COLLAB</div><div class="score-val">76</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/c047460e1eecbe38197859" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Relay</div>
+          <div class="tagline">Broad range. Ready for anything.</div>
+          <div class="person">Lan Hoang &middot; TPL-SAMPLE-DEMO-01</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">COMM</div><div class="score-val">72</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">DEC</div><div class="score-val">66</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">COLLAB</div><div class="score-val">78</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/6096fbd0ffae12d7040e5e" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Compass</div>
+          <div class="tagline">Building foundations. Watch this space.</div>
+          <div class="person">Minh Tran &middot; TPL-SAMPLE-DEMO-06</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-emerging)"><div class="score-dim">COMM</div><div class="score-val">52</div></div>
+          <div class="score" style="--band: var(--band-emerging)"><div class="score-dim">DEC</div><div class="score-val">48</div></div>
+          <div class="score" style="--band: var(--band-emerging)"><div class="score-dim">COLLAB</div><div class="score-val">57</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="workshop">
+    <div class="workshop-head">
+      <h2>The Leadership Workshop</h2>
+      <div class="dims">Leadership &middot; Change Management &middot; Conflict Management</div>
+    </div>
+    <div class="rows">
+
+      <a class="row" href="https://app.theperformancelens.com/p/eed99572935313647897ef" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Lighthouse</div>
+          <div class="tagline">You set the direction. Now bring everyone into it.</div>
+          <div class="person">Mai Do &middot; TPL-SAMPLE-DEMO-08</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">LEAD</div><div class="score-val">88</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">CHANGE</div><div class="score-val">70</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">CONFLICT</div><div class="score-val">64</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/c07bbfefd9cd9a02fecdbd" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Pathfinder</div>
+          <div class="tagline">You find the way through change. Now take people with you.</div>
+          <div class="person">Khanh Bui &middot; TPL-SAMPLE-DEMO-09</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">LEAD</div><div class="score-val">70</div></div>
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">CHANGE</div><div class="score-val">87</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">CONFLICT</div><div class="score-val">66</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/6372969fc253a84cb65772" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Diplomat</div>
+          <div class="tagline">You make it safe to disagree. Now turn that into better work.</div>
+          <div class="person">Trang Ly &middot; TPL-SAMPLE-DEMO-10</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">LEAD</div><div class="score-val">64</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">CHANGE</div><div class="score-val">61</div></div>
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">CONFLICT</div><div class="score-val">91</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/40cf028dd6f0c166dfac11" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Keystone</div>
+          <div class="tagline">You hold the team together. Now stretch what it can reach.</div>
+          <div class="person">Duy Ngo &middot; TPL-SAMPLE-DEMO-07</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">LEAD</div><div class="score-val">78</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">CHANGE</div><div class="score-val">76</div></div>
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">CONFLICT</div><div class="score-val">84</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/212c71848fbffe8a561c73" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Vanguard</div>
+          <div class="tagline">You drive the team forward. Now make room for the hard conversations.</div>
+          <div class="person">Son Dang &middot; TPL-SAMPLE-DEMO-11</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">LEAD</div><div class="score-val">84</div></div>
+          <div class="score" style="--band: var(--band-strong)"><div class="score-dim">CHANGE</div><div class="score-val">82</div></div>
+          <div class="score" style="--band: var(--band-emerging)"><div class="score-dim">CONFLICT</div><div class="score-val">55</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+      <a class="row" href="https://app.theperformancelens.com/p/6b163d7803cf5177f530df" target="_blank" rel="noopener">
+        <div class="who">
+          <div class="archetype"><span>The</span>Cornerstone</div>
+          <div class="tagline">You are the steady base. Now build on it.</div>
+          <div class="person">Yen Truong &middot; TPL-SAMPLE-DEMO-12</div>
+        </div>
+        <div class="scores">
+          <div class="score" style="--band: var(--band-emerging)"><div class="score-dim">LEAD</div><div class="score-val">58</div></div>
+          <div class="score" style="--band: var(--band-emerging)"><div class="score-dim">CHANGE</div><div class="score-val">55</div></div>
+          <div class="score" style="--band: var(--band-developing)"><div class="score-dim">CONFLICT</div><div class="score-val">63</div></div>
+        </div>
+        <div class="open">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
+      </a>
+
+    </div>
+  </section>
+
+  <div class="foot">
+    <div>
+      <h3>Where to start</h3>
+      <p>The Summit and the Lighthouse show the format at full strength. The Compass shows what an early-stage result looks like, and how the profile stays strengths-forward when the scores are low.</p>
+    </div>
+    <div>
+      <h3>Cohorts</h3>
+      <p>Team Effectiveness samples sit in <code>SAMPLE-Q3-26</code>, assessed 21 August 2026. Leadership samples sit in <code>SAMPLE-TLW-Q3-26</code>, assessed 28 August 2026.</p>
+    </div>
+    <div>
+      <h3>Privacy</h3>
+      <p>Hosted profiles are unlisted and carry <code>noindex</code>, so these pages are safe to open in front of visitors and will not turn up in search.</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -302,6 +302,18 @@ def asset_tlw_field_guide():
     return FileResponse(path, media_type="application/pdf",
                         filename="The Leadership Workshop Field Guide.pdf")
 
+@app.get("/samples")
+def sample_profile_library():
+    """Shareable index of the twelve sample participant profiles, one per
+    archetype. Unlisted rather than secret: safe to send to a colleague or a
+    prospect, but kept out of search."""
+    path = os.path.join(_ASSETS_DIR, "sample_profiles.html")
+    if not os.path.exists(path):
+        raise HTTPException(404, "sample profile library not found")
+    return FileResponse(path, media_type="text/html",
+                        headers={"Cache-Control": "public, max-age=3600",
+                                 "X-Robots-Tag": "noindex, nofollow"})
+
 @app.get("/sample/leadership-dashboard")
 def sample_leadership_dashboard():
     """Illustrative sample Leadership Dashboard (static HTML) for prospect demos."""

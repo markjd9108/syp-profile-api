@@ -13,6 +13,10 @@ import working_style as ws_mod
 import dimension_content as dc
 import narrative_v2 as nv
 from working_style_html import render_working_style_section, STYLE_ICONS
+try:
+    import ai_narrative as ain
+except Exception:
+    ain = None
 
 _DIR = os.path.join(os.path.dirname(__file__), "templates_v2")
 
@@ -187,15 +191,15 @@ def _set_working_style(t, answers, family="tew"):
     return t[:style_start] + rendered + t[sec_end:]
 
 
-def _set_tldr_lead(t, scores, family="tew"):
+def _set_tldr_lead(t, scores, family="tew", ai=None):
     """Replace the baked 'Snapshot of the day' summary paragraph."""
-    lead = '<p class="tldr-lead">' + _esc(nv.render_tldr_lead(scores, family)) + '</p>'
+    lead = '<p class="tldr-lead">' + _esc(nv.render_tldr_lead(scores, family, ai)) + '</p>'
     return re.sub(r'<p class="tldr-lead">.*?</p>', lambda _m: lead, t, count=1, flags=re.S)
 
 
-def _set_tldr_heads(t, scores, family="tew"):
+def _set_tldr_heads(t, scores, family="tew", ai=None):
     """Replace the two TL;DR strength/growth headlines with dynamic ones."""
-    hs = list(nv.heads(scores, family))
+    hs = list(nv.heads(scores, family, ai))
     box = {"i": 0}
     def repl(_m):
         v = _esc(hs[box["i"]]) if box["i"] < len(hs) else _m.group(1)
@@ -270,14 +274,24 @@ def inject(archetype, data):
     t = _set_scored_cards(t, scores, family)
     t = _set_tldr_donuts(t, scores)
 
+    # Grounded, per-person prose for the narrative slots. Returns None (and every
+    # section falls back to the deterministic copy) when the AI is off or fails.
+    ai = None
+    if ain is not None:
+        try:
+            ai = ain.generate(name, family, archetype, scores, data.get("working_style"))
+        except Exception as ex:
+            print("[inject_v2] ai_narrative error, using deterministic copy:", ex, flush=True)
+            ai = None
+
     # TL;DR "Snapshot of the day" panel — paragraph, mini working styles, strength/growth
-    t = _set_tldr_lead(t, scores, family)
-    t = _set_tldr_heads(t, scores, family)
+    t = _set_tldr_lead(t, scores, family, ai)
+    t = _set_tldr_heads(t, scores, family, ai)
     t = _set_tldr_ws(t, data.get("working_style"), family)
 
     # dynamic performance narrative (Strength/Growth Edge, next moves + support, momentum)
-    t = _replace_section(t, 'id="sec-stood-out"', nv.render_stood_out(scores, family))
-    t = _replace_section(t, 'id="sec-moves"', nv.render_moves(scores, family))
+    t = _replace_section(t, 'id="sec-stood-out"', nv.render_stood_out(scores, family, ai))
+    t = _replace_section(t, 'id="sec-moves"', nv.render_moves(scores, family, ai))
     t = _replace_section(t, 'Keep the momentum going', nv.render_momentum())
 
     # working style

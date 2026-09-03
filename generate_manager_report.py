@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SYP Team Effectiveness Lab — Manager Diagnostic Report Generator
+The Performance Lens — Manager Diagnostic Report Generator
 ================================================================
 Generates a branded, multi-page PDF diagnostic report for team managers,
 summarising the team's performance across the three core dimensions:
@@ -152,7 +152,7 @@ def _draw_content(canvas, doc):
     canvas.setFont("Helvetica", 6.5)
     canvas.setFillColor(MID_GREY)
     canvas.drawString(L_MARGIN, 4 * mm,
-                      "© The Performance Lens by Saigon Young Professionals")
+                      "© The Performance Lens")
     canvas.drawRightString(PAGE_W - R_MARGIN, 4 * mm,
                            f"Generated {datetime.now().strftime('%d %B %Y')}")
 
@@ -469,7 +469,7 @@ def _section_cover(team_name, workshop_date, manager_name, st):
         ParagraphStyle("logo_txt", fontName="Helvetica-Bold",
                        fontSize=20, textColor=SKY_BLUE)))
     story.append(Paragraph(
-        "by Saigon Young Professionals",
+        "",
         ParagraphStyle("logo_sub", fontName="Helvetica",
                        fontSize=10, textColor=colors.HexColor("#90CAF9"))))
     story.append(Spacer(1, 18 * mm))
@@ -738,7 +738,7 @@ def _section_recommendations(stats, st):
         "Individual profile PDFs have been sent directly to each participant. "
         "You also have the team data sheet, shared separately, which contains all scores "
         "in a searchable format. "
-        "For questions about the Team Effectiveness Workshop, contact your SYP facilitator.",
+        "For questions about the Team Effectiveness Workshop, contact your facilitator.",
         ParagraphStyle("closing", fontName="Helvetica", fontSize=8,
                        textColor=MID_GREY, leading=12)
     ))
@@ -854,7 +854,7 @@ def manager_report():
             io.BytesIO(pdf_bytes),
             mimetype="application/pdf",
             as_attachment=True,
-            download_name=f"SYP_Manager_Report_{safe_name}.pdf",
+            download_name=f"TPL_Manager_Report_{safe_name}.pdf",
         )
     except Exception as e:
         app.logger.error(f"Manager report generation failed: {e}")
@@ -914,10 +914,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
         with open(sys.argv[1]) as f:
             data = json.load(f)
-        out = sys.argv[2] if len(sys.argv) > 2 else "SYP_Manager_Report.pdf"
+        out = sys.argv[2] if len(sys.argv) > 2 else "TPL_Manager_Report.pdf"
     else:
         data = SAMPLE_DATA
-        out  = "SYP_Manager_Report_Sample.pdf"
+        out  = "TPL_Manager_Report_Sample.pdf"
 
     pdf = generate_manager_report_pdf(data)
 

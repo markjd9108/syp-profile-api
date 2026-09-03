@@ -832,7 +832,7 @@ def _build_whats_next(stats, company) -> str:
     # opening tag only, so the label + arrow glyph are preserved untouched).
     pg = pg.replace(
         '<a href="#" style="font-size:12px;font-weight:700;color:#1E88E5;text-decoration:none;">',
-        '<a href="https://saigonyoungprofessionals.com/for-business/" target="_blank" '
+        '<a href="https://theperformancelens.com/for-business/" target="_blank" '
         'style="display:inline-block;background:#1E88E5;color:#fff;font-size:12px;font-weight:700;'
         'text-decoration:none;padding:11px 24px;border-radius:8px;letter-spacing:0.02em;">',
     )

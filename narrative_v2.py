@@ -270,8 +270,10 @@ def _pack(family):
     return _LEAD_PACK if family == "lead" else _TEW_PACK
 
 
-def heads(scores, family="tew"):
+def heads(scores, family="tew", ai=None):
     """(strength_headline, growth_headline) — same as the What-stood-out cards."""
+    if ai:
+        return ai["strength_head"], ai["growth_head"]
     P = _pack(family)
     s_dim, g_dim = select(scores)
     s_band = band_of(scores[DIM_ORDER.index(s_dim)])
@@ -279,8 +281,10 @@ def heads(scores, family="tew"):
     return P.STRENGTH[s_dim][tier][0], P.GROWTH_HEAD[g_dim]
 
 
-def render_tldr_lead(scores, family="tew"):
+def render_tldr_lead(scores, family="tew", ai=None):
     """Two-sentence summary paragraph for the 'Snapshot of the day' panel."""
+    if ai and ai.get("tldr_lead"):
+        return ai["tldr_lead"]
     P = _pack(family)
     s_dim, g_dim = select(scores)
     return ("Your strongest area today was %s. %s. The area with the most room to "
@@ -307,7 +311,7 @@ def _card_open(band):
         '<div class="relative">')
 
 
-def render_stood_out(scores, family="tew"):
+def render_stood_out(scores, family="tew", ai=None):
     P = _pack(family)
     s_dim, g_dim = select(scores)
     s_score = scores[DIM_ORDER.index(s_dim)]
@@ -320,6 +324,9 @@ def render_stood_out(scores, family="tew"):
     g_head = P.GROWTH_HEAD[g_dim]
     g_body = P.GROWTH_BODY[g_dim][g_key]
     g_target = NEXT_BAND[g_band]
+    if ai:
+        s_head, s_body = ai["strength_head"], ai["strength_body"]
+        g_head, g_body = ai["growth_head"], ai["growth_body"]
 
     strength = (
         _card_open(s_band) +
@@ -383,22 +390,28 @@ def _support(label, meta, head, body):
         '</p></div>')
 
 
-def render_moves(scores, family="tew"):
+def render_moves(scores, family="tew", ai=None):
     P = _pack(family)
     s_dim, g_dim = select(scores)
     sN, gN = P.DIM_NAME[s_dim], P.DIM_NAME[g_dim]
     sAct, gAct = P.DIM_ACTION[s_dim], P.DIM_ACTION[g_dim]
 
-    m1 = _move("01", "1", "Lead with your strength.",
-        "In your next few meetings, lean on your %s: %s. It is your most reliable "
-        "contribution, so use it on purpose." % (sN.lower(), sAct), "Every meeting")
-    m2 = _move("02", "2", "Practise one new habit.",
-        "Pick one moment in your next meeting to %s. One clear moment is enough, and "
-        "it adds up faster than trying to fix everything at once." % gAct, "1× per meeting")
-    m3 = _move("03", "3", "Ask for one piece of feedback.",
-        "After a meeting, ask one person: “What is one thing I did that helped the "
-        "team today?” What others notice first is often a better signal than what "
-        "you feel most sure of.", "Weekly")
+    if ai:
+        mv = ai["moves"]
+        m1 = _move("01", "1", mv[0]["head"], mv[0]["body"], "Every meeting")
+        m2 = _move("02", "2", mv[1]["head"], mv[1]["body"], "1× per meeting")
+        m3 = _move("03", "3", mv[2]["head"], mv[2]["body"], "Weekly")
+    else:
+        m1 = _move("01", "1", "Lead with your strength.",
+            "In your next few meetings, lean on your %s: %s. It is your most reliable "
+            "contribution, so use it on purpose." % (sN.lower(), sAct), "Every meeting")
+        m2 = _move("02", "2", "Practise one new habit.",
+            "Pick one moment in your next meeting to %s. One clear moment is enough, and "
+            "it adds up faster than trying to fix everything at once." % gAct, "1× per meeting")
+        m3 = _move("03", "3", "Ask for one piece of feedback.",
+            "After a meeting, ask one person: “What is one thing I did that helped the "
+            "team today?” What others notice first is often a better signal than what "
+            "you feel most sure of.", "Weekly")
 
     sup1 = _support("30-day focus", "Start this week", "One clear moment per meeting.",
         "This month, aim for one moment in each meeting where you %s, even when it "

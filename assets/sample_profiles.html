@@ -161,13 +161,14 @@
 
   .workshop { margin-top: 44px; }
 
+  /* same grid as .row, so the dimension labels sit directly over the score
+     columns instead of drifting to the right edge of the section */
   .workshop-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding-bottom: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto;
+    gap: 20px 28px;
+    align-items: end;
+    padding: 0 16px 10px;
   }
 
   .workshop-head h2 {
@@ -178,13 +179,23 @@
     margin: 0;
   }
 
-  .dims {
+  .dims { display: flex; gap: 8px; }
+
+  .dims span {
+    flex: 1 1 0;
+    min-width: 0;
+    /* 2px score border + 10px score padding, so the label starts exactly
+       where the label inside the tile below it starts */
+    padding-left: 12px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.06em;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
     color: var(--text-faint);
     text-transform: uppercase;
   }
+
+  /* reserves the width of the Open column so the score columns line up */
+  .head-spacer { visibility: hidden; }
 
   .rows { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
 
@@ -313,6 +324,11 @@
     .intro { grid-template-columns: 1fr; gap: 28px; padding-bottom: 8px; }
     .row { grid-template-columns: 1fr; gap: 14px; padding: 18px 12px; }
     .open { justify-content: flex-start; }
+    /* stacked rows have no score columns to sit over, so the header goes back
+       to a plain heading and the per-tile labels carry the dimension names */
+    .workshop-head { grid-template-columns: 1fr; gap: 8px; padding: 0 12px 10px; }
+    .dims { display: none; }
+    .head-spacer { display: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -374,7 +390,8 @@
   <section class="workshop">
     <div class="workshop-head">
       <h2>Team Effectiveness Workshop</h2>
-      <div class="dims">Communication &middot; Decision-Making &middot; Collaboration</div>
+      <div class="dims"><span>Communication</span><span>Decision-Making</span><span>Collaboration</span></div>
+      <div class="open head-spacer" aria-hidden="true">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
     </div>
     <div class="rows">
 
@@ -468,7 +485,8 @@
   <section class="workshop">
     <div class="workshop-head">
       <h2>The Leadership Workshop</h2>
-      <div class="dims">Leadership &middot; Change Management &middot; Conflict Management</div>
+      <div class="dims"><span>Leadership</span><span>Change Mgmt</span><span>Conflict Mgmt</span></div>
+      <div class="open head-spacer" aria-hidden="true">Open<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h9M9 4l4 4-4 4"/></svg></div>
     </div>
     <div class="rows">
 

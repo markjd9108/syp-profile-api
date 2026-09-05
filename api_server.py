@@ -10,7 +10,7 @@ Endpoints:
 """
 
 import os, asyncio, base64, datetime, random, string, secrets, json, re
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response, FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
@@ -302,53 +302,16 @@ def asset_tlw_field_guide():
     return FileResponse(path, media_type="application/pdf",
                         filename="The Leadership Workshop Field Guide.pdf")
 
-def _require_samples_auth(request: Request):
-    """HTTP Basic gate for the sample library.
-
-    Credentials live in the environment (SAMPLES_USER, SAMPLES_PASSWORD), never
-    in the repo. The check runs before the file is read, so an unauthenticated
-    request never receives the page content. With no password configured the
-    route refuses to serve rather than falling open."""
-    expected_user = os.environ.get("SAMPLES_USER", "").strip() or "tpl"
-    expected_pwd = os.environ.get("SAMPLES_PASSWORD", "").strip()
-    if not expected_pwd:
-        raise HTTPException(503, "sample library is not configured for access yet")
-
-    header = request.headers.get("authorization", "")
-    supplied_user = supplied_pwd = ""
-    if header[:6].lower() == "basic ":
-        try:
-            decoded = base64.b64decode(header[6:].strip()).decode("utf-8")
-            supplied_user, _, supplied_pwd = decoded.partition(":")
-        except Exception:
-            supplied_user = supplied_pwd = ""
-
-    # compare_digest on both halves, and always both, so a wrong username costs
-    # the same time as a wrong password
-    # compare as bytes: compare_digest rejects str with non-ASCII characters,
-    # and a password with an accent in it must fail the check, not 500 the route
-    ok_user = secrets.compare_digest(supplied_user.encode("utf-8"),
-                                     expected_user.encode("utf-8"))
-    ok_pwd = secrets.compare_digest(supplied_pwd.encode("utf-8"),
-                                    expected_pwd.encode("utf-8"))
-    if not (ok_user and ok_pwd):
-        raise HTTPException(
-            status_code=401,
-            detail="Authentication required",
-            headers={"WWW-Authenticate": 'Basic realm="The Performance Lens"'})
-
-
 @app.get("/samples")
-def sample_profile_library(request: Request):
-    """Index of the twelve sample participant profiles, one per archetype.
-    Password protected: the page carries the full archetype roster and the band
-    scale, which are not for general release."""
-    _require_samples_auth(request)
+def sample_profile_library():
+    """Shareable index of the twelve sample participant profiles, one per
+    archetype. Unlisted rather than secret: safe to send to a colleague or a
+    prospect, but kept out of search."""
     path = os.path.join(_ASSETS_DIR, "sample_profiles.html")
     if not os.path.exists(path):
         raise HTTPException(404, "sample profile library not found")
     return FileResponse(path, media_type="text/html",
-                        headers={"Cache-Control": "private, no-store",
+                        headers={"Cache-Control": "public, max-age=3600",
                                  "X-Robots-Tag": "noindex, nofollow"})
 
 @app.get("/sample/leadership-dashboard")
